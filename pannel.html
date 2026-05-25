@@ -1,0 +1,2427 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S_Quick Mart — Admin Panel</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        onSnapshot,
+        collection,
+        updateDoc,
+        query,
+        orderBy,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytes,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+        authDomain: "quickmart-b117e.firebaseapp.com",
+        projectId: "quickmart-b117e",
+        storageBucket: "quickmart-b117e.firebasestorage.app",
+        messagingSenderId: "128330058901",
+        appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const storage = getStorage(app);
+      const auth = getAuth(app);
+
+      // ── EXPOSE AUTH FUNCTIONS TO GLOBAL SCRIPT ────────────────
+      window.fbSignIn = async (email, password) => {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          return { success: true };
+        } catch (e) {
+          return { success: false, code: e.code };
+        }
+      };
+
+      window.fbSignOut = async () => {
+        try {
+          await signOut(auth);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      window.fbOnAuthChanged = (cb) => {
+        onAuthStateChanged(auth, cb);
+      };
+
+      window.fbSaveProducts = async (p) => {
+        try {
+          await setDoc(doc(db, "store", "products"), { list: p });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbSaveAnn = async (a) => {
+        try {
+          await setDoc(doc(db, "store", "announcements"), { list: a });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbSaveCategories = async (c) => {
+        try {
+          await setDoc(doc(db, "store", "categories"), { list: c });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbSaveStoreStatus = async (s) => {
+        try {
+          await setDoc(doc(db, "store", "status"), s);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbLoadProducts = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "products"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbLoadAnn = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "announcements"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbLoadCategories = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "categories"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbUpdateOrder = async (id, status) => {
+        try {
+          await updateDoc(doc(db, "orders", id), { status });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      window.fbUploadImage = async (file, name) => {
+        try {
+          const r = ref(storage, `products/${Date.now()}_${name}`);
+          await uploadBytes(r, file);
+          return await getDownloadURL(r);
+        } catch (e) {
+          console.error("Upload error:", e);
+          return null;
+        }
+      };
+
+      window.startOrdersListener = (cb) => {
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        return onSnapshot(q, (snap) =>
+          cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        );
+      };
+
+      window.startYourNeedListener = (cb) => {
+        const q = query(collection(db, "yourneed_requests"), orderBy("createdAt", "desc"));
+        return onSnapshot(q, (snap) =>
+          cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        );
+      };
+
+      window.fbUpdateYourNeed = async (id, status, adminNote) => {
+        try {
+          await updateDoc(doc(db, "yourneed_requests", id), { status, adminNote: adminNote || "" });
+          return true;
+        } catch (e) { console.error(e); return false; }
+      };
+
+      onSnapshot(doc(db, "store", "status"), (snap) => {
+        if (snap.exists()) window._storeStatus = snap.data();
+      });
+
+      // ── AUTH STATE LISTENER ───────────────────────────────────
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User logged in — show admin panel
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("adminScreen").style.display = "block";
+          // Call loadAdminData only if not already loaded
+          if (typeof window.loadAdminData === "function") {
+            window.loadAdminData();
+          } else {
+            // Wait for second script to be ready
+            window._authUser = user;
+          }
+        } else {
+          // User logged out — show login screen
+          document.getElementById("loginScreen").style.display = "flex";
+          document.getElementById("adminScreen").style.display = "none";
+          window._authUser = null;
+        }
+      });
+
+      document.dispatchEvent(new Event("firebaseReady"));
+    </script>
+    <style>
+      :root {
+        --pr: #ff6b00;
+        --pd: #e05e00;
+        --green: #2ecc71;
+        --danger: #e74c3c;
+        --dark: #1a1a2e;
+        --text: #2d2d2d;
+        --muted: #666;
+        --bg: #f7f8fc;
+        --sh: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --r: 16px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      /* LOGIN */
+      .login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        padding: 20px;
+      }
+      .login-box {
+        background: #fff;
+        border-radius: 24px;
+        padding: 40px 32px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        text-align: center;
+      }
+      .login-logo {
+        font-size: 48px;
+        margin-bottom: 8px;
+      }
+      .login-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--pr);
+        margin-bottom: 4px;
+      }
+      .login-sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+      .login-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: "Inter", sans-serif;
+        margin-bottom: 14px;
+        outline: none;
+        transition: 0.2s;
+      }
+      .login-input:focus {
+        border-color: var(--pr);
+      }
+      .login-btn {
+        width: 100%;
+        background: var(--pr);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-family: "Baloo 2", cursive;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .login-error {
+        color: var(--danger);
+        font-size: 13px;
+        margin-top: 10px;
+        display: none;
+      }
+      /* ADMIN LAYOUT */
+      .admin-screen {
+        display: none;
+      }
+      .admin-header {
+        background: var(--dark);
+        color: #fff;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 200;
+      }
+      .admin-logo {
+        font-family: "Baloo 2", cursive;
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--pr);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .admin-badge {
+        background: var(--pr);
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 50px;
+        font-weight: 700;
+      }
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 7px 14px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .admin-tabs {
+        display: flex;
+        background: #fff;
+        border-bottom: 2px solid var(--bg);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .admin-tab {
+        padding: 13px 18px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        color: var(--muted);
+        transition: 0.2s;
+        position: relative;
+      }
+      .admin-tab.active {
+        border-bottom-color: var(--pr);
+        color: var(--pr);
+      }
+      .tab-badge {
+        background: #e74c3c;
+        color: #fff;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        margin-left: 4px;
+        display: none;
+      }
+      .tab-badge.show {
+        display: inline-block;
+      }
+      .admin-content {
+        padding: 18px 14px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      /* CARDS & GRIDS */
+      .admin-card {
+        background: #fff;
+        border-radius: var(--r);
+        padding: 18px;
+        box-shadow: var(--sh);
+        margin-bottom: 16px;
+      }
+      .admin-card-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      @media (min-width: 600px) {
+        .stats-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 12px;
+        text-align: center;
+        box-shadow: var(--sh);
+      }
+      .stat-icon {
+        font-size: 26px;
+        margin-bottom: 6px;
+      }
+      .stat-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--pr);
+      }
+      .stat-label {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 500;
+        margin-top: 2px;
+      }
+      /* REVENUE CARD */
+      .revenue-card {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        color: #fff;
+        border-radius: var(--r);
+        padding: 18px;
+        margin-bottom: 16px;
+        box-shadow: var(--sh);
+      }
+      .rev-title {
+        font-size: 12px;
+        opacity: 0.6;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .rev-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 30px;
+        font-weight: 800;
+        color: var(--pr);
+      }
+      .rev-sub {
+        font-size: 13px;
+        opacity: 0.5;
+        margin-top: 4px;
+      }
+      /* FORM */
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      @media (max-width: 500px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .form-group {
+        margin-bottom: 12px;
+      }
+      .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .form-input,
+      .form-select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        outline: none;
+        transition: 0.2s;
+      }
+      .form-input:focus,
+      .form-select:focus {
+        border-color: var(--pr);
+      }
+      .btn-primary {
+        background: var(--pr);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 11px 22px;
+        font-family: "Baloo 2", cursive;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn-primary:hover {
+        background: var(--pd);
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-edit {
+        background: #f39c12;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-sm {
+        background: var(--bg);
+        color: var(--dark);
+        border: 1.5px solid #ddd;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      /* IMAGE UPLOAD */
+      .img-upload-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 10px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .img-tab {
+        flex: 1;
+        padding: 8px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--muted);
+        background: #fff;
+        transition: 0.2s;
+      }
+      .img-tab.active {
+        background: var(--pr);
+        color: #fff;
+      }
+      .img-panel {
+        display: none;
+      }
+      .img-panel.active {
+        display: block;
+      }
+      .file-drop-zone {
+        border: 2px dashed #ccc;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        background: var(--bg);
+      }
+      .file-drop-zone:hover {
+        border-color: var(--pr);
+        background: #fff8f3;
+      }
+      .file-drop-zone input {
+        display: none;
+      }
+      .img-preview-box {
+        width: 100%;
+        height: 100px;
+        border-radius: 10px;
+        border: 2px dashed #eee;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .img-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .upload-progress {
+        display: none;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--pr);
+        font-weight: 600;
+      }
+      /* PRODUCT TABLE */
+      .product-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .product-table th {
+        text-align: left;
+        padding: 9px 10px;
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 600;
+        background: var(--bg);
+      }
+      .product-table td {
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--bg);
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      .toggle {
+        position: relative;
+        width: 42px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background: #ccc;
+        border-radius: 22px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .toggle-slider:before {
+        content: "";
+        position: absolute;
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background: #fff;
+        border-radius: 50%;
+        transition: 0.3s;
+      }
+      .toggle input:checked + .toggle-slider {
+        background: var(--green);
+      }
+      .toggle input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+      }
+      .toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .toggle-lbl {
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .toggle-lbl.on {
+        color: var(--green);
+      }
+      .toggle-lbl.off {
+        color: var(--danger);
+      }
+      .search-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .search-input2 {
+        flex: 1;
+        padding: 9px 14px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        outline: none;
+      }
+      .search-input2:focus {
+        border-color: var(--pr);
+      }
+      /* CATEGORIES */
+      .cat-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .cat-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg);
+        border: 1.5px solid #e0e0e0;
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .cat-chip-del {
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        padding: 0;
+      }
+      .cat-chip-del:hover {
+        color: var(--danger);
+      }
+      .cat-add-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      /* ORDERS */
+      .order-card {
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+        border: 2px solid #eee;
+        transition: 0.2s;
+      }
+      .order-card.new-order {
+        border-color: #ff6b00;
+        background: #fff8f0;
+        animation: newPulse 2s ease-in-out 3;
+      }
+      @keyframes newPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(255, 107, 0, 0.2);
+        }
+      }
+      .oc-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .oc-id {
+        font-family: "Baloo 2", cursive;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--dark);
+      }
+      .oc-time {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .order-status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .s-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .s-confirmed {
+        background: #d1e7dd;
+        color: #0a3622;
+      }
+      .s-out_for_delivery {
+        background: #cfe2ff;
+        color: #084298;
+      }
+      .s-delivered {
+        background: #d1e7dd;
+        color: #0a3622;
+      }
+      .s-cancelled {
+        background: #f8d7da;
+        color: #842029;
+      }
+      .oc-cust {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      .oc-cust-item {
+        font-size: 12px;
+        color: var(--text);
+      }
+      .oc-items {
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+      .oc-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .oc-total {
+        font-family: "Baloo 2", cursive;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+      }
+      .oc-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .oc-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: "Baloo 2", cursive;
+      }
+      .btn-confirm {
+        background: #2ecc71;
+        color: #fff;
+      }
+      .btn-otd {
+        background: #3498db;
+        color: #fff;
+      }
+      .btn-delivered {
+        background: #1a9e5c;
+        color: #fff;
+      }
+      .btn-cancel-o {
+        background: #e74c3c;
+        color: #fff;
+      }
+      .btn-wa {
+        background: #25d366;
+        color: #fff;
+      }
+      .order-filter-bar {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 14px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+      }
+      .filter-chip {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 2px solid #eee;
+        background: #fff;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .filter-chip.active {
+        border-color: var(--pr);
+        color: var(--pr);
+        background: #fff3ec;
+      }
+      /* SYNC BAR */
+      .sync-bar {
+        background: #e8f5e9;
+        border: 1.5px solid #a5d6a7;
+        border-radius: 10px;
+        padding: 9px 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        color: #2e7d32;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+      }
+      /* MODAL */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 24px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 92vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      }
+      .modal-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        color: var(--dark);
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .btn-cancel-m {
+        flex: 1;
+        background: var(--bg);
+        color: var(--text);
+        border: none;
+        border-radius: 10px;
+        padding: 11px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      /* TOAST */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        background: var(--dark);
+        color: #fff;
+        padding: 11px 22px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 13px;
+        z-index: 5000;
+        white-space: nowrap;
+        opacity: 0;
+        transition: 0.25s;
+      }
+      .toast.show {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+      }
+      .no-orders-admin {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+      }
+      .section-divider {
+        border: none;
+        border-top: 2px solid var(--bg);
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LOGIN -->
+    <div class="login-screen" id="loginScreen">
+      <div class="login-box">
+        <div class="login-logo">🔐</div>
+        <div class="login-title">S_Quick Mart Admin</div>
+        <div class="login-sub">Login to manage your store</div>
+        <input
+          type="email"
+          class="login-input"
+          id="loginUser"
+          placeholder="Email Address"
+        />
+        <input
+          type="password"
+          class="login-input"
+          id="loginPass"
+          placeholder="Password"
+          onkeydown="if (event.key === 'Enter') doLogin();"
+        />
+        <button class="login-btn" onclick="doLogin()">🔓 Login</button>
+        <div class="login-error" id="loginError">❌ Wrong credentials!</div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="admin-screen" id="adminScreen">
+      <div class="admin-header">
+        <div class="admin-logo">
+          🛒 S_Quick Mart <span class="admin-badge">ADMIN</span>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      </div>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchTab('orders', this)">
+          📋 Orders <span class="tab-badge" id="newOrderBadge">0</span>
+        </div>
+        <div class="admin-tab" onclick="switchTab('dashboard', this)">
+          📊 Dashboard
+        </div>
+        <div class="admin-tab" onclick="switchTab('products', this)">
+          📦 Products
+        </div>
+        <div class="admin-tab" onclick="switchTab('addProduct', this)">
+          ➕ Add Product
+        </div>
+        <div class="admin-tab" onclick="switchTab('categories', this)">
+          🏷️ Categories
+        </div>
+        <div class="admin-tab" onclick="switchTab('yourneed', this)">
+          🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
+        </div>
+      </div>
+      <div class="admin-content">
+        <!-- ── ORDERS TAB ── -->
+        <div class="tab-panel active" id="tab-orders">
+          <div class="sync-bar">
+            🔴 Live — New orders arrive automatically!
+          </div>
+          <div class="order-filter-bar">
+            <div class="filter-chip active" onclick="filterOrders('all', this)">
+              🗂️ All
+            </div>
+            <div class="filter-chip" onclick="filterOrders('pending', this)">
+              📋 Pending
+            </div>
+            <div class="filter-chip" onclick="filterOrders('confirmed', this)">
+              ✅ Confirmed
+            </div>
+            <div
+              class="filter-chip"
+              onclick="filterOrders('out_for_delivery', this)"
+            >
+              🛵 Delivery
+            </div>
+            <div class="filter-chip" onclick="filterOrders('delivered', this)">
+              🎉 Delivered
+            </div>
+            <div class="filter-chip" onclick="filterOrders('cancelled', this)">
+              ❌ Cancelled
+            </div>
+          </div>
+          <div id="ordersContainer">
+            <div class="no-orders-admin">
+              <p>⏳ Orders load ho rahe hain...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DASHBOARD TAB ── -->
+        <div class="tab-panel" id="tab-dashboard">
+          <div class="revenue-card">
+            <div class="rev-title">Today's Revenue 💰</div>
+            <div class="rev-num" id="todayRevenue">₹0</div>
+            <div class="rev-sub" id="todayOrderCount">0 orders today</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🛵</div>
+              <div class="stat-num" id="statParcelsToday">0</div>
+              <div class="stat-label">Parcels Today</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🎉</div>
+              <div class="stat-num" id="statDeliveredTotal">0</div>
+              <div class="stat-label">Total Delivered</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📋</div>
+              <div class="stat-num" id="statPending">0</div>
+              <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-num" id="statTotalRevenue">₹0</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-num" id="statConfirmed">0</div>
+              <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🛵</div>
+              <div class="stat-num" id="statOTD">0</div>
+              <div class="stat-label">Out for Delivery</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📦</div>
+              <div class="stat-num" id="statTotalOrders">0</div>
+              <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">❌</div>
+              <div class="stat-num" id="statCancelled">0</div>
+              <div class="stat-label">Cancelled</div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-title">📣 Announcements</div>
+            <div class="form-group">
+              <label class="form-label">Announcement 1</label
+              ><input
+                type="text"
+                class="form-input"
+                id="ann1"
+                placeholder="Type announcement..."
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Announcement 2</label
+              ><input
+                type="text"
+                class="form-input"
+                id="ann2"
+                placeholder="Type second announcement..."
+              />
+            </div>
+            <button class="btn-primary" onclick="saveAnnouncements()">
+              💾 Save
+            </button>
+          </div>
+          <!-- ── YOURNEED DASHBOARD ── -->
+          <div class="admin-card" style="margin-top:14px">
+            <div class="admin-card-title">🎯 YourNeed Dashboard</div>
+            <div class="stats-grid" style="margin-top:10px">
+              <div class="stat-card" onclick="openYN('all')" style="cursor:pointer">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-num" id="yn_total">0</div>
+                <div class="stat-label">Total Requests</div>
+              </div>
+              <div class="stat-card" onclick="openYN('pending')" style="cursor:pointer">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-num" id="yn_pending">0</div>
+                <div class="stat-label">Pending</div>
+              </div>
+              <div class="stat-card" onclick="openYN('confirmed')" style="cursor:pointer">
+                <div class="stat-icon">✅</div>
+                <div class="stat-num" id="yn_confirmed">0</div>
+                <div class="stat-label">Confirmed</div>
+              </div>
+              <div class="stat-card" onclick="openYN('out_for_delivery')" style="cursor:pointer">
+                <div class="stat-icon">🛵</div>
+                <div class="stat-num" id="yn_otd">0</div>
+                <div class="stat-label">Sent</div>
+              </div>
+              <div class="stat-card" onclick="openYN('delivered')" style="cursor:pointer">
+                <div class="stat-icon">🎉</div>
+                <div class="stat-num" id="yn_delivered">0</div>
+                <div class="stat-label">Delivered</div>
+              </div>
+              <div class="stat-card" onclick="openYN('rejected')" style="cursor:pointer">
+                <div class="stat-icon">❌</div>
+                <div class="stat-num" id="yn_rejected">0</div>
+                <div class="stat-label">Rejected</div>
+              </div>
+            </div>
+            <div class="stats-grid" style="margin-top:12px">
+              <div class="stat-card" onclick="openYN('custom_item')" style="cursor:pointer">
+                <div class="stat-icon">🛍️</div>
+                <div class="stat-num" id="yn_custom">0</div>
+                <div class="stat-label">Custom Items</div>
+              </div>
+              <div class="stat-card" onclick="openYN('pickup_drop')" style="cursor:pointer">
+                <div class="stat-icon">🏍️</div>
+                <div class="stat-num" id="yn_pd">0</div>
+                <div class="stat-label">Pickup & Drop</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PRODUCTS TAB ── -->
+        <div class="tab-panel" id="tab-products">
+          <div class="admin-card">
+            <div class="admin-card-title">
+              📦 All Products
+              <span
+                style="
+                  font-size: 13px;
+                  color: var(--muted);
+                  font-family: &quot;Inter&quot;;
+                "
+                id="productCount"
+              ></span>
+            </div>
+            <div class="search-bar" style="align-items:center;gap:8px;">
+              <input
+                type="text"
+                class="search-input2"
+                placeholder="🔍 Search products..."
+                oninput="filterProducts(this.value)"
+              />
+              <select
+                class="form-select"
+                style="width: auto"
+                onchange="filterByCat(this.value)"
+                id="filterCatSelect"
+              >
+                <option value="all">All</option>
+              </select>
+              <button class="btn-primary" onclick="toggleAllProducts()" style="white-space: nowrap;">Toggle All ON/OFF</button>
+            </div>
+            <div style="overflow-x: auto">
+              <table class="product-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Homepage</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ADD PRODUCT TAB ── -->
+        <div class="tab-panel" id="tab-addProduct">
+          <div class="admin-card">
+            <div class="admin-card-title">➕ Add New Product</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Emoji (backup icon)</label
+                ><input
+                  type="text"
+                  class="form-input"
+                  id="newEmoji"
+                  placeholder="📦"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category *</label
+                ><select
+                  class="form-select"
+                  id="newCat"
+                  onchange="updateSubOptions('newCat', 'newSub')"
+                >
+                  <option value="">Loading...</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Subcategory</label
+                ><select class="form-select" id="newSub">
+                  <option value="">Select category first</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Product Name *</label
+                ><input
+                  type="text"
+                  class="form-input"
+                  id="newName"
+                  placeholder="e.g. Tata Salt"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Unit *</label
+                ><input
+                  type="text"
+                  class="form-input"
+                  id="newUnit"
+                  placeholder="e.g. 1 kg"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price (₹) *</label
+                ><input
+                  type="number"
+                  class="form-input"
+                  id="newPrice"
+                  placeholder="45"
+                />
+              </div>
+            </div>
+            <!-- IMAGE UPLOAD SECTION -->
+            <div class="form-group">
+              <label class="form-label">📷 Product Image</label>
+              <div class="img-upload-tabs">
+                <div
+                  class="img-tab active"
+                  onclick="switchImgTab('url', 'new')"
+                >
+                  🔗 URL se
+                </div>
+                <div class="img-tab" onclick="switchImgTab('file', 'new')">
+                  📁 File se
+                </div>
+              </div>
+              <div class="img-panel active" id="new-url-panel">
+                <input
+                  type="text"
+                  class="form-input"
+                  id="newImg"
+                  placeholder="Paste image URL (BigBasket, Google, etc.)"
+                  oninput="previewImgUrl('newImg', 'newImgPreview')"
+                />
+              </div>
+              <div class="img-panel" id="new-file-panel">
+                <div
+                  class="file-drop-zone"
+                  onclick="document.getElementById('newImgFile').click()"
+                >
+                  <input
+                    type="file"
+                    id="newImgFile"
+                    accept="image/*"
+                    onchange="
+                      handleFileSelect(
+                        this,
+                        'newImgPreview',
+                        'newImg',
+                        'newUploadProgress',
+                      )
+                    "
+                  />
+                  <div style="font-size: 28px; margin-bottom: 6px">📁</div>
+                  <div style="font-size: 13px; color: var(--muted)">
+                    Click or drag file here<br /><strong
+                      >JPG, PNG, WebP</strong
+                    >
+                    supported
+                  </div>
+                </div>
+                <div class="upload-progress" id="newUploadProgress">
+                  ⏳ Uploading...
+                </div>
+              </div>
+              <div class="img-preview-box" id="newImgPreview">
+                <span style="font-size: 32px; color: #ccc">📷</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Show on Homepage</label>
+              <label class="toggle" style="margin-top:4px;display:inline-flex;align-items:center;">
+                <input type="checkbox" id="newActive" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label
+              ><input
+                type="text"
+                class="form-input"
+                id="newDesc"
+                placeholder="Short product description"
+              />
+            </div>
+            <button class="btn-primary" onclick="addProduct()">
+              ✅ Add Product
+            </button>
+          </div>
+        </div>
+
+        <!-- ── CATEGORIES TAB ── -->
+        <div class="tab-panel" id="tab-categories">
+          <div class="admin-card">
+            <div class="admin-card-title">🏷️ Manage Categories</div>
+            <p
+              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
+            >
+              Add or remove categories and subcategories here. These changes
+              will automatically appear in the Add Product form.
+            </p>
+            <div id="categoryManager"></div>
+            <button
+              class="btn-primary"
+              style="margin-top: 8px"
+              onclick="saveCategoriesAndRefresh()"
+            >
+              💾 Save Categories
+            </button>
+          </div>
+        </div>
+
+        <!-- ── YOURNEED TAB ── -->
+        <div class="tab-panel" id="tab-yourneed">
+          <div class="sync-bar">🔴 Live — YourNeed requests auto-update!</div>
+          <div class="order-filter-bar">
+            <div class="filter-chip active" onclick="filterYN('all', this)">🗂️ All</div>
+            <div class="filter-chip" onclick="filterYN('pending', this)">⏳ Pending</div>
+            <div class="filter-chip" onclick="filterYN('confirmed', this)">✅ Confirmed</div>
+            <div class="filter-chip" onclick="filterYN('rejected', this)">❌ Rejected</div>
+            <div class="filter-chip" onclick="filterYN('custom_item', this)">🛍️ Custom Items</div>
+            <div class="filter-chip" onclick="filterYN('pickup_drop', this)">🏍️ Pickup & Drop</div>
+          </div>
+          <div id="yourNeedContainer">
+            <div class="no-orders-admin"><p>⏳ YourNeed requests load ho rahe hain...</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-box">
+        <div class="modal-title">✏️ Edit Product</div>
+        <input type="hidden" id="editId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Emoji</label
+            ><input type="text" class="form-input" id="editEmoji" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label
+            ><select
+              class="form-select"
+              id="editCat"
+              onchange="updateSubOptions('editCat', 'editSub')"
+            >
+              <option>Loading...</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subcategory</label
+          ><select class="form-select" id="editSub"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Name</label
+            ><input type="text" class="form-input" id="editName" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit</label
+            ><input type="text" class="form-input" id="editUnit" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹)</label
+          ><input type="number" class="form-input" id="editPrice" />
+        </div>
+        <!-- IMAGE UPLOAD FOR EDIT -->
+        <div class="form-group">
+          <label class="form-label">📷 Product Image</label>
+          <div class="img-upload-tabs">
+            <div class="img-tab active" onclick="switchImgTab('url', 'edit')">
+              🔗 URL se
+            </div>
+            <div class="img-tab" onclick="switchImgTab('file', 'edit')">
+              📁 File se
+            </div>
+          </div>
+          <div class="img-panel active" id="edit-url-panel">
+            <input
+              type="text"
+              class="form-input"
+              id="editImg"
+              placeholder="Paste image URL..."
+              oninput="previewImgUrl('editImg', 'editImgPreview')"
+            />
+          </div>
+          <div class="img-panel" id="edit-file-panel">
+            <div
+              class="file-drop-zone"
+              onclick="document.getElementById('editImgFile').click()"
+            >
+              <input
+                type="file"
+                id="editImgFile"
+                accept="image/*"
+                onchange="
+                  handleFileSelect(
+                    this,
+                    'editImgPreview',
+                    'editImg',
+                    'editUploadProgress',
+                  )
+                "
+              />
+              <div style="font-size: 28px; margin-bottom: 6px">📁</div>
+              <div style="font-size: 13px; color: var(--muted)">
+                Click or drag file here
+              </div>
+            </div>
+            <div class="upload-progress" id="editUploadProgress">
+              ⏳ Uploading...
+            </div>
+          </div>
+          <div class="img-preview-box" id="editImgPreview">
+            <span style="font-size: 32px; color: #ccc">📷</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Show on Homepage</label>
+          <label class="toggle" style="margin-top:4px;display:inline-flex;align-items:center;">
+            <input type="checkbox" id="editActive" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label
+          ><input type="text" class="form-input" id="editDesc" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel-m" onclick="closeEdit()">Cancel</button>
+          <button class="btn-primary" style="flex: 1" onclick="saveEdit()">
+            💾 Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // ── LOGIN ────────────────────────────────────────────────────
+      // Check if Firebase Auth already has a user logged in (page refresh)
+      document.addEventListener("firebaseReady", () => {
+        if (window._authUser && typeof loadAdminData === "function") {
+          loadAdminData();
+        }
+        // Mark loadAdminData as ready for onAuthStateChanged
+        window.loadAdminData = loadAdminData;
+        // If auth already resolved before this script ran
+        if (window._authUser) loadAdminData();
+      });
+
+      async function doLogin() {
+        const email = document.getElementById("loginUser").value.trim();
+        const pass = document.getElementById("loginPass").value.trim();
+        const errEl = document.getElementById("loginError");
+        errEl.style.display = "none";
+
+        if (!email || !pass) {
+          errEl.textContent = "❌ Email aur password dono bharein!";
+          errEl.style.display = "block";
+          return;
+        }
+
+        const result = await window.fbSignIn(email, pass);
+        if (!result.success) {
+          let msg = "❌ Wrong email or password!";
+          if (result.code === "auth/too-many-requests")
+            msg = "❌ Bahut zyada attempts! Thodi der baad try karo.";
+          else if (result.code === "auth/invalid-email")
+            msg = "❌ Email sahi format mein dalo!";
+          errEl.textContent = msg;
+          errEl.style.display = "block";
+        }
+        // Success case handled by onAuthStateChanged in module script
+      }
+
+      async function doLogout() {
+        if (unsubOrders) { unsubOrders(); unsubOrders = null; }
+        if (unsubYN) { unsubYN(); unsubYN = null; }
+        await window.fbSignOut();
+        // UI update handled by onAuthStateChanged
+      }
+
+      async function loadAdminData() {
+        showToast("⏳ Loading data...");
+
+        const savedCats = await window.fbLoadCategories();
+        if (savedCats.length) categories = savedCats;
+        renderCategoryManager();
+        populateCategoryDropdowns();
+
+        products = await window.fbLoadProducts();
+        nextId = products.length
+          ? Math.max(...products.map((p) => p.id)) + 1
+          : 100;
+        renderTable();
+        updateProductStats();
+
+        const ann = await window.fbLoadAnn();
+        document.getElementById("ann1").value = ann[0] || "";
+        document.getElementById("ann2").value = ann[1] || "";
+
+        // Live orders listener
+        if (unsubOrders) unsubOrders();
+        unsubOrders = window.startOrdersListener((orders) => {
+          const prevPending = allOrders.filter(
+            (o) => o.status === "pending",
+          ).length;
+          allOrders = orders;
+          if (orders.filter((o) => o.status === "pending").length > prevPending)
+            showToast("🔔 New order received!");
+          renderOrders();
+          updateDashboardStats();
+          updateOrderBadge();
+        });
+
+        // Live YourNeed listener
+        if (unsubYN) unsubYN();
+        unsubYN = window.startYourNeedListener((reqs) => {
+          const prev = allYourNeed.filter(r => r.status === "pending").length;
+          allYourNeed = reqs;
+          if (reqs.filter(r => r.status === "pending").length > prev)
+            showToast("🎯 New YourNeed request!");
+          renderYourNeed();
+          updateYNBadge();
+          updateDashboardStats();
+        });
+
+        showToast("✅ Admin ready!");
+      }
+      const defaultCategories = [
+        {
+          id: "grocery",
+          label: "Grocery",
+          emoji: "🌾",
+          subs: [
+            "Dal & Rice",
+            "Atta & Flour",
+            "Oil & Ghee",
+            "Sugar & Salt",
+            "Masale",
+            "Dry Fruits",
+          ],
+        },
+        {
+          id: "dairy",
+          label: "Dairy",
+          emoji: "🥛",
+          subs: ["Milk", "Curd & Paneer", "Butter & Cheese"],
+        },
+        {
+          id: "snacks",
+          label: "Snacks",
+          emoji: "🍪",
+          subs: ["Biscuits", "Chips", "Instant Food", "Namkeen"],
+        },
+        {
+          id: "personal",
+          label: "Personal Care",
+          emoji: "🧴",
+          subs: [
+            "Bath & Body",
+            "Oral Care",
+            "Hair Care",
+            "Skin Care",
+            "Grooming",
+          ],
+        },
+        {
+          id: "home",
+          label: "Home Needs",
+          emoji: "🧹",
+          subs: ["Laundry", "Kitchen", "Bathroom", "Cleaning"],
+        },
+        {
+          id: "beverages",
+          label: "Beverages",
+          emoji: "☕",
+          subs: ["Tea & Coffee", "Juice", "Cold Drinks", "Water"],
+        },
+        {
+          id: "bakery",
+          label: "Bakery",
+          emoji: "🍞",
+          subs: ["Bread", "Cakes", "Rusks"],
+        },
+      ];
+
+      let categories = [...defaultCategories];
+      let products = [],
+        nextId = 100;
+      let filterText = "",
+        filterCat = "all";
+      let allOrders = [],
+        orderFilter = "all",
+        unsubOrders = null;
+      let allYourNeed = [], ynFilter = "all", unsubYN = null;
+      let storeIsOpen = true;
+
+      function switchTab(id, btn) {
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".admin-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.getElementById("tab-" + id).classList.add("active");
+        btn.classList.add("active");
+      }
+
+      // ── CATEGORIES ───────────────────────────────────────────────
+      function renderCategoryManager() {
+        const el = document.getElementById("categoryManager");
+        el.innerHTML =
+          categories
+            .map(
+              (cat, ci) => `
+    <div style="border:1.5px solid #eee;border-radius:12px;padding:14px;margin-bottom:12px;background:#fff">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <input type="text" value="${cat.emoji}" style="width:50px;padding:6px;border:1.5px solid #eee;border-radius:8px;text-align:center;font-size:16px" onchange="categories[${ci}].emoji=this.value"/>
+        <input type="text" value="${cat.label}" style="flex:1;min-width:120px;padding:7px 12px;border:1.5px solid #eee;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif" onchange="categories[${ci}].label=this.value"/>
+        <input type="text" value="${cat.id}" style="width:110px;padding:7px 12px;border:1.5px solid #eee;border-radius:8px;font-size:12px;color:#999;font-family:'Inter',sans-serif" onchange="categories[${ci}].id=this.value" placeholder="category-id"/>
+        <button class="btn-danger" onclick="removeCategory(${ci})" style="padding:7px 12px">🗑️</button>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Subcategories:</div>
+      <div class="cat-list" id="sublist-${ci}">
+        ${cat.subs.map((s, si) => `<div class="cat-chip">${s}<button class="cat-chip-del" onclick="removeSub(${ci},${si})">×</button></div>`).join("")}
+      </div>
+      <div class="cat-add-row">
+        <input type="text" id="newsub-${ci}" placeholder="New subcategory name..." style="flex:1;padding:7px 12px;border:1.5px solid #eee;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none" onkeydown="if(event.key==='Enter')addSub(${ci})"/>
+        <button class="btn-sm" onclick="addSub(${ci})">+ Add</button>
+      </div>
+    </div>`,
+            )
+            .join("") +
+          `<div style="margin-top:8px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px">Add New Category:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="newCatEmoji" placeholder="🛒" style="width:50px;padding:8px;border:1.5px solid #eee;border-radius:8px;text-align:center;font-size:16px"/>
+        <input type="text" id="newCatLabel" placeholder="Category name" style="flex:1;min-width:120px;padding:8px 12px;border:1.5px solid #eee;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;outline:none"/>
+        <input type="text" id="newCatId" placeholder="category-id" style="width:120px;padding:8px 12px;border:1.5px solid #eee;border-radius:8px;font-size:12px;font-family:'Inter',sans-serif;outline:none"/>
+        <button class="btn-primary" style="padding:8px 16px" onclick="addCategory()">+ Add Category</button>
+      </div>
+    </div>`;
+      }
+
+      function addCategory() {
+        const emoji =
+          document.getElementById("newCatEmoji").value.trim() || "📦";
+        const label = document.getElementById("newCatLabel").value.trim();
+        const id =
+          document
+            .getElementById("newCatId")
+            .value.trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-") || label.toLowerCase().replace(/\s+/g, "-");
+        if (!label) {
+          showToast("❌ Please enter a category name!");
+          return;
+        }
+        categories.push({ id, label, emoji, subs: [] });
+        renderCategoryManager();
+      }
+
+      function removeCategory(ci) {
+        if (!confirm(`Delete category "${categories[ci].label}"?`)) return;
+        categories.splice(ci, 1);
+        renderCategoryManager();
+      }
+
+      function addSub(ci) {
+        const inp = document.getElementById("newsub-" + ci);
+        const val = inp.value.trim();
+        if (!val) return;
+        categories[ci].subs.push(val);
+        inp.value = "";
+        renderCategoryManager();
+      }
+
+      function removeSub(ci, si) {
+        categories[ci].subs.splice(si, 1);
+        renderCategoryManager();
+      }
+
+      async function saveCategoriesAndRefresh() {
+        const ok = await window.fbSaveCategories(categories);
+        if (ok) {
+          populateCategoryDropdowns();
+          showToast("✅ Categories saved!");
+        } else showToast("❌ Save failed!");
+      }
+
+      function populateCategoryDropdowns() {
+        const makeOptions = () =>
+          categories
+            .map(
+              (c) => `<option value="${c.id}">${c.emoji} ${c.label}</option>`,
+            )
+            .join("");
+        ["newCat", "editCat", "filterCatSelect"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (id === "filterCatSelect")
+            el.innerHTML = `<option value="all">All</option>` + makeOptions();
+          else el.innerHTML = makeOptions();
+        });
+        updateSubOptions("newCat", "newSub");
+      }
+
+      function updateSubOptions(catSelId, subSelId) {
+        const catId = document.getElementById(catSelId).value;
+        const cat = categories.find((c) => c.id === catId);
+        const subEl = document.getElementById(subSelId);
+        subEl.innerHTML =
+          (cat ? cat.subs : [])
+            .map((s) => `<option value="${s}">${s}</option>`)
+            .join("") || `<option value="">No subcategory</option>`;
+      }
+
+      // ── IMAGE UPLOAD ──────────────────────────────────────────────
+      function switchImgTab(type, prefix) {
+        document
+          .querySelectorAll(
+            `#${prefix === "new" ? "tab-addProduct" : "editModal"} .img-tab`,
+          )
+          .forEach((t, i) =>
+            t.classList.toggle(
+              "active",
+              (i === 0 && type === "url") || (i === 1 && type === "file"),
+            ),
+          );
+        document
+          .getElementById(`${prefix}-url-panel`)
+          .classList.toggle("active", type === "url");
+        document
+          .getElementById(`${prefix}-file-panel`)
+          .classList.toggle("active", type === "file");
+      }
+
+      function previewImgUrl(inputId, previewId) {
+        const url = document.getElementById(inputId).value.trim();
+        const box = document.getElementById(previewId);
+        box.innerHTML = url
+          ? `<img src="${url}" onerror="this.parentNode.innerHTML='<span style=\\'font-size:24px;color:#ccc\\'>❌ Invalid URL</span>'">`
+          : `<span style="font-size:32px;color:#ccc">📷</span>`;
+      }
+
+      async function handleFileSelect(
+        input,
+        previewId,
+        urlInputId,
+        progressId,
+      ) {
+        const file = input.files[0];
+        if (!file) return;
+        const progress = document.getElementById(progressId);
+        progress.style.display = "block";
+        progress.textContent = "⏳ Uploading to Firebase...";
+        const url = await window.fbUploadImage(file, file.name);
+        progress.style.display = "none";
+        if (url) {
+          document.getElementById(urlInputId).value = url;
+          document.getElementById(previewId).innerHTML = `<img src="${url}">`;
+          showToast("✅ Image uploaded!");
+        } else {
+          showToast("❌ Upload failed! Enable Firebase Storage.");
+          progress.style.display = "block";
+          progress.textContent =
+            "❌ Upload failed — enable Firebase Storage (check console).";
+        }
+      }
+
+      // ── ORDERS ────────────────────────────────────────────────────
+      function updateOrderBadge() {
+        const n = allOrders.filter((o) => o.status === "pending").length;
+        const badge = document.getElementById("newOrderBadge");
+        badge.textContent = n;
+        badge.classList.toggle("show", n > 0);
+      }
+
+      function filterOrders(status, el) {
+        orderFilter = status;
+        document
+          .querySelectorAll(".filter-chip")
+          .forEach((c) => c.classList.remove("active"));
+        if (el) el.classList.add("active");
+        renderOrders();
+      }
+
+      function renderOrders() {
+        const con = document.getElementById("ordersContainer");
+        const orders =
+          orderFilter === "all"
+            ? allOrders
+            : allOrders.filter((o) => (o.status || "pending") === orderFilter);
+        if (!orders.length) {
+          con.innerHTML = `<div class="no-orders-admin"><p>📭 No orders found</p></div>`;
+          return;
+        }
+        const statusMap = {
+          pending: "📋 Pending",
+          confirmed: "✅ Confirmed",
+          out_for_delivery: "🛵 Out for Delivery",
+          delivered: "🎉 Delivered",
+          cancelled: "❌ Cancelled",
+        };
+        con.innerHTML = orders
+          .map((o) => {
+            const status = o.status || "pending";
+            const dt = o.createdAt
+              ? new Date(o.createdAt.seconds * 1000).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "";
+            const itemsList = o.items
+              ? o.items
+                  .map(
+                    (i) =>
+                      `${i.emoji || "📦"} ${i.name} (${i.unit}) ×${i.qty} = ₹${i.price * i.qty}`,
+                  )
+                  .join("<br>")
+              : "";
+            return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
+      <div class="oc-top">
+        <div><div class="oc-id">🔖 #${o.id.slice(-6).toUpperCase()}</div><div class="oc-time">⏰ ${dt}</div></div>
+        <span class="order-status-badge s-${status}">${statusMap[status] || status}</span>
+      </div>
+      <div class="oc-cust">
+        <div class="oc-cust-item">👤 <strong>${o.name || "-"}</strong></div>
+        <div class="oc-cust-item">📞 <a href="tel:${o.phone}" style="color:var(--pr);font-weight:700">${o.phone || "-"}</a></div>
+        <div class="oc-cust-item">🏠 ${o.address || "-"}</div>
+      </div>
+      <div class="oc-items">${itemsList}</div>
+      <div class="oc-footer">
+        <div class="oc-total">₹${o.total} <span style="font-size:11px;color:var(--muted);font-family:'Inter'">${o.delivery === 0 ? "Free Del" : "Del: ₹" + (o.delivery || 20)}</span></div>
+        <div class="oc-actions">
+          ${status === "pending" ? `<button class="oc-btn btn-confirm" onclick="updateStatus('${o.id}','confirmed')">✅ Confirm</button>` : ""}
+          ${status === "confirmed" ? `<button class="oc-btn btn-otd" onclick="updateStatus('${o.id}','out_for_delivery')">🛵 Send</button>` : ""}
+          ${status === "out_for_delivery" ? `<button class="oc-btn btn-delivered" onclick="updateStatus('${o.id}','delivered')">🎉 Done</button>` : ""}
+          ${status !== "delivered" && status !== "cancelled" ? `<button class="oc-btn btn-cancel-o" onclick="updateStatus('${o.id}','cancelled')">❌</button>` : ""}
+          <button class="oc-btn btn-wa" onclick="sendWA('${o.phone}','${o.name}','${status}')">📲</button>
+        </div>
+      </div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function updateStatus(orderId, status) {
+        const ok = await window.fbUpdateOrder(orderId, status);
+        const msgs = {
+          confirmed: "✅ Confirmed!",
+          out_for_delivery: "🛵 Out for delivery!",
+          delivered: "🎉 Delivered!",
+          cancelled: "❌ Cancelled",
+        };
+        showToast(ok ? msgs[status] || "Updated!" : "❌ Failed!");
+      }
+
+      function sendWA(phone, name, status) {
+        const msgs = {
+          confirmed: `Hello ${name}! 🎉 Your order has been confirmed! We will deliver it soon. — S_Quick Mart`,
+          out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart`,
+          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart`,
+          cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 7058204462 — S_Quick Mart`,
+        };
+        const msg =
+          msgs[status] ||
+          `Hello ${name}! Your order update: ${status}. — S_Quick Mart`;
+        window.open(
+          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
+      }
+
+      // ── DASHBOARD STATS ───────────────────────────────────────────
+      function updateDashboardStats() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayOrders = allOrders.filter(
+          (o) => o.createdAt && new Date(o.createdAt.seconds * 1000) >= today,
+        );
+        const todayRev = todayOrders
+          .filter((o) =>
+            ["delivered", "out_for_delivery", "confirmed"].includes(o.status),
+          )
+          .reduce((s, o) => s + o.total, 0);
+        document.getElementById("todayRevenue").textContent = "₹" + todayRev;
+        document.getElementById("todayOrderCount").textContent =
+          todayOrders.length + " orders today";
+        const todayDelivered = todayOrders.filter((o) =>
+          ["delivered", "out_for_delivery"].includes(o.status),
+        ).length;
+        document.getElementById("statParcelsToday").textContent =
+          todayDelivered;
+        document.getElementById("statDeliveredTotal").textContent =
+          allOrders.filter((o) => o.status === "delivered").length;
+        document.getElementById("statPending").textContent = allOrders.filter(
+          (o) => !o.status || o.status === "pending",
+        ).length;
+        document.getElementById("statConfirmed").textContent = allOrders.filter(
+          (o) => o.status === "confirmed",
+        ).length;
+        document.getElementById("statOTD").textContent = allOrders.filter(
+          (o) => o.status === "out_for_delivery",
+        ).length;
+        document.getElementById("statCancelled").textContent = allOrders.filter(
+          (o) => o.status === "cancelled",
+        ).length;
+        document.getElementById("statTotalOrders").textContent =
+          allOrders.length;
+        document.getElementById("statTotalRevenue").textContent =
+          "₹" +
+          allOrders
+            .filter((o) => o.status === "delivered")
+            .reduce((s, o) => s + o.total, 0);
+
+        // ── YourNeed stats ──
+        try {
+          const totalYN = allYourNeed.length;
+          const ynPending = allYourNeed.filter(r => (r.status||'pending') === 'pending').length;
+          const ynConfirmed = allYourNeed.filter(r => r.status === 'confirmed').length;
+          const ynOTD = allYourNeed.filter(r => r.status === 'out_for_delivery').length;
+          const ynDelivered = allYourNeed.filter(r => r.status === 'delivered').length;
+          const ynRejected = allYourNeed.filter(r => r.status === 'rejected').length;
+          const ynCustom = allYourNeed.filter(r => r.type === 'custom_item').length;
+          const ynPD = allYourNeed.filter(r => r.type === 'pickup_drop').length;
+          const setIf = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+          setIf('yn_total', totalYN);
+          setIf('yn_pending', ynPending);
+          setIf('yn_confirmed', ynConfirmed);
+          setIf('yn_otd', ynOTD);
+          setIf('yn_delivered', ynDelivered);
+          setIf('yn_rejected', ynRejected);
+          setIf('yn_custom', ynCustom);
+          setIf('yn_pd', ynPD);
+        } catch (e) { console.error('YN stats error', e); }
+      }
+
+      function updateProductStats() {
+        document.getElementById("productCount").textContent =
+          products.length + " products";
+      }
+
+      // ── ANNOUNCEMENTS ─────────────────────────────────────────────
+      async function saveAnnouncements() {
+        const a1 = document.getElementById("ann1").value.trim();
+        const a2 = document.getElementById("ann2").value.trim();
+        const ok = await window.fbSaveAnn([a1, a2]);
+        showToast(ok ? "✅ Announcements saved!" : "❌ Failed!");
+      }
+
+      // ── PRODUCTS TABLE ────────────────────────────────────────────
+      function getFiltered() {
+        return products.filter((p) => {
+          const mc = filterCat === "all" || p.cat === filterCat;
+          const ms =
+            !filterText ||
+            p.name.toLowerCase().includes(filterText.toLowerCase());
+          return mc && ms;
+        });
+      }
+
+      function filterProducts(v) {
+        filterText = v;
+        renderTable();
+      }
+      function filterByCat(v) {
+        filterCat = v;
+        renderTable();
+      }
+
+      function renderTable() {
+        const items = getFiltered();
+        document.getElementById("productCount").textContent =
+          items.length + " products";
+        const tbody = document.getElementById("productTableBody");
+        if (!items.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:#aaa">No products</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = items
+          .map((p) => {
+            const cat = categories.find((c) => c.id === p.cat);
+            const catLabel = cat ? `${cat.emoji} ${cat.label}` : p.cat;
+            const visible = p.visible !== false;
+            const active = p.active !== false;
+            const stockControl = `<div class="toggle-wrap"><label class="toggle"><input type="checkbox" ${active ? "checked" : ""} onchange="toggleActive(${p.id},this.checked)"><span class="toggle-slider"></span></label><span class="toggle-lbl ${active ? "on" : "off"}" id="active-tlbl-${p.id}">${active ? "ON" : "OFF"}</span></div>`;
+            return `<tr>
+      <td><div style="width:42px;height:42px;border-radius:8px;overflow:hidden;background:#f5f5f5;display:flex;align-items:center;justify-content:center">
+        ${p.img ? `<img src="${p.img}" style="width:42px;height:42px;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='block'"><span style="display:none;font-size:20px">${p.emoji}</span>` : `<span style="font-size:20px">${p.emoji}</span>`}
+      </div></td>
+      <td><strong>${p.name}</strong><br><span style="font-size:10px;color:var(--muted)">${p.sub || ""} · ${p.unit}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${catLabel}</td>
+      <td><strong style="color:var(--pr)">₹${p.price}</strong></td>
+      <td>${stockControl}</td>
+      <td><div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" ${visible ? "checked" : ""} onchange="toggleVisible(${p.id},this.checked)"><span class="toggle-slider"></span></label>
+        <span class="toggle-lbl ${visible ? "on" : "off"}" id="visible-tlbl-${p.id}">${visible ? "ON" : "OFF"}</span>
+      </div></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn-edit" onclick="openEdit(${p.id})">✏️</button>
+        <button class="btn-danger" onclick="deleteProduct(${p.id})">🗑️</button>
+      </div></td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      async function toggleActive(id, val) {
+        const idx = products.findIndex((x) => x.id === id);
+        if (idx === -1) return;
+        products[idx].active = val;
+        const ok = await window.fbSaveProducts(products);
+        const lbl = document.getElementById("active-tlbl-" + id);
+        if (lbl) {
+          lbl.textContent = val ? "ON" : "OFF";
+          lbl.className = "toggle-lbl " + (val ? "on" : "off");
+        }
+        showToast(ok ? `✅ ${val ? "Available" : "Out of stock"}!` : "❌ Failed!");
+      }
+
+      async function toggleVisible(id, val) {
+        const idx = products.findIndex((x) => x.id === id);
+        if (idx === -1) return;
+        products[idx].visible = val;
+        const ok = await window.fbSaveProducts(products);
+        const lbl = document.getElementById("visible-tlbl-" + id);
+        if (lbl) {
+          lbl.textContent = val ? "ON" : "OFF";
+          lbl.className = "toggle-lbl " + (val ? "on" : "off");
+        }
+        showToast(ok ? `✅ ${val ? "Visible on home" : "H"}!` : "❌ Failed!");
+      }
+
+      async function toggleAllProducts() {
+        if (!products.length) {
+          showToast("❌ No products available to update.");
+          return;
+        }
+        const allOn = products.every((p) => p.visible !== false);
+        const targetState = !allOn;
+        const action = targetState ? "ON" : "OFF";
+        if (!confirm(`Turn ${action} for all products?`)) return;
+        products = products.map((p) => ({ ...p, visible: targetState }));
+        const ok = await window.fbSaveProducts(products);
+        if (ok) {
+          renderTable();
+          showToast(`✅ All products are now ${action}.`);
+        } else {
+          showToast("❌ Failed to update products.");
+        }
+      }
+
+      // ── ADD PRODUCT ───────────────────────────────────────────────
+      async function addProduct() {
+        const name = document.getElementById("newName").value.trim();
+        const unit = document.getElementById("newUnit").value.trim();
+        const price = parseInt(document.getElementById("newPrice").value);
+        const emoji = document.getElementById("newEmoji").value.trim() || "📦";
+        const cat = document.getElementById("newCat").value;
+        const sub = document.getElementById("newSub").value;
+        const img = document.getElementById("newImg").value.trim();
+        const desc = document.getElementById("newDesc").value.trim();
+        const visible = document.getElementById("newActive").checked;
+        if (!name || !unit || !price) {
+          showToast("❌ Name, unit and price are required!");
+          return;
+        }
+        products.push({
+          id: nextId++,
+          cat,
+          sub,
+          name,
+          unit,
+          price,
+          emoji,
+          img,
+          desc,
+          visible,
+        });
+        const ok = await window.fbSaveProducts(products);
+        renderTable();
+        updateProductStats();
+        showToast(ok ? `✅ ${name} added!` : "❌ Firebase save failed!");
+        [
+          "newName",
+          "newUnit",
+          "newPrice",
+          "newEmoji",
+          "newImg",
+          "newDesc",
+        ].forEach((id) => {
+          document.getElementById(id).value = "";
+        });
+        document.getElementById("newActive").checked = true;
+        document.getElementById("newImgPreview").innerHTML =
+          `<span style="font-size:32px;color:#ccc">📷</span>`;
+        document.getElementById("newImgFile").value = "";
+      }
+
+      async function deleteProduct(id) {
+        if (!confirm("Delete this product?")) return;
+        const p = products.find((x) => x.id === id);
+        products = products.filter((x) => x.id !== id);
+        const ok = await window.fbSaveProducts(products);
+        renderTable();
+        updateProductStats();
+        showToast(ok ? `🗑️ ${p ? p.name : "Product"} deleted!` : "❌ Failed!");
+      }
+
+      // ── EDIT PRODUCT ──────────────────────────────────────────────
+      function openEdit(id) {
+        const p = products.find((x) => x.id === id);
+        if (!p) return;
+        document.getElementById("editId").value = id;
+        document.getElementById("editEmoji").value = p.emoji;
+        document.getElementById("editName").value = p.name;
+        document.getElementById("editUnit").value = p.unit;
+        document.getElementById("editPrice").value = p.price;
+        document.getElementById("editImg").value = p.img || "";
+        document.getElementById("editDesc").value = p.desc || "";
+        document.getElementById("editActive").checked = p.visible !== false;
+        // populate category dropdowns
+        const catOpts = categories
+          .map(
+            (c) =>
+              `<option value="${c.id}" ${c.id === p.cat ? "selected" : ""}>${c.emoji} ${c.label}</option>`,
+          )
+          .join("");
+        document.getElementById("editCat").innerHTML = catOpts;
+        updateSubOptions("editCat", "editSub");
+        setTimeout(() => {
+          document.getElementById("editSub").value = p.sub || "";
+        }, 50);
+        const box = document.getElementById("editImgPreview");
+        box.innerHTML = p.img
+          ? `<img src="${p.img}">`
+          : `<span style="font-size:32px;color:#ccc">📷</span>`;
+        document.getElementById("editModal").classList.add("open");
+      }
+
+      function closeEdit() {
+        document.getElementById("editModal").classList.remove("open");
+      }
+
+      async function saveEdit() {
+        const id = parseInt(document.getElementById("editId").value);
+        const idx = products.findIndex((x) => x.id === id);
+        if (idx === -1) return;
+        products[idx] = {
+          ...products[idx],
+          emoji: document.getElementById("editEmoji").value.trim() || "📦",
+          name: document.getElementById("editName").value.trim(),
+          unit: document.getElementById("editUnit").value.trim(),
+          price: parseInt(document.getElementById("editPrice").value),
+          cat: document.getElementById("editCat").value,
+          sub: document.getElementById("editSub").value,
+          img: document.getElementById("editImg").value.trim(),
+          desc: document.getElementById("editDesc").value.trim(),
+          visible: document.getElementById("editActive").checked,
+        };
+        const ok = await window.fbSaveProducts(products);
+        closeEdit();
+        renderTable();
+        showToast(ok ? "✅ Updated!" : "❌ Failed!");
+      }
+
+      // ── YOURNEED ──────────────────────────────────────────────────
+      function updateYNBadge(){
+        const n=allYourNeed.filter(r=>r.status==='pending').length;
+        const b=document.getElementById('yourNeedBadge');
+        if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+      }
+
+      function filterYN(filter, el){
+        ynFilter=filter;
+        document.querySelectorAll('#tab-yourneed .filter-chip').forEach(c=>c.classList.remove('active'));
+        if(el) el.classList.add('active');
+        renderYourNeed();
+      }
+
+      function openYN(filter){
+        const tabBtn = Array.from(document.querySelectorAll('.admin-tab')).find(b=>b && b.getAttribute('onclick') && b.getAttribute('onclick').includes("yourneed"));
+        if(tabBtn) switchTab('yourneed', tabBtn);
+        // find the chip element inside yourneed tab to mark active
+        const chip = Array.from(document.querySelectorAll('#tab-yourneed .filter-chip')).find(c=>c && c.getAttribute('onclick') && c.getAttribute('onclick').includes("'"+filter+"'"));
+        filterYN(filter, chip||null);
+      }
+
+      function renderYourNeed(){
+        const con=document.getElementById('yourNeedContainer');
+        if(!con) return;
+        let reqs=allYourNeed;
+        if(ynFilter==='pending'||ynFilter==='confirmed'||ynFilter==='rejected' || ynFilter==='out_for_delivery' || ynFilter==='delivered'){
+          reqs=allYourNeed.filter(r=>(r.status||'pending')===ynFilter);
+        } else if(ynFilter==='custom_item'||ynFilter==='pickup_drop'){
+          reqs=allYourNeed.filter(r=>r.type===ynFilter);
+        }
+        if(!reqs.length){
+          con.innerHTML='<div class="no-orders-admin"><p>📭 No YourNeed requests found</p></div>';
+          return;
+        }
+        const statusMap={pending:'⏳ Pending',confirmed:'✅ Confirmed',out_for_delivery:'🛵 Sent',delivered:'🎉 Done',rejected:'❌ Rejected'};
+        con.innerHTML=reqs.map(r=>{
+          const status=r.status||'pending';
+          const dt=r.createdAt?new Date(r.createdAt.seconds*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+          const isCustom=r.type==='custom_item';
+          const typeLabel=isCustom?'🛍️ Custom Item Request':'🏍️ Pickup & Drop';
+          let detailHTML='';
+          if(isCustom){
+            const itemsHTML=(r.items||[]).map(i=>`${i.name} ×${i.qty}${i.brand?' — '+i.brand:''}`).join('<br>');
+            detailHTML=`
+              <div class="oc-items">
+                <strong>📂 Category:</strong> ${r.category||'-'}<br>
+                <strong>📦 Items:</strong><br>${itemsHTML||'-'}
+                ${r.note?'<br><strong>📝 Note:</strong> '+r.note:''}
+              </div>
+              <div class="oc-cust">
+                <div class="oc-cust-item">👤 <strong>${r.name||'-'}</strong></div>
+                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone||'-'}</a></div>
+                <div class="oc-cust-item">📍 ${r.area||'-'}</div>
+                <div class="oc-cust-item">🏠 ${r.address||'-'}</div>
+                <div class="oc-cust-item">⏰ ${r.deliverySlot||'-'}</div>
+              </div>`;
+          } else {
+            detailHTML=`
+              <div class="oc-items">
+                <strong>📦 Item Type:</strong> ${r.itemType||'-'}<br>
+                <strong>📝 Description:</strong> ${r.itemDesc||'-'}<br>
+                <strong>📍 Pickup:</strong> ${r.pickupArea||'-'} — ${r.pickupAddr||'-'}<br>
+                <strong>👤 Pickup Person:</strong> ${r.pickupName||'-'} — 📞 ${r.pickupPhone||'-'}<br>
+                <strong>🏁 Drop:</strong> ${r.dropArea||'-'} — ${r.dropAddr||'-'}
+                ${r.note?'<br><strong>📝 Note:</strong> '+r.note:''}
+              </div>
+              <div class="oc-cust">
+                <div class="oc-cust-item">👤 <strong>${r.name||'-'}</strong></div>
+                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone||'-'}</a></div>
+                <div class="oc-cust-item">⏰ ${r.deliverySlot||'-'}</div>
+              </div>`;
+          }
+          return `<div class="order-card ${status==='pending'?'new-order':''}">
+            <div class="oc-top">
+              <div>
+                <div class="oc-id">${typeLabel}</div>
+                <div class="oc-time">⏰ ${dt}</div>
+                <div class="oc-time" style="font-size:10px;color:#aaa">ID: ${r.id.slice(-8).toUpperCase()}</div>
+              </div>
+              <span class="order-status-badge s-${status}">${statusMap[status]||status}</span>
+            </div>
+            ${detailHTML}
+            ${r.adminNote?`<div style="background:#fff3cd;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:8px;color:#856404">📋 Admin Note: ${r.adminNote}</div>`:''}
+            <div class="oc-footer">
+              <div></div>
+              <div class="oc-actions">
+                ${status==='pending'?`<button class="oc-btn btn-confirm" onclick="ynAccept('${r.id}')">✅ Confirm</button>`:''}
+                ${status==='pending'?`<button class="oc-btn btn-cancel-o" onclick="ynReject('${r.id}')">❌ Reject</button>`:''}
+                ${status==='confirmed'?`<button class="oc-btn btn-otd" onclick="ynSend('${r.id}')">🛵 Send</button>`:''}
+                ${status==='out_for_delivery'?`<button class="oc-btn btn-delivered" onclick="ynDone('${r.id}')">🎉 Done</button>`:''}
+                <button class="oc-btn btn-wa" onclick="ynWA('${r.phone}','${r.name}','${status}')">📲 WA</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+      
+      async function ynAccept(id){
+        const note=prompt('Add a note for customer (optional):','')||'';
+        const ok=await window.fbUpdateYourNeed(id,'confirmed',note);
+        showToast(ok?'✅ Request Confirmed!':'❌ Failed!');
+      }
+
+      async function ynReject(id){
+        const note=prompt('Reason for rejection (optional):','')||'';
+        const ok=await window.fbUpdateYourNeed(id,'rejected',note);
+        showToast(ok?'❌ Request Rejected':'❌ Failed!');
+      }
+
+      async function ynSend(id){
+        const note=prompt('Optional note to customer (e.g. "Driver assigned")','')||'';
+        const ok=await window.fbUpdateYourNeed(id,'out_for_delivery',note);
+        showToast(ok?'🛵 Request marked Sent!':'❌ Failed!');
+      }
+
+      async function ynDone(id){
+        const note=prompt('Delivery note (optional):','')||'';
+        const ok=await window.fbUpdateYourNeed(id,'delivered',note);
+        showToast(ok?'🎉 Request marked Done!':'❌ Failed!');
+      }
+
+      function ynWA(phone, name, status){
+        const msgs={
+          confirmed:`Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart`,
+          out_for_delivery:`Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
+          delivered:`Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
+          rejected:`Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart`,
+          pending:`Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart`,
+        };
+        const msg=msgs[status]||`Hello ${name}! Update on your request: ${status}. — S_Quick Mart`;
+        window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+      }
+
+      // ── TOAST ─────────────────────────────────────────────────────
+      let toastTmr = null;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        if (toastTmr) {
+          clearTimeout(toastTmr);
+          t.classList.remove("show");
+        }
+        t.textContent = msg;
+        void t.offsetWidth;
+        t.classList.add("show");
+        toastTmr = setTimeout(() => {
+          t.classList.remove("show");
+          toastTmr = null;
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>

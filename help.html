@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S_Quick Mart — Help & About</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #246a73;
+        --primary-light: #e8f4f5;
+        --green: #1a9e5c;
+        --green-light: #e8f7f0;
+        --dark: #1a1a2e;
+        --text: #1e1e1e;
+        --muted: #6b7280;
+        --bg: #f8f9fa;
+        --white: #ffffff;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+        --r: 16px;
+        --orange: #ff6b00;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        font-size: 15px;
+      }
+
+      /* HEADER */
+      .header {
+        background: var(--dark);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+      .logo {
+        font-family: "Baloo 2", cursive;
+        font-size: 19px;
+        font-weight: 800;
+        color: #4ecdc4;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .logo small {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 11px;
+        font-weight: 500;
+        font-family: "Inter", sans-serif;
+      }
+      .back-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+        padding: 7px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      /* HERO */
+      .hero {
+        background: linear-gradient(145deg, var(--dark) 0%, #0f3460 100%);
+        color: #fff;
+        padding: 36px 20px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: rgba(78, 205, 196, 0.08);
+        top: -80px;
+        right: -60px;
+      }
+      .hero-icon {
+        font-size: 46px;
+        margin-bottom: 10px;
+        display: block;
+      }
+      .hero-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .hero-title span {
+        color: #4ecdc4;
+      }
+      .hero-sub {
+        font-size: 13px;
+        opacity: 0.72;
+        max-width: 320px;
+        margin: 0 auto;
+        line-height: 1.65;
+      }
+
+      /* NAV TABS */
+      .nav-tabs {
+        display: flex;
+        background: var(--white);
+        border-bottom: 2px solid #eee;
+        overflow-x: auto;
+        scrollbar-width: none;
+        position: sticky;
+        top: 51px;
+        z-index: 90;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+      .nav-tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .nav-tab {
+        padding: 12px 15px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        color: var(--muted);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s;
+      }
+      .nav-tab.active,
+      .nav-tab:hover {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      /* CONTENT */
+      .content {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px 14px 70px;
+      }
+
+      /* SECTION */
+      .section {
+        margin-bottom: 26px;
+      }
+      .section-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          var(--primary-light),
+          transparent
+        );
+        border-radius: 2px;
+      }
+
+      /* CARD */
+      .card {
+        background: var(--white);
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow: var(--shadow);
+        margin-bottom: 11px;
+      }
+
+      /* ABOUT HERO CARD */
+      .about-card {
+        background: linear-gradient(135deg, var(--dark), #0f3460);
+        color: #fff;
+        border-radius: var(--r);
+        padding: 22px 18px;
+        margin-bottom: 11px;
+        position: relative;
+        overflow: hidden;
+      }
+      .about-card::after {
+        content: "🛒";
+        position: absolute;
+        font-size: 72px;
+        right: -8px;
+        bottom: -8px;
+        opacity: 0.07;
+      }
+      .about-card h3 {
+        font-family: "Baloo 2", cursive;
+        font-size: 18px;
+        font-weight: 800;
+        color: #4ecdc4;
+        margin-bottom: 9px;
+      }
+      .about-card p {
+        font-size: 13px;
+        line-height: 1.7;
+        opacity: 0.82;
+      }
+
+      /* FEATURE GRID */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-bottom: 11px;
+      }
+      .feature-item {
+        background: var(--white);
+        border-radius: 14px;
+        padding: 15px 12px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+      .feature-icon {
+        font-size: 26px;
+        margin-bottom: 7px;
+        display: block;
+      }
+      .feature-label {
+        font-family: "Baloo 2", cursive;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 3px;
+      }
+      .feature-desc {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      /* INFO ROW */
+      .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        padding: 13px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .info-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+      }
+      .info-icon.green {
+        background: var(--green-light);
+      }
+      .info-icon.orange {
+        background: #fff3ec;
+      }
+      .info-body {
+        flex: 1;
+      }
+      .info-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 3px;
+      }
+      .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .info-value.highlight {
+        color: var(--primary);
+      }
+
+      /* BADGE */
+      .badge {
+        display: inline-block;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50px;
+        padding: 2px 9px;
+        font-size: 10px;
+        font-weight: 700;
+        margin-left: 5px;
+      }
+      .badge.green {
+        background: var(--green-light);
+        color: var(--green);
+      }
+      .badge.orange {
+        background: #fff3ec;
+        color: var(--orange);
+      }
+
+      /* STEPS */
+      .steps {
+        display: flex;
+        flex-direction: column;
+      }
+      .step {
+        display: flex;
+        gap: 13px;
+        align-items: flex-start;
+        position: relative;
+        padding-bottom: 16px;
+      }
+      .step:last-child {
+        padding-bottom: 0;
+      }
+      .step:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: 18px;
+        top: 38px;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          to bottom,
+          var(--primary-light),
+          transparent
+        );
+      }
+      .step-num {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        font-family: "Baloo 2", cursive;
+        font-size: 15px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 3px 10px rgba(36, 106, 115, 0.3);
+      }
+      .step-body {
+        padding-top: 5px;
+      }
+      .step-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 3px;
+      }
+      .step-desc {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      /* FAQ */
+      .faq-item {
+        border: 1.5px solid #eee;
+        border-radius: 13px;
+        margin-bottom: 9px;
+        overflow: hidden;
+      }
+      .faq-item.open {
+        border-color: var(--primary);
+      }
+      .faq-q {
+        padding: 14px 15px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dark);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        background: var(--white);
+        user-select: none;
+      }
+      .faq-arrow {
+        font-size: 14px;
+        transition: 0.3s;
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+      .faq-item.open .faq-arrow {
+        transform: rotate(180deg);
+        color: var(--primary);
+      }
+      .faq-a {
+        display: none;
+        padding: 0 15px 14px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.7;
+        background: var(--white);
+      }
+      .faq-item.open .faq-a {
+        display: block;
+      }
+
+      /* CONTACT */
+      .contact-card {
+        background: linear-gradient(135deg, #1a9e5c, #0d7a46);
+        border-radius: var(--r);
+        padding: 20px 16px;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 11px;
+      }
+      .contact-card h3 {
+        font-family: "Baloo 2", cursive;
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .contact-card p {
+        font-size: 12px;
+        opacity: 0.82;
+        margin-bottom: 15px;
+        line-height: 1.6;
+      }
+      .wa-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        color: #1a9e5c;
+        border-radius: 50px;
+        padding: 11px 24px;
+        font-family: "Baloo 2", cursive;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      }
+
+      /* DIRECTOR CARD */
+      .director-card {
+        background: linear-gradient(135deg, #1a1a2e, #0f3460);
+        border-radius: var(--r);
+        padding: 20px 18px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 11px;
+      }
+      .director-avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4ecdc4, #246a73);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 14px rgba(78, 205, 196, 0.35);
+      }
+      .director-info {
+        flex: 1;
+      }
+      .director-title {
+        font-size: 10px;
+        font-weight: 600;
+        color: #4ecdc4;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+      }
+      .director-name {
+        font-family: "Baloo 2", cursive;
+        font-size: 20px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 4px;
+      }
+      .director-company {
+        font-size: 12px;
+        opacity: 0.65;
+        margin-bottom: 10px;
+      }
+      .director-wa {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #25d366;
+        color: #fff;
+        border-radius: 50px;
+        padding: 7px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        font-family: "Baloo 2", cursive;
+      }
+
+      /* OUTSIDE DELIVERY CARD */
+      .outside-card {
+        background: linear-gradient(135deg, #fff8ec, #fff3dc);
+        border: 1.5px solid #ffe0a0;
+        border-radius: var(--r);
+        padding: 18px 16px;
+        margin-bottom: 11px;
+      }
+      .outside-card h4 {
+        font-family: "Baloo 2", cursive;
+        font-size: 16px;
+        font-weight: 700;
+        color: #b45309;
+        margin-bottom: 8px;
+      }
+      .outside-card p {
+        font-size: 13px;
+        color: #78350f;
+        line-height: 1.65;
+        margin-bottom: 12px;
+      }
+      .outside-wa-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #25d366;
+        color: #fff;
+        border-radius: 50px;
+        padding: 10px 20px;
+        font-family: "Baloo 2", cursive;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      /* POLICY */
+      .policy-item {
+        display: flex;
+        gap: 11px;
+        padding: 11px 0;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: flex-start;
+      }
+      .policy-item:last-child {
+        border-bottom: none;
+      }
+      .policy-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--primary);
+        margin-top: 6px;
+        flex-shrink: 0;
+      }
+      .policy-text {
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .policy-text strong {
+        color: var(--dark);
+      }
+
+      /* FOOTER */
+      .footer {
+        background: var(--dark);
+        color: #fff;
+        text-align: center;
+        padding: 22px 16px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .footer a {
+        color: #4ecdc4;
+        text-decoration: none;
+      }
+
+      /* TOAST */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        background: var(--dark);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        z-index: 5000;
+        opacity: 0;
+        transition: 0.25s;
+        white-space: nowrap;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <div class="header">
+      <a class="logo" href="index.html"
+        >🛒 S_Quick Mart <small>Parbhani</small></a
+      >
+      <a class="back-btn" href="index.html">← Shop</a>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <span class="hero-icon">🛒</span>
+      <div class="hero-title">Help & <span>About Us</span></div>
+      <div class="hero-sub">
+        Parbhani's fastest grocery delivery — order from home in minutes!
+      </div>
+    </div>
+
+    <!-- NAV TABS -->
+    <div class="nav-tabs">
+      <a class="nav-tab active" href="#about">🏪 About</a>
+      <a class="nav-tab" href="#how-it-works">📦 How it Works</a>
+      <a class="nav-tab" href="#delivery">🛵 Delivery</a>
+      <a class="nav-tab" href="#faq">❓ FAQ</a>
+      <a class="nav-tab" href="#contact">📞 Contact</a>
+      <a class="nav-tab" href="#policy">📋 Policy</a>
+    </div>
+
+    <div class="content">
+      <!-- ABOUT -->
+      <div class="section" id="about">
+        <div class="section-title">🏪 About S_Quick Mart</div>
+
+        <div class="about-card">
+          <h3>Parbhani's Fast Grocery Delivery! 🚀</h3>
+          <p>
+            S_Quick Mart is a local grocery delivery service built for the
+            people of Parbhani. Our mission is simple — get fresh groceries and
+            daily essentials delivered to your doorstep in just 20–30 minutes,
+            hassle-free!
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-item">
+            <span class="feature-icon">⚡</span>
+            <div class="feature-label">Super Fast</div>
+            <div class="feature-desc">Delivered in 20–30 mins</div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🏠</span>
+            <div class="feature-label">Doorstep</div>
+            <div class="feature-desc">Right to your door</div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">💰</span>
+            <div class="feature-label">Free Delivery</div>
+            <div class="feature-desc">On orders above ₹149</div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">💵</span>
+            <div class="feature-label">Pay on Delivery</div>
+            <div class="feature-desc">Cash on delivery</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="info-row">
+            <div class="info-icon">🕐</div>
+            <div class="info-body">
+              <div class="info-label">Store Timing</div>
+              <div class="info-value highlight">
+                7:00 AM – 10:00 PM <span class="badge green">Daily</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon green">🛵</div>
+            <div class="info-body">
+              <div class="info-label">Delivery Time</div>
+              <div class="info-value">20 – 30 Minutes</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon orange">📍</div>
+            <div class="info-body">
+              <div class="info-label">Primary Delivery Area</div>
+              <div class="info-value">
+                Parbhani City <span class="badge">PIN: 431401</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon orange">🗺️</div>
+            <div class="info-body">
+              <div class="info-label">Nearby Areas</div>
+              <div class="info-value">
+                Pedgaon, Dharmapuri & nearby
+                <span class="badge orange">WhatsApp to Confirm</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">💳</div>
+            <div class="info-body">
+              <div class="info-label">Payment</div>
+              <div class="info-value">Cash on Delivery (COD)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="section" id="how-it-works">
+        <div class="section-title">📦 How it Works</div>
+        <div class="card">
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <div class="step-title">Browse Products 🛍️</div>
+                <div class="step-desc">
+                  Explore categories and products on the homepage — or search
+                  for exactly what you need.
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <div class="step-title">Add to Cart 🛒</div>
+                <div class="step-desc">
+                  Tap "+" on any product to add it to your cart. Adjust
+                  quantities easily.
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <div class="step-title">Place Your Order ✅</div>
+                <div class="step-desc">
+                  Enter your name, phone number and address — tap "Place Order".
+                  You'll receive a WhatsApp confirmation!
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-body">
+                <div class="step-title">Receive Delivery 🎉</div>
+                <div class="step-desc">
+                  Our delivery partner arrives in 20–30 minutes. Pay in cash at
+                  the door!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="background: #fff3ec; border: 1.5px solid #ffe0cc"
+        >
+          <div
+            style="
+              font-family: &quot;Baloo 2&quot;, cursive;
+              font-size: 15px;
+              font-weight: 700;
+              color: #ff6b00;
+              margin-bottom: 7px;
+            "
+          >
+            🎯 Can't find what you need?
+          </div>
+          <div
+            style="
+              font-size: 13px;
+              color: #78350f;
+              line-height: 1.65;
+              margin-bottom: 12px;
+            "
+          >
+            Use the <strong>YourNeed</strong> feature to request any item not
+            listed — or request a Pickup & Drop service!
+          </div>
+          <a
+            href="yourneed.html"
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: #ff6b00;
+              color: #fff;
+              border-radius: 10px;
+              padding: 9px 18px;
+              font-family: &quot;Baloo 2&quot;, cursive;
+              font-size: 14px;
+              font-weight: 700;
+              text-decoration: none;
+            "
+            >Try YourNeed →</a
+          >
+        </div>
+      </div>
+
+      <!-- DELIVERY -->
+      <div class="section" id="delivery">
+        <div class="section-title">🛵 Delivery Info</div>
+
+        <div class="card">
+          <div class="info-row">
+            <div class="info-icon green">🎉</div>
+            <div class="info-body">
+              <div class="info-label">Free Delivery</div>
+              <div class="info-value">
+                On all orders of ₹149 or above
+                <span class="badge green">FREE</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon orange">🚚</div>
+            <div class="info-body">
+              <div class="info-label">Delivery Charge</div>
+              <div class="info-value">
+                Only <strong>₹20</strong> on orders below ₹149
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">⏱️</div>
+            <div class="info-body">
+              <div class="info-label">Estimated Time</div>
+              <div class="info-value">20 – 30 Minutes after confirmation</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">📍</div>
+            <div class="info-body">
+              <div class="info-label">Primary Area</div>
+              <div class="info-value">Parbhani City (PIN: 431401)</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">💵</div>
+            <div class="info-body">
+              <div class="info-label">Payment</div>
+              <div class="info-value">Cash on Delivery only</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OUTSIDE PARBHANI -->
+        <div class="outside-card">
+          <h4>🗺️ Outside Parbhani? We May Deliver!</h4>
+          <p>
+            We also deliver to nearby areas within ~10km such as
+            <strong>Pedgaon, Dharmapuri</strong> and surrounding villages.
+            Delivery charges for outside areas are confirmed on WhatsApp before
+            dispatch.
+          </p>
+          <a
+            class="outside-wa-btn"
+            href="https://wa.me/917249148205?text=Hi%2C%20I%20want%20to%20order%20from%20outside%20Parbhani.%20Please%20confirm%20delivery%20availability%20and%20charges."
+            target="_blank"
+          >
+            💬 WhatsApp to Confirm
+          </a>
+        </div>
+
+        <div
+          class="card"
+          style="background: var(--green-light); border: 1.5px solid #b7e4cc"
+        >
+          <div style="font-size: 13px; color: #0a5c35; line-height: 1.7">
+            💡 <strong>Tip:</strong> Place your order between 7AM–9:30PM to
+            ensure on-time delivery. Last orders accepted at 9:30 PM.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="section" id="faq">
+        <div class="section-title">❓ Frequently Asked Questions</div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            How can I track my order? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Tap the "My Orders" icon on the homepage, enter your phone number
+            and all your orders with live status will appear. We also send
+            WhatsApp updates!
+          </div>
+        </div>
+        <!-- <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Can I cancel my order? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Yes — WhatsApp us at 7249148205 as soon as possible. Cancellation is
+            not possible once the delivery partner is on the way.
+          </div>
+        </div> -->
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Wrong Item? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            
+            Please open and verify your order in front of the delivery partner before they leave. Once the delivery partner has left, returns and replacements will not be accepted under any circumstances.
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Is online payment available? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Currently only Cash on Delivery (COD) is available. Pay in cash when
+            your order arrives. UPI/online payment will be added soon!
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Is there a minimum order amount? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            No minimum order! However, a ₹20 delivery charge applies on orders
+            below ₹149. Orders of ₹149 or above get free delivery.
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            A product I need isn't listed — what do I do?
+            <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Use the "YourNeed" feature to submit a custom item request. We'll do
+            our best to get it for you! Or WhatsApp us directly at 7249148205.
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Do you deliver outside Parbhani? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            Yes, for nearby areas within ~10km like Pedgaon and Dharmapuri,
+            delivery is possible with additional charges. WhatsApp us at
+            7249148205 to confirm availability and charges before placing your
+            order.
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            Can I order after 10 PM? <span class="faq-arrow">▼</span>
+          </div>
+          <div class="faq-a">
+            No — our store operates from 7AM to 10PM daily. Orders placed after
+            hours will not be accepted. You can order again from 7AM the next
+            morning!
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="section" id="contact">
+        <div class="section-title">📞 Contact Us</div>
+
+        <!-- Support -->
+        <div class="contact-card">
+          <h3>💬 Chat with Support</h3>
+          <p>
+            For order issues, delivery questions or general help — our support
+            team is available during store hours.
+          </p>
+          <a
+            class="wa-btn"
+            href="https://wa.me/917249148205?text=Hi%20S_Quick%20Mart%2C%20I%20need%20help!"
+            target="_blank"
+          >
+            💬 WhatsApp Support
+          </a>
+        </div>
+
+        <div class="card">
+          <div class="info-row">
+            <div class="info-icon green">📱</div>
+            <div class="info-body">
+              <div class="info-label">Support — WhatsApp / Call</div>
+              <div class="info-value">
+                <a
+                  href="tel:7249148205"
+                  style="
+                    color: var(--primary);
+                    font-weight: 700;
+                    text-decoration: none;
+                  "
+                  >7249148205</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">🕐</div>
+            <div class="info-body">
+              <div class="info-label">Support Hours</div>
+              <div class="info-value">7:00 AM – 10:00 PM (Daily)</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon orange">⚡</div>
+            <div class="info-body">
+              <div class="info-label">Response Time</div>
+              <div class="info-value">Usually within 15 minutes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Director Card -->
+        <div class="director-card">
+          <div class="director-avatar">👤</div>
+          <div class="director-info">
+            <div class="director-title">Director — S_Quick Mart</div>
+            <div class="director-name">Mr. Shaikh Azeem</div>
+            <div class="director-company">For escalations & direct connect</div>
+            <a
+              class="director-wa"
+              href="https://wa.me/917058204462?text=Hi%2C%20I%20would%20like%20to%20connect%20with%20the%20Director."
+              target="_blank"
+            >
+              💬 Connect on WhatsApp
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="
+            background: #f0f9ff;
+            border: 1.5px solid #bae6fd;
+            font-size: 13px;
+            color: #0c4a6e;
+            line-height: 1.65;
+            padding: 15px 16px;
+          "
+        >
+          ℹ️ <strong>Note:</strong> Please contact Support first for order &
+          delivery issues. Reach out to the Director only for unresolved
+          concerns or business enquiries.
+        </div>
+      </div>
+
+      <!-- POLICY -->
+      <div class="section" id="policy">
+        <div class="section-title">📋 Delivery & Return Policy</div>
+
+        <div class="card">
+          <div
+            style="
+              font-family: &quot;Baloo 2&quot;, cursive;
+              font-size: 15px;
+              font-weight: 700;
+              color: var(--dark);
+              margin-bottom: 11px;
+            "
+          >
+            🚚 Delivery Policy
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Primary Area:</strong> Delivery available within Parbhani
+              city (PIN: 431401).
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Outside Parbhani:</strong> Areas within ~10km (Pedgaon,
+              Dharmapuri etc.) — WhatsApp us to confirm charges before ordering.
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Delivery Time:</strong> 20–30 minutes after order
+              confirmation.
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Free Delivery:</strong> On orders of ₹149 or above.
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Delivery Charge:</strong> ₹20 on orders below ₹149.
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Store Hours:</strong> Orders accepted from 7:00 AM to
+              10:00 PM daily.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div
+            style="
+              font-family: &quot;Baloo 2&quot;, cursive;
+              font-size: 15px;
+              font-weight: 700;
+              color: var(--dark);
+              margin-bottom: 11px;
+            "
+          >
+            🔄 Return & Refund Policy
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Wrong Item:</strong> Check your items immediately when the delivery partner is at your door. If anything is wrong, inform the delivery partner on the spot — returns are only accepted at the time of delivery, not after.
+            </div>
+          </div>
+         
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Please Note:</strong> S_Quick Mart processes every order carefully before dispatch. Since we deliver fresh groceries and daily essentials, we do not accept cancellations once the order is placed — as items are packed and dispatched quickly. We request you to review your cart carefully before placing your order. Thank you for understanding! 🙏
+            </div>
+          </div>
+          <div class="policy-item">
+            <div class="policy-dot"></div>
+            <div class="policy-text">
+              <strong>Payment:</strong> Cash on Delivery only. Please keep exact
+              change ready if possible.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      © 2025 S_Quick Mart, Parbhani &nbsp;|&nbsp;
+      <a href="index.html">Shop</a> &nbsp;|&nbsp;
+      <a href="yourneed.html">YourNeed</a> &nbsp;|&nbsp;
+      <a href="https://wa.me/917249148205">WhatsApp</a>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      function toggleFaq(el) {
+        const isOpen = el.classList.contains("open");
+        document
+          .querySelectorAll(".faq-item")
+          .forEach((f) => f.classList.remove("open"));
+        if (!isOpen) el.classList.add("open");
+      }
+
+      const sections = [
+        "about",
+        "how-it-works",
+        "delivery",
+        "faq",
+        "contact",
+        "policy",
+      ];
+      const tabs = document.querySelectorAll(".nav-tab");
+      window.addEventListener("scroll", () => {
+        let current = "";
+        sections.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && window.scrollY >= el.offsetTop - 120) current = id;
+        });
+        tabs.forEach((t) =>
+          t.classList.toggle(
+            "active",
+            t.getAttribute("href") === "#" + current,
+          ),
+        );
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2763 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Your Need — QuickMart Parbhani</title>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+        authDomain: "quickmart-b117e.firebaseapp.com",
+        projectId: "quickmart-b117e",
+        storageBucket: "quickmart-b117e.firebasestorage.app",
+        messagingSenderId: "128330058901",
+        appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      window.fbSaveYourNeed = async (data) => {
+        try {
+          const ref = await addDoc(collection(db, "yourneed_requests"), {
+            ...data,
+            status: "pending",
+            createdAt: serverTimestamp(),
+          });
+          return ref.id;
+        } catch (e) {
+          console.error("YourNeed save error:", e);
+          return null;
+        }
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #ff6b00;
+        --primary-dark: #e05800;
+        --primary-light: #fff4ed;
+        --blue: #1d4ed8;
+        --blue-light: #eff6ff;
+        --green: #059669;
+        --dark: #08080f;
+        --bg: #f2f3f7;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --radius: 16px;
+        --header-h: 64px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── HEADER ── */
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 300;
+        height: var(--header-h);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .logo-mark {
+        width: 38px;
+        height: 38px;
+        background: var(--primary);
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        box-shadow: 0 4px 10px rgba(255, 107, 0, 0.32);
+        flex-shrink: 0;
+      }
+      .logo-text .brand {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 17px;
+        color: var(--text);
+        line-height: 1.2;
+      }
+      .logo-text .tagline {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+      }
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: #f9fafb;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.18s;
+        white-space: nowrap;
+      }
+      .back-btn:active {
+        background: #f0f0f0;
+      }
+
+      /* ── HERO ── */
+      .hero {
+        background: var(--dark);
+        padding: 48px 20px 56px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 500px 350px at 5% 50%,
+            rgba(255, 107, 0, 0.18) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 350px 250px at 95% 15%,
+            rgba(255, 107, 0, 0.1) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 280px 280px at 50% 105%,
+            rgba(29, 78, 216, 0.12) 0%,
+            transparent 65%
+          );
+      }
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 36px 36px;
+      }
+      .hero-inner {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 107, 0, 0.12);
+        border: 1px solid rgba(255, 107, 0, 0.25);
+        color: #ff8c3a;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        background: #ff6b00;
+        border-radius: 50%;
+        animation: blink 2s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(1.5);
+        }
+      }
+      .hero h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(28px, 7vw, 50px);
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.1;
+        margin-bottom: 16px;
+      }
+      .hero h1 .accent {
+        color: transparent;
+        background: linear-gradient(130deg, #ff6b00, #ff9a3c);
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+      .hero-desc {
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 15px;
+        max-width: 480px;
+        margin: 0 auto 28px;
+        line-height: 1.8;
+      }
+      .hero-desc strong {
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 600;
+      }
+      .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        padding: 8px 14px;
+        border-radius: 50px;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      /* ── SERVICE TABS ── */
+      .service-nav {
+        background: #fff;
+        border-bottom: 1.5px solid var(--border);
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 12px;
+        gap: 2px;
+        position: sticky;
+        top: var(--header-h);
+        z-index: 200;
+      }
+      .service-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .sn-tab {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 18px;
+        height: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        border-bottom: 2.5px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: 0.18s;
+        flex-shrink: 0;
+      }
+      .sn-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+      }
+
+      /* ── MAIN CONTENT ── */
+      .main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 20px 12px 80px;
+      }
+      @media (min-width: 600px) {
+        .main {
+          padding: 28px 20px 80px;
+        }
+      }
+      .section-panel {
+        display: none;
+      }
+      .section-panel.active {
+        display: block;
+      }
+
+      /* ── SEC HEAD ── */
+      .sec-head {
+        margin-bottom: 20px;
+        padding: 0 2px;
+      }
+      .sec-head-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--text);
+        margin-bottom: 3px;
+      }
+      .sec-head-sub {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      /* ── STEP CARDS ── */
+      .step {
+        background: #fff;
+        border-radius: var(--radius);
+        border: 1.5px solid var(--border);
+        margin-bottom: 12px;
+        overflow: hidden;
+        transition: 0.22s;
+      }
+      .step.completed {
+        border-color: #bbf7d0;
+        background: #fbfefb;
+      }
+      .step.active {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.07);
+      }
+      .step-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        cursor: pointer;
+        user-select: none;
+        /* big touch target */
+        min-height: 60px;
+      }
+      .step-num {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--muted);
+        border: 2px solid var(--border);
+        flex-shrink: 0;
+        transition: 0.2s;
+      }
+      .step.active .step-num {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+      .step.completed .step-num {
+        background: #10b981;
+        color: #fff;
+        border-color: #10b981;
+      }
+      .step-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .step-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .step-subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 400;
+        margin-top: 2px;
+      }
+      .step-check {
+        font-size: 16px;
+        display: none;
+        flex-shrink: 0;
+      }
+      .step.completed .step-check {
+        display: block;
+      }
+      .step.completed .step-arrow {
+        display: none;
+      }
+      .step-arrow {
+        font-size: 16px;
+        color: var(--muted);
+        transition: 0.2s;
+        flex-shrink: 0;
+      }
+      .step.active .step-arrow {
+        transform: rotate(180deg);
+      }
+      .step-body {
+        display: none;
+        padding: 0 16px 20px;
+      }
+      .step.active .step-body {
+        display: block;
+      }
+
+      /* ── CATEGORY GRID ── */
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      @media (min-width: 480px) {
+        .cat-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .cat-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 11px 6px;
+        border-radius: 13px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: 0.18s;
+        text-align: center;
+        /* touch friendly */
+        min-height: 72px;
+        justify-content: center;
+      }
+      .cat-btn:active {
+        transform: scale(0.95);
+      }
+      .cat-btn.selected {
+        border-color: var(--primary);
+        background: var(--primary-light);
+      }
+      .cat-emoji {
+        font-size: 24px;
+        line-height: 1;
+      }
+      .cat-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--muted);
+        line-height: 1.2;
+      }
+      .cat-btn.selected .cat-label {
+        color: var(--primary);
+      }
+
+      /* ── AREA GRID ── */
+      .area-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .area-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .area-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+        margin-bottom: 10px;
+      }
+      @media (min-width: 400px) {
+        .area-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (min-width: 560px) {
+        .area-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .area-btn {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: 0.18s;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--muted);
+        min-height: 40px;
+      }
+      .area-btn:active {
+        transform: scale(0.96);
+      }
+      .area-btn.selected {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .area-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--border);
+        flex-shrink: 0;
+        transition: 0.18s;
+      }
+      .area-btn.selected .area-dot {
+        background: var(--primary);
+      }
+
+      /* ── TIME SLOTS ── */
+      .slot-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 10px;
+      }
+      .slot-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 9px 12px;
+        border-radius: 10px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: 0.18s;
+        text-align: center;
+        min-width: 80px;
+        flex: 1;
+        max-width: 120px;
+      }
+      .slot-btn:active {
+        transform: scale(0.95);
+      }
+      .slot-btn.selected {
+        border-color: var(--primary);
+        background: var(--primary-light);
+      }
+      .slot-time {
+        font-family: "Syne", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .slot-label {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 500;
+        margin-top: 2px;
+      }
+      .slot-btn.selected .slot-time,
+      .slot-btn.selected .slot-label {
+        color: var(--primary);
+      }
+      .custom-time-wrap {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+        background: var(--primary-light);
+        border: 1.5px solid #fed7aa;
+        border-radius: 11px;
+        padding: 10px 14px;
+      }
+      .custom-time-wrap.show {
+        display: flex;
+      }
+      .custom-time-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary);
+        white-space: nowrap;
+      }
+      .fi-time {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1.5px solid #fed7aa;
+        border-radius: 9px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        outline: none;
+        color: var(--text);
+        background: #fff;
+        min-width: 0;
+      }
+      .fi-time:focus {
+        border-color: var(--primary);
+      }
+
+      /* ── FORM FIELDS ── */
+      .fg {
+        margin-bottom: 13px;
+      }
+      .fg:last-child {
+        margin-bottom: 0;
+      }
+      .fl {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 6px;
+      }
+      .fl .req {
+        color: #ef4444;
+        font-size: 13px;
+        margin-left: 1px;
+      }
+      .fi {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 11px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        outline: none;
+        transition: 0.18s;
+        color: var(--text);
+        background: #fafafa;
+        /* Mobile: no zoom on focus (font-size ≥16 prevents iOS zoom) */
+        font-size: 16px;
+      }
+      .fi:focus {
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.07);
+      }
+      .fi::placeholder {
+        color: #c4c8d0;
+        font-size: 14px;
+      }
+      textarea.fi {
+        resize: vertical;
+        min-height: 76px;
+        font-size: 15px;
+      }
+      textarea.fi::placeholder {
+        font-size: 14px;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      @media (min-width: 440px) {
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* ── ITEMS ── */
+      .items-wrap {
+        margin-bottom: 10px;
+      }
+      .item-card {
+        background: #fafafa;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 11px 13px;
+        margin-bottom: 8px;
+      }
+      .item-card:focus-within {
+        border-color: var(--primary);
+      }
+      .item-top {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+      }
+      .item-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        background: var(--primary-light);
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .item-name-in {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-family: "DM Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        outline: none;
+        color: var(--text);
+        min-width: 0;
+      }
+      .item-name-in::placeholder {
+        color: #c4c8d0;
+        font-size: 13px;
+      }
+      .item-bottom {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 9px;
+        flex-wrap: wrap;
+      }
+      .qty-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .qty-lbl {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .qty-ctrl {
+        display: flex;
+        align-items: center;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #f3f4f6;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+        transition: 0.14s;
+        flex-shrink: 0;
+      }
+      .qty-btn:active {
+        background: var(--primary);
+        color: #fff;
+      }
+      .qty-val {
+        width: 38px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        background: #fff;
+        outline: none;
+        font-family: "DM Sans", sans-serif;
+      }
+      .item-note-in {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        outline: none;
+        color: var(--muted);
+        min-width: 80px;
+      }
+      .item-note-in::placeholder {
+        color: #d1d5db;
+        font-size: 12px;
+      }
+      .remove-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: none;
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.14s;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .remove-btn:active {
+        background: #dc2626;
+        color: #fff;
+      }
+      .add-item-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px;
+        border-radius: 11px;
+        background: transparent;
+        border: 1.5px dashed #d1d5db;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        cursor: pointer;
+        transition: 0.18s;
+        min-height: 46px;
+      }
+      .add-item-btn:active {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-light);
+      }
+
+      /* ── PRICE BOX ── */
+      .price-box {
+        background: linear-gradient(135deg, #fff8f0, #fff4ed);
+        border: 1.5px solid #fed7aa;
+        border-radius: 13px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+      .price-box-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 11px;
+      }
+      .pr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 7px;
+        font-size: 14px;
+      }
+      .pr:last-child {
+        margin-bottom: 0;
+        border-top: 1.5px dashed #fed7aa;
+        padding-top: 8px;
+      }
+      .pr .pl {
+        color: var(--muted);
+      }
+      .pr .pv {
+        font-weight: 700;
+        color: var(--text);
+      }
+      .pr.total .pv {
+        color: var(--primary);
+        font-size: 15px;
+      }
+
+      /* ── ORDER PREVIEW ── */
+      .order-preview {
+        background: #f9fafb;
+        border: 1.5px solid var(--border);
+        border-radius: 13px;
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      .op-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text);
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .op-sec {
+        margin-bottom: 10px;
+      }
+      .op-sec-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 5px;
+      }
+      .op-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        font-size: 13px;
+        color: var(--text);
+        margin-bottom: 4px;
+        line-height: 1.5;
+      }
+      .op-div {
+        height: 1.5px;
+        background: var(--border);
+        margin: 9px 0;
+      }
+
+      /* ── INFO BOX ── */
+      .info-box {
+        border-radius: 11px;
+        padding: 13px 14px;
+        display: flex;
+        gap: 11px;
+        align-items: flex-start;
+        margin-bottom: 14px;
+      }
+      .info-box.green {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+      }
+      .info-box.blue {
+        background: var(--blue-light);
+        border: 1.5px solid #bfdbfe;
+      }
+      .info-icon {
+        font-size: 17px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .info-text {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--text);
+      }
+      .info-text strong {
+        color: var(--green);
+      }
+      .info-box.blue .info-text strong {
+        color: var(--blue);
+      }
+
+      /* ── SUBMIT BTN ── */
+      .submit-btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 13px;
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.22s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        letter-spacing: 0.2px;
+        min-height: 54px;
+      }
+      .submit-btn.orange {
+        background: linear-gradient(135deg, #ff6b00, #ff8c42);
+        color: #fff;
+        box-shadow: 0 5px 20px rgba(255, 107, 0, 0.38);
+      }
+      .submit-btn.blue-btn {
+        background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+        color: #fff;
+        box-shadow: 0 5px 20px rgba(29, 78, 216, 0.32);
+      }
+      .submit-btn:active {
+        transform: scale(0.97);
+      }
+
+      /* ── TRUST SECTION ── */
+      .trust-section {
+        background: var(--dark);
+        padding: 40px 16px;
+      }
+      .trust-inner {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .trust-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 19px;
+        color: #fff;
+        margin-bottom: 18px;
+        text-align: center;
+      }
+      .trust-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+      @media (min-width: 520px) {
+        .trust-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .trust-card {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        padding: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .trust-card-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .tc-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.88);
+        margin-bottom: 2px;
+      }
+      .tc-sub {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.38);
+      }
+      .trust-contact {
+        text-align: center;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.38);
+      }
+      .trust-contact strong {
+        color: var(--primary);
+      }
+
+      /* ── SUCCESS OVERLAY ── */
+      .suc-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 9000;
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+        backdrop-filter: blur(4px);
+      }
+      .suc-overlay.open {
+        display: flex;
+      }
+      .suc-box {
+        background: #fff;
+        border-radius: 24px 24px 0 0;
+        padding: 36px 24px calc(36px + env(safe-area-inset-bottom));
+        text-align: center;
+        width: 100%;
+        max-width: 480px;
+        animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%);
+        }
+        to {
+          transform: translateY(0);
+        }
+      }
+      .suc-anim {
+        font-size: 64px;
+        margin-bottom: 14px;
+        display: block;
+        animation: popIn 0.5s 0.1s both;
+      }
+      @keyframes popIn {
+        0% {
+          transform: scale(0);
+        }
+        60% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .suc-title {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+        color: var(--green);
+        margin-bottom: 8px;
+      }
+      .suc-msg {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .suc-close {
+        width: 100%;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      /* ── TOAST ── */
+      #toast {
+        position: fixed;
+        bottom: calc(24px + env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%) translateY(12px);
+        background: #111827;
+        color: #fff;
+        padding: 11px 22px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 13px;
+        z-index: 9999;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        max-width: 90vw;
+        white-space: normal;
+        text-align: center;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ── DIVIDER LABEL ── */
+      .divider-or {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .divider-or span {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+      }
+      .divider-or::before,
+      .divider-or::after {
+        content: "";
+        flex: 1;
+        height: 1.5px;
+        background: var(--border);
+      }
+
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .logo-mark {
+        width: 38px;
+        height: 38px;
+        background: var(--primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        overflow: hidden;
+      }
+      .logo-mark img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .logo-brand {
+        font-family: "Baloo 2", cursive;
+        font-weight: 800;
+        font-size: 20px;
+        color: #0f0f1a;
+        font-family: Algerian, sans-serif;
+        line-height: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <div class="header">
+      <a class="logo" href="#">
+        <div class="logo-mark"> 
+            <img
+              src="icon&logo/S2.PNG"
+              alt="Logo"
+              onerror="
+                this.style.display = 'none';
+                this.parentNode.innerHTML = '🛒';
+              "
+            />
+          </div>
+        <div class="logo-text">
+          <div class="logo-brand">S_Quick Mart</div>
+          <div class="tagline">Parbhani's Trusted Local Service</div>
+        </div>
+      </a>
+      <a class="back-btn" href="index.html">← Back</a>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <span class="badge-dot"></span> Special Services — Parbhani Only
+        </div>
+        <h1>We Deliver<br /><span class="accent">Your Need</span></h1>
+        <p class="hero-desc">
+          Can't find it online? Need something picked up?
+          <strong>We've got you covered.</strong><br />
+          From rare groceries and medicines to tiffin pickups and important
+          documents — just tell us what you need, and we handle the rest.
+          <strong>Fast. Trusted. Local.</strong>
+        </p>
+        <div class="hero-stats">
+          <div class="stat-chip">⚡ 20–45 Min</div>
+          <div class="stat-chip">💵 Pay on Delivery</div>
+          <div class="stat-chip">📲 WhatsApp Confirmed</div>
+          <div class="stat-chip">📍 Parbhani Only</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE TABS -->
+    <div class="service-nav">
+      <div
+        class="sn-tab active"
+        onclick="switchService('custom')"
+        id="tab-custom"
+      >
+        🛍️ Custom Item Request
+      </div>
+      <div class="sn-tab" onclick="switchService('pickup')" id="tab-pickup">
+        🏍️ Pickup &amp; Drop
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- ══════════ CUSTOM ITEM ══════════ -->
+      <div class="section-panel active" id="panel-custom">
+        <div class="sec-head">
+          <div class="sec-head-title">Custom Item Request</div>
+          <div class="sec-head-sub">
+            Any item not in our store — we'll source it for you
+          </div>
+        </div>
+
+        <!-- Step 1: Category -->
+        <div class="step active" id="step-cr-1">
+          <div class="step-header" onclick="toggleStep('cr', 1)">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <div class="step-title">Select Item Category</div>
+              <div class="step-subtitle">What type of item do you need?</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="cat-grid" id="cr-cat-grid">
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Grocery')"
+                data-cat="Grocery"
+              >
+                <div class="cat-emoji">🛒</div>
+                <div class="cat-label">Grocery</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Medicine')"
+                data-cat="Medicine"
+              >
+                <div class="cat-emoji">💊</div>
+                <div class="cat-label">Medicine</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Stationery')"
+                data-cat="Stationery"
+              >
+                <div class="cat-emoji">📚</div>
+                <div class="cat-label">Stationery</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Electronics')"
+                data-cat="Electronics"
+              >
+                <div class="cat-emoji">🔌</div>
+                <div class="cat-label">Electronics</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Food & Snacks')"
+                data-cat="Food & Snacks"
+              >
+                <div class="cat-emoji">🍱</div>
+                <div class="cat-label">Food &amp; Snacks</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Clothing')"
+                data-cat="Clothing"
+              >
+                <div class="cat-emoji">👕</div>
+                <div class="cat-label">Clothing</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Hardware')"
+                data-cat="Hardware"
+              >
+                <div class="cat-emoji">🔧</div>
+                <div class="cat-label">Hardware</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Other')"
+                data-cat="Other"
+              >
+                <div class="cat-emoji">📦</div>
+                <div class="cat-label">Other</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Items -->
+        <div class="step" id="step-cr-2">
+          <div class="step-header" onclick="toggleStep('cr', 2)">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <div class="step-title">Add Your Items</div>
+              <div class="step-subtitle">Name and quantity of each item</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="items-wrap" id="cr-items-wrap"></div>
+            <button class="add-item-btn" onclick="addCrItem()">
+              ＋ Add Another Item
+            </button>
+            <div class="fg" style="margin-top: 14px">
+              <label class="fl"
+                >📝 Special Note
+                <span
+                  style="
+                    text-transform: none;
+                    font-weight: 400;
+                    letter-spacing: 0;
+                    font-size: 10px;
+                  "
+                  >(optional)</span
+                ></label
+              >
+              <textarea
+                class="fi"
+                id="cr_note"
+                placeholder="Brand preference, size, color, or any specific instruction..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Delivery Details -->
+        <div class="step" id="step-cr-3">
+          <div class="step-header" onclick="toggleStep('cr', 3)">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <div class="step-title">Your Details &amp; Address</div>
+              <div class="step-subtitle">Where and when to deliver?</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Your Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="cr_name"
+                  placeholder="Full name"
+                  autocomplete="name"
+                />
+              </div>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Your Mobile <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="cr_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
+            <div class="fg">
+              <div class="area-label-row">
+                <label class="fl" style="margin: 0"
+                  >📍 Select Your Area <span class="req">*</span></label
+                >
+              </div>
+              <div class="area-grid" id="cr-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="cr_address"
+                placeholder="House no., street, landmark..."
+                autocomplete="street-address"
+              />
+            </div>
+            <div class="fg">
+              <label class="fl" style="margin-bottom: 8px"
+                >⏰ Preferred Delivery Time <span class="req">*</span></label
+              >
+              <div class="slot-row" id="cr-slot-grid">
+                <div
+                  class="slot-btn selected"
+                  onclick="selectSlot('cr', 'ASAP')"
+                  data-slot="ASAP"
+                >
+                  <div class="slot-time">⚡ ASAP</div>
+                  <div class="slot-label">Right away</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'Within 1 Hour')"
+                  data-slot="Within 1 Hour"
+                >
+                  <div class="slot-time">1 Hour</div>
+                  <div class="slot-label">Relaxed</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'Evening 5–8 PM')"
+                  data-slot="Evening 5–8 PM"
+                >
+                  <div class="slot-time">🌆 Evening</div>
+                  <div class="slot-label">5–8 PM</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'custom')"
+                  data-slot="custom"
+                >
+                  <div class="slot-time">🕐 Custom</div>
+                  <div class="slot-label">Pick time</div>
+                </div>
+              </div>
+              <div class="custom-time-wrap" id="cr-custom-time">
+                <span class="custom-time-label">🕐 Select Time:</span>
+                <input type="time" class="fi-time" id="cr_custom_time" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div class="step" id="step-cr-4">
+          <div class="step-header" onclick="reviewCR()">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <div class="step-title">Review &amp; Confirm</div>
+              <div class="step-subtitle">Tap to check your order summary</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="order-preview" id="cr-preview"></div>
+            <div class="price-box">
+              <div class="price-box-title">💰 Estimated Charges</div>
+              <div class="pr">
+                <span class="pl">Item Price</span
+                ><span class="pv">Confirmed on WhatsApp</span>
+              </div>
+              <div class="pr">
+                <span class="pl">Delivery Charge</span
+                ><span class="pv">₹20</span>
+              </div>
+              <div class="pr total">
+                <span class="pl">Total</span
+                ><span class="pv">Item Cost + ₹20</span>
+              </div>
+            </div>
+            <div class="info-box green">
+              <div class="info-icon">✅</div>
+              <div class="info-text">
+                We confirm
+                <strong>price &amp; availability on WhatsApp</strong> before
+                delivery. You pay only after receiving.
+                <strong>Zero advance. Zero hidden charges.</strong>
+              </div>
+            </div>
+            <button class="submit-btn orange" onclick="submitCR()">
+              ✅ Confirm & Send on WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- end custom panel -->
+
+      <!-- ══════════ PICKUP & DROP ══════════ -->
+      <div class="section-panel" id="panel-pickup">
+        <div class="sec-head">
+          <div class="sec-head-title">Pickup &amp; Drop</div>
+          <div class="sec-head-sub">
+            Tiffin, documents, parcels — we collect and deliver across Parbhani
+          </div>
+        </div>
+
+        <!-- Step 1: Item Type -->
+        <div class="step active" id="step-pd-1">
+          <div class="step-header" onclick="toggleStep('pd', 1)">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <div class="step-title">What Are We Picking Up?</div>
+              <div class="step-subtitle">Select item type and describe it</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="cat-grid" id="pd-cat-grid">
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Tiffin')"
+                data-cat="Tiffin"
+              >
+                <div class="cat-emoji">🍱</div>
+                <div class="cat-label">Tiffin</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Document')"
+                data-cat="Document"
+              >
+                <div class="cat-emoji">📄</div>
+                <div class="cat-label">Document</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Parcel')"
+                data-cat="Parcel"
+              >
+                <div class="cat-emoji">📦</div>
+                <div class="cat-label">Parcel</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Medicine')"
+                data-cat="Medicine"
+              >
+                <div class="cat-emoji">💊</div>
+                <div class="cat-label">Medicine</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Groceries')"
+                data-cat="Groceries"
+              >
+                <div class="cat-emoji">🛒</div>
+                <div class="cat-label">Groceries</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Keys / Items')"
+                data-cat="Keys / Items"
+              >
+                <div class="cat-emoji">🔑</div>
+                <div class="cat-label">Keys / Items</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Clothes')"
+                data-cat="Clothes"
+              >
+                <div class="cat-emoji">👕</div>
+                <div class="cat-label">Clothes</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Other')"
+                data-cat="Other"
+              >
+                <div class="cat-emoji">🗂️</div>
+                <div class="cat-label">Other</div>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl"
+                >📝 Describe the Item <span class="req">*</span></label
+              >
+              <textarea
+                class="fi"
+                id="pd_item"
+                rows="2"
+                placeholder="e.g. Tiffin from mom's house, legal documents from office, friend's parcel..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Route -->
+        <div class="step" id="step-pd-2">
+          <div class="step-header" onclick="toggleStep('pd', 2)">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <div class="step-title">Pickup &amp; Delivery Locations</div>
+              <div class="step-subtitle">
+                Where to collect from, and where to deliver
+              </div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <!-- PICKUP FROM -->
+            <div class="fg">
+              <label class="fl"
+                >📍 Pickup From — Area <span class="req">*</span></label
+              >
+              <div class="area-grid" id="pd-from-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="pd_from_addr"
+                placeholder="Full pickup address / person's name &amp; location"
+              />
+            </div>
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Pickup Person's Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="pd_from_name"
+                  placeholder="Who to collect from"
+                />
+              </div>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Their Mobile Number <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="pd_from_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                />
+              </div>
+            </div>
+
+            <!-- DELIVER TO -->
+            <div class="fg">
+              <label class="fl"
+                >🏁 Deliver To — Area <span class="req">*</span></label
+              >
+              <div class="area-grid" id="pd-to-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="pd_to_addr"
+                placeholder="Full delivery address"
+              />
+            </div>
+            <div class="fg">
+              <label class="fl"
+                >📝 Special Instructions
+                <span
+                  style="
+                    text-transform: none;
+                    font-weight: 400;
+                    letter-spacing: 0;
+                    font-size: 10px;
+                  "
+                  >(optional)</span
+                ></label
+              >
+              <input
+                type="text"
+                class="fi"
+                id="pd_note"
+                placeholder="e.g. Call before pickup, handle with care, ring bell..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Your Details + Time -->
+        <div class="step" id="step-pd-3">
+          <div class="step-header" onclick="toggleStep('pd', 3)">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <div class="step-title">Your Details &amp; Timing</div>
+              <div class="step-subtitle">
+                Your name, contact, and pickup time
+              </div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Your Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="pd_name"
+                  placeholder="Your full name"
+                  autocomplete="name"
+                />
+              </div>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Your Mobile <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="pd_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl" style="margin-bottom: 8px"
+                >⏰ Pickup Time <span class="req">*</span></label
+              >
+              <div class="slot-row" id="pd-slot-grid">
+                <div
+                  class="slot-btn selected"
+                  onclick="selectSlot('pd', 'ASAP')"
+                  data-slot="ASAP"
+                >
+                  <div class="slot-time">⚡ ASAP</div>
+                  <div class="slot-label">Right now</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '8–9 AM')"
+                  data-slot="8–9 AM"
+                >
+                  <div class="slot-time">🌅 8–9 AM</div>
+                  <div class="slot-label">Morning</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '9–10 AM')"
+                  data-slot="9–10 AM"
+                >
+                  <div class="slot-time">☀️ 9–10 AM</div>
+                  <div class="slot-label">Office time</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '12–2 PM')"
+                  data-slot="12–2 PM"
+                >
+                  <div class="slot-time">🌤 12–2 PM</div>
+                  <div class="slot-label">Lunch break</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '5–7 PM')"
+                  data-slot="5–7 PM"
+                >
+                  <div class="slot-time">🌆 5–7 PM</div>
+                  <div class="slot-label">Evening</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '7–9 PM')"
+                  data-slot="7–9 PM"
+                >
+                  <div class="slot-time">🌙 7–9 PM</div>
+                  <div class="slot-label">Night</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', 'custom')"
+                  data-slot="custom"
+                >
+                  <div class="slot-time">🕐 Custom</div>
+                  <div class="slot-label">Pick time</div>
+                </div>
+              </div>
+              <div class="custom-time-wrap" id="pd-custom-time">
+                <span class="custom-time-label">🕐 Select Time:</span>
+                <input type="time" class="fi-time" id="pd_custom_time" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div class="step" id="step-pd-4">
+          <div class="step-header" onclick="reviewPD()">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <div class="step-title">Review &amp; Confirm</div>
+              <div class="step-subtitle">Tap to check your request summary</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="order-preview" id="pd-preview"></div>
+            <div class="price-box">
+              <div class="price-box-title">💰 Estimated Charges</div>
+              <div class="pr">
+                <span class="pl">Same area / Nearby</span
+                ><span class="pv">₹30</span>
+              </div>
+              <div class="pr">
+                <span class="pl">Different area / Far</span
+                ><span class="pv">₹50</span>
+              </div>
+              <div class="pr total">
+                <span class="pl">Exact charge</span
+                ><span class="pv">Confirmed on WhatsApp</span>
+              </div>
+            </div>
+            <div class="info-box blue">
+              <div class="info-icon">💡</div>
+              <div class="info-text">
+                <strong>Cash on delivery only.</strong> Exact charge and pickup
+                timing will be confirmed on WhatsApp. Available only within
+                Parbhani city.
+              </div>
+            </div>
+            <button class="submit-btn blue-btn" onclick="submitPD()">
+              ✅ Confirm & Send on WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- end pickup panel -->
+    </div>
+    <!-- .main -->
+
+    <!-- TRUST SECTION -->
+    <div class="trust-section">
+      <div class="trust-inner">
+        <div class="trust-title">Why People Trust QuickMart 🤝</div>
+        <div class="trust-grid">
+          <div class="trust-card">
+            <div class="trust-card-icon">📍</div>
+            <div>
+              <div class="tc-title">100% Local</div>
+              <div class="tc-sub">Born and built in Parbhani</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">💵</div>
+            <div>
+              <div class="tc-title">Zero Advance</div>
+              <div class="tc-sub">Pay only after you receive</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">📲</div>
+            <div>
+              <div class="tc-title">Personal Confirmation</div>
+              <div class="tc-sub">Every order confirmed by us</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">🔒</div>
+            <div>
+              <div class="tc-title">Your Data is Safe</div>
+              <div class="tc-sub">Used only for your delivery</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">🚫</div>
+            <div>
+              <div class="tc-title">No Hidden Charges</div>
+              <div class="tc-sub">What we say is what you pay</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">⚡</div>
+            <div>
+              <div class="tc-title">Fast &amp; Reliable</div>
+              <div class="tc-sub">20–45 min delivery promise</div>
+            </div>
+          </div>
+        </div>
+        <div class="trust-contact">
+          Questions? WhatsApp us at <strong>7058204462</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS SHEET -->
+    <div class="suc-overlay" id="sucOverlay">
+      <div class="suc-box">
+        <span class="suc-anim">🎉</span>
+        <div class="suc-title">Request Sent!</div>
+        <div class="suc-msg" id="sucMsg">
+          Your request has been sent on WhatsApp. We will confirm the details
+          shortly.
+        </div>
+        <div class="suc-msg">📞 Contact: <strong>7058204462</strong></div>
+        <button class="suc-close" onclick="closeSuc()">
+          OK, Thank You! 😊
+        </button>
+      </div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+      const WA = "917058204462";
+      const S = {
+        cr: { cat: "", slot: "ASAP", area: "" },
+        pd: { cat: "", slot: "ASAP", fromArea: "", toArea: "" },
+      };
+
+      /* ─ SERVICE SWITCH ─ */
+      function switchService(s) {
+        document
+          .querySelectorAll(".section-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".sn-tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.getElementById("panel-" + s).classList.add("active");
+        document.getElementById("tab-" + s).classList.add("active");
+        window.scrollTo({
+          top: document.querySelector(".service-nav").offsetTop - 10,
+          behavior: "smooth",
+        });
+      }
+
+      /* ─ STEP HELPERS ─ */
+      function panelOf(p) {
+        return p === "cr" ? "custom" : "pickup";
+      }
+      function toggleStep(p, n) {
+        const el = document.getElementById("step-" + p + "-" + n);
+        const was = el.classList.contains("active");
+        document
+          .querySelectorAll("#panel-" + panelOf(p) + " .step")
+          .forEach((s) => s.classList.remove("active"));
+        if (!was) el.classList.add("active");
+      }
+      function openStep(p, n) {
+        document
+          .querySelectorAll("#panel-" + panelOf(p) + " .step")
+          .forEach((s) => s.classList.remove("active"));
+        const el = document.getElementById("step-" + p + "-" + n);
+        el.classList.add("active");
+        // smooth scroll — offset for sticky header+nav (~116px)
+        setTimeout(() => {
+          const rect = el.getBoundingClientRect();
+          const offset = rect.top + window.pageYOffset - 120;
+          window.scrollTo({ top: Math.max(0, offset), behavior: "smooth" });
+        }, 60);
+      }
+
+      /* ─ CATEGORY ─ */
+      function selectCat(p, cat) {
+        S[p].cat = cat;
+        document
+          .getElementById(p + "-cat-grid")
+          .querySelectorAll(".cat-btn")
+          .forEach((b) =>
+            b.classList.toggle("selected", b.dataset.cat === cat),
+          );
+        document.getElementById("step-" + p + "-1").classList.remove("active");
+        document.getElementById("step-" + p + "-1").classList.add("completed");
+        const s2 = document.getElementById("step-" + p + "-2");
+        s2.classList.remove("completed");
+        openStep(p, 2);
+      }
+
+      /* ─ AREA ─ */
+      function selectArea(p, area) {
+        S[p].area = area;
+        document
+          .getElementById(p + "-area-grid")
+          .querySelectorAll(".area-btn")
+          .forEach((b) =>
+            b.classList.toggle("selected", b.dataset.area === area),
+          );
+      }
+      function selectAreaPD(type, area) {
+        if (type === "from") S.pd.fromArea = area;
+        else S.pd.toArea = area;
+        document
+          .getElementById("pd-" + type + "-area-grid")
+          .querySelectorAll(".area-btn")
+          .forEach((b) =>
+            b.classList.toggle("selected", b.dataset.area === area),
+          );
+      }
+
+      /* ─ TIME SLOT ─ */
+      function selectSlot(p, slot) {
+        S[p].slot = slot;
+        document
+          .getElementById(p + "-slot-grid")
+          .querySelectorAll(".slot-btn")
+          .forEach((b) =>
+            b.classList.toggle("selected", b.dataset.slot === slot),
+          );
+        const cw = document.getElementById(p + "-custom-time");
+        if (slot === "custom") cw.classList.add("show");
+        else cw.classList.remove("show");
+      }
+      function finalSlot(p) {
+        if (S[p].slot !== "custom") return S[p].slot;
+        const t = document.getElementById(p + "_custom_time").value;
+        if (!t) {
+          showToast("❌ Please select a custom time!");
+          return null;
+        }
+        const [h, m] = t.split(":");
+        const hr = parseInt(h),
+          ampm = hr >= 12 ? "PM" : "AM",
+          d = hr > 12 ? hr - 12 : hr || 12;
+        return `Custom — ${d}:${m} ${ampm}`;
+      }
+
+      /* ─ ITEMS ─ */
+      let crc = 0;
+      function initItems() {
+        crc = 0;
+        document.getElementById("cr-items-wrap").innerHTML = "";
+        addCrItem();
+      }
+      function addCrItem() {
+        crc++;
+        const w = document.getElementById("cr-items-wrap");
+        const d = document.createElement("div");
+        d.className = "item-card";
+        d.id = "ci-" + crc;
+        d.innerHTML = `<div class="item-top">
+    <div class="item-num">${crc}</div>
+    <input class="item-name-in" type="text" placeholder="Item name (e.g. Boost 500g, Crocin 650)" id="cin-${crc}" autocomplete="off">
+    <button class="remove-btn" onclick="removeCrItem(${crc})" ${crc === 1 ? 'style="opacity:0;pointer-events:none"' : ""}>✕</button>
+  </div>
+  <div class="item-bottom">
+    <div class="qty-wrap"><span class="qty-lbl">Qty</span>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="chQty(${crc},-1)">−</button>
+        <input class="qty-val" type="number" id="ciq-${crc}" value="1" min="1">
+        <button class="qty-btn" onclick="chQty(${crc},1)">+</button>
+      </div>
+    </div>
+    <input class="item-note-in" type="text" placeholder="Brand / size preference..." id="cib-${crc}">
+  </div>`;
+        w.appendChild(d);
+        if (crc > 1) {
+          const f = w.querySelector(".remove-btn");
+          f.style.opacity = "1";
+          f.style.pointerEvents = "auto";
+        }
+      }
+      function removeCrItem(n) {
+        document.getElementById("ci-" + n)?.remove();
+        const all = document.querySelectorAll("#cr-items-wrap .item-card");
+        if (all.length === 1) {
+          const b = all[0].querySelector(".remove-btn");
+          b.style.opacity = "0";
+          b.style.pointerEvents = "none";
+        }
+      }
+      function chQty(n, d) {
+        const i = document.getElementById("ciq-" + n);
+        if (i) i.value = Math.max(1, (parseInt(i.value) || 1) + d);
+      }
+      function getItems() {
+        return Array.from(
+          document.querySelectorAll("#cr-items-wrap .item-card"),
+        )
+          .map((c) => {
+            const id = c.id.split("-").pop();
+            const name = document.getElementById("cin-" + id)?.value.trim();
+            const qty = document.getElementById("ciq-" + id)?.value || "1";
+            const brand = document.getElementById("cib-" + id)?.value.trim();
+            return name ? { name, qty, brand } : null;
+          })
+          .filter(Boolean);
+      }
+
+      /* ─ REVIEW CR ─ */
+      function reviewCR() {
+        const items = getItems();
+        const name = document.getElementById("cr_name").value.trim();
+        const phone = document.getElementById("cr_phone").value.trim();
+        const addr = document.getElementById("cr_address").value.trim();
+        if (!S.cr.cat) {
+          showToast("❌ Please select a category!");
+          openStep("cr", 1);
+          return;
+        }
+        if (!items.length) {
+          showToast("❌ Please add at least one item!");
+          openStep("cr", 2);
+          return;
+        }
+        if (!name) {
+          showToast("❌ Please enter your name!");
+          openStep("cr", 3);
+          return;
+        }
+        if (!/^\d{10}$/.test(phone)) {
+          showToast("❌ Please enter a valid 10-digit mobile number!");
+          openStep("cr", 3);
+          return;
+        }
+        if (!S.cr.area) {
+          showToast("❌ Please select your area!");
+          openStep("cr", 3);
+          return;
+        }
+        if (!addr) {
+          showToast("❌ Please enter your delivery address!");
+          openStep("cr", 3);
+          return;
+        }
+        const slot = finalSlot("cr");
+        if (!slot) return;
+        document.getElementById("step-cr-3").classList.remove("active");
+        document.getElementById("step-cr-3").classList.add("completed");
+        const iHTML = items
+          .map(
+            (i) =>
+              `<div class="op-row"><span style="color:var(--primary);font-weight:800;flex-shrink:0">•</span><span>${i.name} × ${i.qty}${i.brand ? " — " + i.brand : ""}</span></div>`,
+          )
+          .join("");
+        document.getElementById("cr-preview").innerHTML = `
+    <div class="op-title">📋 Order Summary</div>
+    <div class="op-sec"><div class="op-sec-label">Category</div><div class="op-row">📦 ${S.cr.cat}</div></div>
+    <div class="op-div"></div>
+    <div class="op-sec"><div class="op-sec-label">Items (${items.length})</div>${iHTML}</div>
+    <div class="op-div"></div>
+    <div class="op-sec"><div class="op-sec-label">Delivery Details</div>
+      <div class="op-row">👤 ${name} — 📞 ${phone}</div>
+      <div class="op-row">📍 ${S.cr.area}</div>
+      <div class="op-row">🏠 ${addr}</div>
+      <div class="op-row">⏰ ${slot}</div>
+    </div>`;
+        openStep("cr", 4);
+      }
+
+      /* ─ SUBMIT CR ─ */
+      async function submitCR() {
+        const items = getItems();
+        const name = document.getElementById("cr_name").value.trim();
+        const phone = document.getElementById("cr_phone").value.trim();
+        const addr = document.getElementById("cr_address").value.trim();
+        const note = document.getElementById("cr_note").value.trim();
+        const slot = finalSlot("cr");
+        if (!slot) return;
+        if (!items.length || !name || !addr) {
+          showToast("❌ Please complete all required fields!");
+          return;
+        }
+        const t = new Date().toLocaleString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "short",
+        });
+        const iLines = items
+          .map(
+            (i) =>
+              `  • ${i.name} — Qty: ${i.qty}${i.brand ? " (" + i.brand + ")" : ""}`,
+          )
+          .join("\n");
+        let reqId = "------";
+        if (window.fbSaveYourNeed) {
+          const savedId = await window.fbSaveYourNeed({
+            type: "custom_item",
+            category: S.cr.cat,
+            items,
+            name,
+            phone,
+            area: S.cr.area,
+            address: addr,
+            deliverySlot: slot,
+            note,
+            requestedAt: t,
+          });
+          if (savedId) reqId = savedId.slice(-6).toUpperCase();
+        }
+        const msg = `🛍️ *NEW CUSTOM REQUEST — S_Quick Mart*
+🔖 Request ID: #${reqId}
+
+📂 *Category:* ${S.cr.cat}
+👤 *Name:* ${name}
+📞 *Phone:* ${phone}
+📍 *Area:* ${S.cr.area}
+🏠 *Address:* ${addr}
+⏰ *Delivery Time:* ${slot}
+
+📦 *Items Requested:*
+${iLines}${note ? `\n\n📝 *Note:* ${note}` : ""}
+
+💵 *Payment:* Cash on Delivery
+🕐 *Requested At:* ${t}
+
+_Please confirm price & availability._`;
+        window.open(
+          `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
+        document.getElementById("sucMsg").textContent =
+          "Your custom item request has been sent on WhatsApp! We'll confirm price and availability shortly. You pay only on delivery. 😊";
+        document.getElementById("sucOverlay").classList.add("open");
+        resetCR();
+      }
+      function resetCR() {
+        ["cr_name", "cr_phone", "cr_address", "cr_note"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+        S.cr = { cat: "", slot: "ASAP", area: "" };
+        document
+          .querySelectorAll("#cr-cat-grid .cat-btn,#cr-area-grid .area-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelectorAll("#cr-slot-grid .slot-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelector('#cr-slot-grid [data-slot="ASAP"]')
+          .classList.add("selected");
+        document.getElementById("cr-custom-time").classList.remove("show");
+        document
+          .querySelectorAll("#panel-custom .step")
+          .forEach((s) => s.classList.remove("active", "completed"));
+        document.getElementById("step-cr-1").classList.add("active");
+        initItems();
+      }
+
+      /* ─ REVIEW PD ─ */
+      function reviewPD() {
+        const item = document.getElementById("pd_item").value.trim();
+        const fromAddr = document.getElementById("pd_from_addr").value.trim();
+        const fromName = document.getElementById("pd_from_name").value.trim();
+        const fromPhone = document.getElementById("pd_from_phone").value.trim();
+        const toAddr = document.getElementById("pd_to_addr").value.trim();
+        const name = document.getElementById("pd_name").value.trim();
+        const phone = document.getElementById("pd_phone").value.trim();
+        if (!S.pd.cat) {
+          showToast("❌ Please select item type!");
+          openStep("pd", 1);
+          return;
+        }
+        if (!item) {
+          showToast("❌ Please describe the item!");
+          openStep("pd", 1);
+          return;
+        }
+        if (!S.pd.fromArea) {
+          showToast("❌ Please select pickup area!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!fromAddr) {
+          showToast("❌ Please enter pickup address!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!fromName) {
+          showToast("❌ Please enter pickup person's name!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!/^\d{10}$/.test(fromPhone)) {
+          showToast("❌ Please enter pickup person's valid mobile number!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!S.pd.toArea) {
+          showToast("❌ Please select delivery area!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!toAddr) {
+          showToast("❌ Please enter delivery address!");
+          openStep("pd", 2);
+          return;
+        }
+        if (!name) {
+          showToast("❌ Please enter your name!");
+          openStep("pd", 3);
+          return;
+        }
+        if (!/^\d{10}$/.test(phone)) {
+          showToast("❌ Please enter your valid 10-digit mobile!");
+          openStep("pd", 3);
+          return;
+        }
+        const slot = finalSlot("pd");
+        if (!slot) return;
+        document.getElementById("step-pd-3").classList.remove("active");
+        document.getElementById("step-pd-3").classList.add("completed");
+        const note = document.getElementById("pd_note").value.trim();
+        document.getElementById("pd-preview").innerHTML = `
+    <div class="op-title">📋 Request Summary</div>
+    <div class="op-sec"><div class="op-sec-label">Item Type &amp; Description</div><div class="op-row">📦 ${S.pd.cat} — ${item}</div></div>
+    <div class="op-div"></div>
+    <div class="op-sec"><div class="op-sec-label">Pickup From</div>
+      <div class="op-row">📍 ${S.pd.fromArea} — ${fromAddr}</div>
+      <div class="op-row">👤 ${fromName} — 📞 ${fromPhone}</div>
+    </div>
+    <div class="op-div"></div>
+    <div class="op-sec"><div class="op-sec-label">Deliver To</div>
+      <div class="op-row">🏁 ${S.pd.toArea} — ${toAddr}</div>
+    </div>
+    <div class="op-div"></div>
+    <div class="op-sec"><div class="op-sec-label">Your Details &amp; Timing</div>
+      <div class="op-row">👤 ${name} — 📞 ${phone}</div>
+      <div class="op-row">⏰ ${slot}</div>
+      ${note ? `<div class="op-row">📝 ${note}</div>` : ""}
+    </div>`;
+        openStep("pd", 4);
+      }
+
+      /* ─ SUBMIT PD ─ */
+      async function submitPD() {
+        const item = document.getElementById("pd_item").value.trim();
+        const fromAddr = document.getElementById("pd_from_addr").value.trim();
+        const fromName = document.getElementById("pd_from_name").value.trim();
+        const fromPhone = document.getElementById("pd_from_phone").value.trim();
+        const toAddr = document.getElementById("pd_to_addr").value.trim();
+        const name = document.getElementById("pd_name").value.trim();
+        const phone = document.getElementById("pd_phone").value.trim();
+        const note = document.getElementById("pd_note").value.trim();
+        const slot = finalSlot("pd");
+        if (!slot) return;
+        if (!fromAddr || !toAddr || !item || !name) {
+          showToast("❌ Please complete all required fields!");
+          return;
+        }
+        const t = new Date().toLocaleString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "short",
+        });
+        let reqId = "------";
+        if (window.fbSaveYourNeed) {
+          const savedId = await window.fbSaveYourNeed({
+            type: "pickup_drop",
+            itemType: S.pd.cat,
+            itemDesc: item,
+            pickupArea: S.pd.fromArea,
+            pickupAddr: fromAddr,
+            pickupName: fromName,
+            pickupPhone: fromPhone,
+            dropArea: S.pd.toArea,
+            dropAddr: toAddr,
+            name,
+            phone,
+            deliverySlot: slot,
+            note,
+            requestedAt: t,
+          });
+          if (savedId) reqId = savedId.slice(-6).toUpperCase();
+        }
+        const msg = `🏍️ *NEW PICKUP & DROP REQUEST — S_Quick Mart*
+🔖 Request ID: #${reqId}
+
+📂 *Item Type:* ${S.pd.cat}
+📦 *Description:* ${item}
+
+📍 *Pickup From:*
+  Area: ${S.pd.fromArea}
+  Address: ${fromAddr}
+  Person: ${fromName} — 📞 ${fromPhone}
+
+🏁 *Deliver To:*
+  Area: ${S.pd.toArea}
+  Address: ${toAddr}
+
+👤 *Your Name:* ${name}
+📞 *Your Phone:* ${phone}
+⏰ *Pickup Time:* ${slot}${note ? `\n📝 *Instructions:* ${note}` : ""}
+
+💵 *Payment:* Cash on Delivery
+🕐 *Requested At:* ${t}
+
+_Please confirm charge & timing._`;
+        window.open(
+          `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
+        document.getElementById("sucMsg").textContent =
+          "Your Pickup & Drop request has been sent on WhatsApp! We'll confirm the charge and timing shortly. 😊";
+        document.getElementById("sucOverlay").classList.add("open");
+        resetPD();
+      }
+      function resetPD() {
+        [
+          "pd_item",
+          "pd_from_addr",
+          "pd_from_name",
+          "pd_from_phone",
+          "pd_to_addr",
+          "pd_note",
+          "pd_name",
+          "pd_phone",
+        ].forEach((id) => (document.getElementById(id).value = ""));
+        S.pd = { cat: "", slot: "ASAP", fromArea: "", toArea: "" };
+        document
+          .querySelectorAll(
+            "#pd-cat-grid .cat-btn,#pd-from-area-grid .area-btn,#pd-to-area-grid .area-btn",
+          )
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelectorAll("#pd-slot-grid .slot-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelector('#pd-slot-grid [data-slot="ASAP"]')
+          .classList.add("selected");
+        document.getElementById("pd-custom-time").classList.remove("show");
+        document
+          .querySelectorAll("#panel-pickup .step")
+          .forEach((s) => s.classList.remove("active", "completed"));
+        document.getElementById("step-pd-1").classList.add("active");
+      }
+
+      function closeSuc() {
+        document.getElementById("sucOverlay").classList.remove("open");
+      }
+
+      let tT = null;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        if (tT) {
+          clearTimeout(tT);
+          t.classList.remove("show");
+        }
+        t.textContent = msg;
+        void t.offsetWidth;
+        t.classList.add("show");
+        tT = setTimeout(() => {
+          t.classList.remove("show");
+          tT = null;
+        }, 2800);
+      }
+
+      initItems();
+    </script>
+  </body>
+</html>
