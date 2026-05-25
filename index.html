@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>S_Quick Mart — Parbhani</title>
+    <title>S_Quick Mart</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -1391,7 +1391,9 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
       }
       .profile-back:hover {
         background: rgba(255, 255, 255, 0.2);
@@ -1583,7 +1585,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s ease, background 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
       }
       .phone-modal-back:hover {
         background: #f7f7f7;
@@ -1906,7 +1910,7 @@
         <div class="logo">
           <div class="logo-icon">
             <img
-              src="icon&logo/S2.PNG"
+              src="S2.PNG"
               alt="Logo"
               onerror="
                 this.style.display = 'none';
@@ -2145,7 +2149,13 @@
     <!-- PHONE LOGIN MODAL -->
     <div class="phone-modal-overlay" id="phoneModal">
       <div class="phone-modal">
-        <button class="phone-modal-back" onclick="skipPhoneLogin()" aria-label="Close">✕</button>
+        <button
+          class="phone-modal-back"
+          onclick="skipPhoneLogin()"
+          aria-label="Close"
+        >
+          ✕
+        </button>
         <div class="phone-modal-icon">📱</div>
         <div class="phone-modal-title">Enter Your Phone Number</div>
         <div class="phone-modal-sub">
@@ -2175,7 +2185,32 @@
     ></div>
     <div class="profile-sidebar" id="profileSidebar">
       <div class="profile-header">
-        <button class="profile-back" onclick="closeProfile()" aria-label="Close profile">✕</button>
+        <button
+          onclick="logoutCustomer()"
+          style="
+            position: absolute;
+            right: 65px;
+            top: 20px;
+            background: none;
+            border: 2px solid #246a73;
+            color: #fff;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: &quot;Inter&quot;, sans-serif;
+          "
+        >
+          🚪 Log Out
+        </button>
+        <button
+          class="profile-back"
+          onclick="closeProfile()"
+          aria-label="Close profile"
+        >
+          ✕
+        </button>
         <div class="profile-avatar" id="profileAvatar">👤</div>
         <div class="profile-name" id="profileName">Guest User</div>
         <div class="profile-phone" id="profilePhoneLabel">
@@ -2235,7 +2270,8 @@
         <div class="suc-icon">🎉</div>
         <div class="suc-title">Order Placed!</div>
         <div class="suc-msg">
-          Your order has been received! We will confirm it shortly and deliver within 20–30 minutes.
+          Your order has been received! We will confirm it shortly and deliver
+          within 20–30 minutes.
         </div>
         <div class="suc-time">⏱️ Expected: 20–30 Minutes</div>
         <div class="suc-msg">📞 Support: <strong>7249148205</strong></div>
@@ -2290,29 +2326,43 @@
     </div>
     <div id="toast"></div>
 
+    <!-- FOOTER -->
+    <footer
+      style="
+        background: #1a1a2e;
+        color: #fff;
+        font-family: &quot;Inter&quot;, sans-serif;
+        padding: 32px 20px 24px;
+      "
+    >
+      <div style="max-width: 600px; margin: 0 auto">
+        <!-- Logo + Tagline -->
+        <div style="margin-bottom: 20px">
+          <div
+            style="
+              font-family: &quot;Baloo 2&quot;, cursive;
+              font-size: 20px;
+              font-weight: 800;
+              color: #4ecdc4;
+              margin-bottom: 4px;
+            "
+          >
+            🛒 S_Quick Mart
+          </div>
+          <div
+            style="
+              font-size: 12px;
+              color: rgba(255, 255, 255, 0.45);
+              line-height: 1.7;
+            "
+          >
+            Parbhani's Own Store — Groceries & Daily Essentials<br />
+            Delivered to your doorstep in just 20–30 minutes.
+          </div>
+        </div>
 
-
-
-
-
-
-
-
-<!-- FOOTER -->
-<footer style="background:#1a1a2e; color:#fff; font-family:'Inter',sans-serif; padding:32px 20px 24px;">
-  <div style="max-width:600px; margin:0 auto;">
-
-    <!-- Logo + Tagline -->
-    <div style="margin-bottom:20px;">
-      <div style="font-family:'Baloo 2',cursive; font-size:20px; font-weight:800; color:#4ecdc4; margin-bottom:4px;">🛒 S_Quick Mart</div>
-      <div style="font-size:12px; color:rgba(255,255,255,0.45); line-height:1.7;">
-        Parbhani's Own Store — Groceries & Daily Essentials<br/>
-        Delivered to your doorstep in just 20–30 minutes.
-      </div>
-    </div>
-
-    <!-- Trust Badges -->
-    <!-- <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;">
+        <!-- Trust Badges -->
+        <!-- <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;">
       <div style="background:rgba(255,255,255,0.07); border-radius:50px; padding:6px 13px; font-size:11px; color:rgba(255,255,255,0.65); font-weight:600;">⚡ 20–30 Min Delivery</div>
       <div style="background:rgba(255,255,255,0.07); border-radius:50px; padding:6px 13px; font-size:11px; color:rgba(255,255,255,0.65); font-weight:600;">💰 Free Delivery on ₹149+</div>
       <div style="background:rgba(255,255,255,0.07); border-radius:50px; padding:6px 13px; font-size:11px; color:rgba(255,255,255,0.65); font-weight:600;">💰 Just ₹20 delivery charge</div>
@@ -2322,33 +2372,110 @@
       <div style="background:rgba(255,255,255,0.07); border-radius:50px; padding:6px 13px; font-size:11px; color:rgba(255,255,255,0.65); font-weight:600;">⚡</div>
     </div> -->
 
-    <!-- Nav Links -->
-    <div style="display:flex; flex-wrap:wrap; gap:5px 18px; margin-bottom:22px;">
-      <a href="help.html#about"        style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">About</a>
-      <a href="help.html#how-it-works" style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">How it Works</a>
-      <a href="help.html#delivery"     style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">Delivery Info</a>
-      <a href="help.html#faq"          style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">FAQ</a>
-      <a href="help.html#contact"      style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">Contact</a>
-      <a href="help.html#policy"       style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">Policy</a>
-      <a href="yourneed.html"          style="color:rgba(255,255,255,0.55); text-decoration:none; font-size:13px;">YourNeed</a>
-    </div>
+        <!-- Nav Links -->
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px 18px;
+            margin-bottom: 22px;
+          "
+        >
+          <a
+            href="help.html#about"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >About</a
+          >
+          <a
+            href="help.html#how-it-works"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >How it Works</a
+          >
+          <a
+            href="help.html#delivery"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >Delivery Info</a
+          >
+          <a
+            href="help.html#faq"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >FAQ</a
+          >
+          <a
+            href="help.html#contact"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >Contact</a
+          >
+          <a
+            href="help.html#policy"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >Policy</a
+          >
+          <a
+            href="yourneed.html"
+            style="
+              color: rgba(255, 255, 255, 0.55);
+              text-decoration: none;
+              font-size: 13px;
+            "
+            >YourNeed</a
+          >
+        </div>
 
-    <!-- Bottom -->
-    <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-      <div style="font-size:11px; color:rgba(255,255,255,0.28);">© 2026 S_Quick Mart, Parbhani</div>
-      <a href="https://wa.me/917249148205" target="_blank" style="font-size:11px; color:#4ecdc4; text-decoration:none; font-weight:600;">💬 Need help?</a>
-    </div>
+        <!-- Bottom -->
+        <div
+          style="
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+          "
+        >
+          <div style="font-size: 11px; color: rgba(255, 255, 255, 0.28)">
+            © 2026 S_Quick Mart, Parbhani
+          </div>
+          <a
+            href="https://wa.me/917249148205"
+            target="_blank"
+            style="
+              font-size: 11px;
+              color: #4ecdc4;
+              text-decoration: none;
+              font-weight: 600;
+            "
+            >💬 Need help?</a
+          >
+        </div>
+      </div>
+    </footer>
 
-  </div>
-</footer>
-
-
-
-
-
-
-
-    
     <script>
       let catInfo = {};
       // default categories fallback (keeps same structure as admin)
@@ -2482,6 +2609,25 @@
         document.getElementById("phoneModal").classList.remove("open");
       }
 
+      function logoutCustomer() {
+        if (
+          !confirm(
+            "Are you sure? Your saved name, phone and address will be cleared.",
+          )
+        )
+          return;
+        localStorage.removeItem("sqm_user");
+        currentUser = { phone: "", name: "", address: "" };
+        updateProfileUI();
+        ["pPhone", "pName", "pAddr"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        document.getElementById("orderHistoryList").innerHTML =
+          '<div class="no-orders"><div class="no-orders-icon">📭</div><p>No orders yet</p></div>';
+        showToast("✅ Data cleared!");
+      }
+
       function saveProfile() {
         const ph = document.getElementById("pPhone").value.trim();
         const nm = document.getElementById("pName").value.trim();
@@ -2559,7 +2705,10 @@
         }
 
         // Real-time listener — client-side filter by phone (no composite index needed)
-        const q = window._query(window._collection(window._db, "orders"), window._orderBy("createdAt", "desc"));
+        const q = window._query(
+          window._collection(window._db, "orders"),
+          window._orderBy("createdAt", "desc"),
+        );
 
         orderHistoryUnsub = window._onSnapshot(
           q,
@@ -2743,7 +2892,8 @@
           drop.classList.remove("show");
           return;
         }
-        const normalize = (s) => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+        const normalize = (s) =>
+          (s || "").toLowerCase().replace(/\s+/g, " ").trim();
         const singular = (s) => normalize(s).replace(/\b([a-z]+)s\b/g, "$1");
         const qNorm = normalize(val);
         const qSing = singular(val);
@@ -2827,8 +2977,9 @@
         const cats = curCat === "all" ? Object.keys(catInfo) : [curCat];
         let any = false;
         cats.forEach((cat) => {
-          const items = window.products.filter((p) =>
-            p.cat === cat && (curCat === "all" ? p.visible !== false : true),
+          const items = window.products.filter(
+            (p) =>
+              p.cat === cat && (curCat === "all" ? p.visible !== false : true),
           );
           if (!items.length) return;
           any = true;
