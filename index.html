@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>S_Quick Mart</title>
+    <title>S_Quick Mart — Parbhani</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -87,6 +87,15 @@
           return [];
         }
       };
+
+      // ── EXPOSE FIRESTORE FUNCTIONS TO GLOBAL SCRIPT ──────────
+      window._query = query;
+      window._collection = collection;
+      window._orderBy = orderBy;
+      window._where = where;
+      window._onSnapshot = onSnapshot;
+      window._getDocs = getDocs;
+      window._db = db;
 
       // load categories first so product rendering has category info
       loadCategories().then(() => loadProducts());
@@ -2550,9 +2559,9 @@
         }
 
         // Real-time listener — client-side filter by phone (no composite index needed)
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        const q = window._query(window._collection(window._db, "orders"), window._orderBy("createdAt", "desc"));
 
-        orderHistoryUnsub = onSnapshot(
+        orderHistoryUnsub = window._onSnapshot(
           q,
           (snap) => {
             // Filter by phone on client side
