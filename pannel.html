@@ -2127,7 +2127,7 @@
         const o = allOrders.find((x) => x.id === orderId);
         if (!o) return;
         const items = (o.items || [])
-          .map((i) => `• ${i.name} x${i.qty} — ₹${i.price * i.qty}`)
+          .map((i) => `• ${i.name} x${i.qty}`)
           .join("\n");
         const text = `🛒 ORDER — S_Quick Mart
 🔖 ID: #${o.id.slice(-6).toUpperCase()}
@@ -2140,7 +2140,6 @@
 ${items}
 
 💰 Total: ₹${o.total}
-🚚 Delivery: ${o.delivery === 0 ? "FREE" : "₹" + (o.delivery || 20)}
 💳 Cash on Delivery`;
 
         navigator.clipboard.writeText(text).then(() => {
