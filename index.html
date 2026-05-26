@@ -2374,23 +2374,26 @@
       </div>
     </div>
 
-
     <!-- MY ORDERS PANEL -->
-<div class="orders-overlay" id="ordersOverlay" onclick="closeMyOrders()"></div>
-<div class="orders-panel" id="ordersPanel">
-  <div class="orders-panel-header">
-    <div class="orders-panel-title">📦 My Orders</div>
-    <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
-  </div>
-  <div class="orders-panel-body">
-    <div id="orderHistoryList">
-      <div class="no-orders">
-        <div class="no-orders-icon">📭</div>
-        <p>No orders yet</p>
+    <div
+      class="orders-overlay"
+      id="ordersOverlay"
+      onclick="closeMyOrders()"
+    ></div>
+    <div class="orders-panel" id="ordersPanel">
+      <div class="orders-panel-header">
+        <div class="orders-panel-title">📦 My Orders</div>
+        <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
+      </div>
+      <div class="orders-panel-body">
+        <div id="orderHistoryList">
+          <div class="no-orders">
+            <div class="no-orders-icon">📭</div>
+            <p>No orders yet</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
     <!-- SUCCESS -->
     <div class="suc-overlay" id="sucOverlay">
@@ -3349,30 +3352,28 @@
           .join("");
       }
 
-
-
-
+      // My order section
 
       function openMyOrders() {
-  closeCart();
-  if (!currentUser.phone) {
-    openProfile();
-    showToast("⚠️ Please login first!");
-    return;
-  }
-  document.getElementById("ordersOverlay").classList.add("open");
-  document.getElementById("ordersPanel").classList.add("open");
-  loadOrderHistory(currentUser.phone);
-}
+        closeCart();
+        if (!currentUser.phone) {
+          openProfile();
+          showToast("⚠️ Please login first!");
+          return;
+        }
+        document.getElementById("ordersOverlay").classList.add("open");
+        document.getElementById("ordersPanel").classList.add("open");
+        loadOrderHistory(currentUser.phone);
+      }
 
-function closeMyOrders() {
-  document.getElementById("ordersOverlay").classList.remove("open");
-  document.getElementById("ordersPanel").classList.remove("open");
-  if (orderHistoryUnsub) {
-    orderHistoryUnsub();
-    orderHistoryUnsub = null;
-  }
-}
+      function closeMyOrders() {
+        document.getElementById("ordersOverlay").classList.remove("open");
+        document.getElementById("ordersPanel").classList.remove("open");
+        if (orderHistoryUnsub) {
+          orderHistoryUnsub();
+          orderHistoryUnsub = null;
+        }
+      }
       function openCart() {
         document.getElementById("cOverlay").classList.add("open");
         document.getElementById("cSidebar").classList.add("open");
