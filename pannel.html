@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S_Quick Mart — Admin Panel</title>
-    <link rel="icon" type="image/png" href="S2.PNG" />
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -175,6 +174,20 @@
           console.error(e);
           return false;
         }
+      };
+
+      window.fbSaveAreas = async (areas) => {
+        try {
+          await setDoc(doc(db, "store", "yourneed_areas"), { list: areas });
+          return true;
+        } catch (e) { return false; }
+      };
+
+      window.fbLoadAreas = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "yourneed_areas"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) { return []; }
       };
 
       onSnapshot(doc(db, "store", "status"), (snap) => {
@@ -984,72 +997,70 @@
         padding: 40px;
         color: var(--muted);
       }
+      /* AREA CARD */
+      .area-admin-card {
+        background:#fff;border:1.5px solid #eee;border-radius:12px;
+        padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+        transition:.2s;
+      }
+      .area-admin-card.unavailable { background:#fff5f5;border-color:#fecaca; }
+      .area-admin-name { font-size:14px;font-weight:600;color:var(--text);flex:1; }
+      .area-admin-badge {
+        font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px;white-space:nowrap;
+      }
+      .area-admin-badge.avail { background:#d1fae5;color:#065f46; }
+      .area-admin-badge.unavail { background:#fee2e2;color:#991b1b; }
+      .area-admin-actions { display:flex;gap:6px;align-items:center; }
       .section-divider {
         border: none;
         border-top: 2px solid var(--bg);
         margin: 16px 0;
       }
 
-      /* Arrow button copy details */
-      .oc-details {
-        display: none;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #f0f0f0;
-        animation: slideDown 0.25s ease;
-      }
-      .oc-details.open {
-        display: block;
-      }
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-6px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .oc-toggle {
-        background: #f5f5f5;
-        border: none;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-        cursor: pointer;
-        color: #666;
-        transition:
-          transform 0.3s,
-          background 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .oc-toggle.open {
-        transform: rotate(180deg);
-        background: #e8f4f5;
-        color: var(--pr);
-      }
-      .mini-copy {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        background: #f0f0f0;
-        border: none;
-        border-radius: 8px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        margin-top: 10px;
-        color: #333;
-      }
-      .mini-copy:active {
-        background: #ddd;
-      }
+      .oc-details { 
+  display: none; 
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  animation: slideDown 0.25s ease;
+}
+.oc-details.open { display: block; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.oc-toggle { 
+  background: #f5f5f5; 
+  border: none; 
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  font-size: 12px;
+  cursor: pointer; 
+  color: #666;
+  transition: transform 0.3s, background 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.oc-toggle.open { 
+  transform: rotate(180deg); 
+  background: #e8f4f5;
+  color: var(--pr);
+}
+.mini-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  color: #333;
+}
+.mini-copy:active { background: #ddd; }
     </style>
   </head>
   <body>
@@ -1103,6 +1114,9 @@
         </div>
         <div class="admin-tab" onclick="switchTab('yourneed', this)">
           🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
+        </div>
+        <div class="admin-tab" onclick="switchTab('areas', this)">
+          🗺️ Areas
         </div>
       </div>
       <div class="admin-content">
@@ -1550,6 +1564,28 @@
             </div>
           </div>
         </div>
+
+        <!-- ── AREAS TAB ── -->
+        <div class="tab-panel" id="tab-areas">
+          <div class="admin-card">
+            <div class="admin-card-title">🗺️ Manage YourNeed Areas</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+              Areas add/remove karo. Kisi area ko <strong>Not Available</strong> karne ke liye toggle off karo — woh yourneed page pe blur dikhega aur select nahi hoga.
+            </p>
+
+            <!-- Add new area row -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <input type="text" id="newAreaName" class="form-input" placeholder="New area name (e.g. Sailu Road)" style="flex:1;min-width:160px;" onkeydown="if(event.key==='Enter')addArea()"/>
+              <button class="btn-primary" onclick="addArea()">＋ Add Area</button>
+            </div>
+
+            <div id="areasList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:20px;">⏳ Loading areas...</div>
+            </div>
+
+            <button class="btn-primary" style="margin-top:16px;width:100%;" onclick="saveAreas()">💾 Save All Areas</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1765,6 +1801,20 @@
         });
 
         showToast("✅ Admin ready!");
+
+        // Load areas
+        const savedAreas = await window.fbLoadAreas();
+        if (savedAreas.length) {
+          ynAreas = savedAreas;
+        } else {
+          // Default areas seed
+          ynAreas = [
+            "Parbhani Main","Ganesh Nagar","Shivaji Nagar","Padmapura",
+            "Bhagyanagar","Vasant Nagar","Sadar Bazar","Railway Station",
+            "Anand Nagar","Camp Area","Jintur Road","Other"
+          ].map(n => ({ name: n, available: true }));
+        }
+        renderAreasList();
       }
       const defaultCategories = [
         {
@@ -1835,6 +1885,7 @@
       let allYourNeed = [],
         ynFilter = "all",
         unsubYN = null;
+      let ynAreas = [];
       let storeIsOpen = true;
 
       function switchTab(id, btn) {
@@ -2064,8 +2115,7 @@
                   .join("<br>")
               : "";
 
-              // copy detail js
-           return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
+            return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
 
   <!-- TOP: ID + Status + Arrow -->
   <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleOrder('${o.id}')">
@@ -2111,12 +2161,13 @@
 
 </div>`;
 
-          })
+   })
           .join("");
       }
 
-
-       function toggleOrder(id) {
+           
+       
+      function toggleOrder(id) {
         const details = document.getElementById("details-" + id);
         const arrow = document.getElementById("arrow-" + id);
         details.classList.toggle("open");
@@ -2140,14 +2191,13 @@
 ${items}
 
 💰 Total: ₹${o.total}
+
 💳 Cash on Delivery`;
 
         navigator.clipboard.writeText(text).then(() => {
           showToast("✅ Order copied!");
         });
       }
-
-
 
       async function updateStatus(orderId, status) {
         const ok = await window.fbUpdateOrder(orderId, status);
@@ -2676,6 +2726,57 @@ ${items}
           `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
           "_blank",
         );
+      }
+
+      // ── AREAS MANAGEMENT ──────────────────────────────────────────
+      function renderAreasList() {
+        const el = document.getElementById("areasList");
+        if (!el) return;
+        if (!ynAreas.length) {
+          el.innerHTML = '<div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:20px;">No areas yet. Add one above!</div>';
+          return;
+        }
+        el.innerHTML = ynAreas.map((a, i) => `
+          <div class="area-admin-card ${a.available ? '' : 'unavailable'}">
+            <span class="area-admin-name">📍 ${a.name}</span>
+            <div class="area-admin-actions">
+              <span class="area-admin-badge ${a.available ? 'avail' : 'unavail'}">${a.available ? '✅ Available' : '🚫 Not Available'}</span>
+              <label class="toggle" title="Toggle availability">
+                <input type="checkbox" ${a.available ? 'checked' : ''} onchange="toggleAreaAvail(${i}, this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+              <button class="btn-danger" onclick="deleteArea(${i})" style="padding:5px 10px;font-size:12px;">🗑️</button>
+            </div>
+          </div>`).join('');
+      }
+
+      function toggleAreaAvail(i, val) {
+        ynAreas[i].available = val;
+        renderAreasList();
+      }
+
+      function addArea() {
+        const inp = document.getElementById("newAreaName");
+        const name = inp.value.trim();
+        if (!name) { showToast("❌ Area name likhna padega!"); return; }
+        if (ynAreas.find(a => a.name.toLowerCase() === name.toLowerCase())) {
+          showToast("❌ Yeh area already hai!"); return;
+        }
+        ynAreas.push({ name, available: true });
+        inp.value = "";
+        renderAreasList();
+        showToast(`✅ "${name}" added! Save karna mat bhulo.`);
+      }
+
+      function deleteArea(i) {
+        if (!confirm(`Delete "${ynAreas[i].name}" area?`)) return;
+        ynAreas.splice(i, 1);
+        renderAreasList();
+      }
+
+      async function saveAreas() {
+        const ok = await window.fbSaveAreas(ynAreas);
+        showToast(ok ? "✅ Areas saved! Yourneed page pe live ho gaya." : "❌ Save failed!");
       }
 
       // ── TOAST ─────────────────────────────────────────────────────
