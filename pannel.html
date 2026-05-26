@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S_Quick Mart — Admin Panel</title>
-    <link rel="icon" type="image/png" href="S2.PNG">
+    <link rel="icon" type="image/png" href="S2.PNG" />
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -155,7 +155,10 @@
       };
 
       window.startYourNeedListener = (cb) => {
-        const q = query(collection(db, "yourneed_requests"), orderBy("createdAt", "desc"));
+        const q = query(
+          collection(db, "yourneed_requests"),
+          orderBy("createdAt", "desc"),
+        );
         return onSnapshot(q, (snap) =>
           cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
         );
@@ -163,9 +166,15 @@
 
       window.fbUpdateYourNeed = async (id, status, adminNote) => {
         try {
-          await updateDoc(doc(db, "yourneed_requests", id), { status, adminNote: adminNote || "" });
+          await updateDoc(doc(db, "yourneed_requests", id), {
+            status,
+            adminNote: adminNote || "",
+          });
           return true;
-        } catch (e) { console.error(e); return false; }
+        } catch (e) {
+          console.error(e);
+          return false;
+        }
       };
 
       onSnapshot(doc(db, "store", "status"), (snap) => {
@@ -980,6 +989,67 @@
         border-top: 2px solid var(--bg);
         margin: 16px 0;
       }
+
+      /* Arrow button copy details */
+      .oc-details {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        animation: slideDown 0.25s ease;
+      }
+      .oc-details.open {
+        display: block;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .oc-toggle {
+        background: #f5f5f5;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        cursor: pointer;
+        color: #666;
+        transition:
+          transform 0.3s,
+          background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .oc-toggle.open {
+        transform: rotate(180deg);
+        background: #e8f4f5;
+        color: var(--pr);
+      }
+      .mini-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+        color: #333;
+      }
+      .mini-copy:active {
+        background: #ddd;
+      }
     </style>
   </head>
   <body>
@@ -1038,9 +1108,7 @@
       <div class="admin-content">
         <!-- ── ORDERS TAB ── -->
         <div class="tab-panel active" id="tab-orders">
-          <div class="sync-bar">
-            🔴 Live — New orders arrive automatically!
-          </div>
+          <div class="sync-bar">🔴 Live — New orders arrive automatically!</div>
           <div class="order-filter-bar">
             <div class="filter-chip active" onclick="filterOrders('all', this)">
               🗂️ All
@@ -1149,47 +1217,79 @@
             </button>
           </div>
           <!-- ── YOURNEED DASHBOARD ── -->
-          <div class="admin-card" style="margin-top:14px">
+          <div class="admin-card" style="margin-top: 14px">
             <div class="admin-card-title">🎯 YourNeed Dashboard</div>
-            <div class="stats-grid" style="margin-top:10px">
-              <div class="stat-card" onclick="openYN('all')" style="cursor:pointer">
+            <div class="stats-grid" style="margin-top: 10px">
+              <div
+                class="stat-card"
+                onclick="openYN('all')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">🎯</div>
                 <div class="stat-num" id="yn_total">0</div>
                 <div class="stat-label">Total Requests</div>
               </div>
-              <div class="stat-card" onclick="openYN('pending')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('pending')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">⏳</div>
                 <div class="stat-num" id="yn_pending">0</div>
                 <div class="stat-label">Pending</div>
               </div>
-              <div class="stat-card" onclick="openYN('confirmed')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('confirmed')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">✅</div>
                 <div class="stat-num" id="yn_confirmed">0</div>
                 <div class="stat-label">Confirmed</div>
               </div>
-              <div class="stat-card" onclick="openYN('out_for_delivery')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('out_for_delivery')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">🛵</div>
                 <div class="stat-num" id="yn_otd">0</div>
                 <div class="stat-label">Sent</div>
               </div>
-              <div class="stat-card" onclick="openYN('delivered')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('delivered')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">🎉</div>
                 <div class="stat-num" id="yn_delivered">0</div>
                 <div class="stat-label">Delivered</div>
               </div>
-              <div class="stat-card" onclick="openYN('rejected')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('rejected')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">❌</div>
                 <div class="stat-num" id="yn_rejected">0</div>
                 <div class="stat-label">Rejected</div>
               </div>
             </div>
-            <div class="stats-grid" style="margin-top:12px">
-              <div class="stat-card" onclick="openYN('custom_item')" style="cursor:pointer">
+            <div class="stats-grid" style="margin-top: 12px">
+              <div
+                class="stat-card"
+                onclick="openYN('custom_item')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">🛍️</div>
                 <div class="stat-num" id="yn_custom">0</div>
                 <div class="stat-label">Custom Items</div>
               </div>
-              <div class="stat-card" onclick="openYN('pickup_drop')" style="cursor:pointer">
+              <div
+                class="stat-card"
+                onclick="openYN('pickup_drop')"
+                style="cursor: pointer"
+              >
                 <div class="stat-icon">🏍️</div>
                 <div class="stat-num" id="yn_pd">0</div>
                 <div class="stat-label">Pickup & Drop</div>
@@ -1212,7 +1312,7 @@
                 id="productCount"
               ></span>
             </div>
-            <div class="search-bar" style="align-items:center;gap:8px;">
+            <div class="search-bar" style="align-items: center; gap: 8px">
               <input
                 type="text"
                 class="search-input2"
@@ -1227,7 +1327,13 @@
               >
                 <option value="all">All</option>
               </select>
-              <button class="btn-primary" onclick="toggleAllProducts()" style="white-space: nowrap;">Toggle All ON/OFF</button>
+              <button
+                class="btn-primary"
+                onclick="toggleAllProducts()"
+                style="white-space: nowrap"
+              >
+                Toggle All ON/OFF
+              </button>
             </div>
             <div style="overflow-x: auto">
               <table class="product-table">
@@ -1353,9 +1459,7 @@
                   />
                   <div style="font-size: 28px; margin-bottom: 6px">📁</div>
                   <div style="font-size: 13px; color: var(--muted)">
-                    Click or drag file here<br /><strong
-                      >JPG, PNG, WebP</strong
-                    >
+                    Click or drag file here<br /><strong>JPG, PNG, WebP</strong>
                     supported
                   </div>
                 </div>
@@ -1369,7 +1473,14 @@
             </div>
             <div class="form-group">
               <label class="form-label">Show on Homepage</label>
-              <label class="toggle" style="margin-top:4px;display:inline-flex;align-items:center;">
+              <label
+                class="toggle"
+                style="
+                  margin-top: 4px;
+                  display: inline-flex;
+                  align-items: center;
+                "
+              >
                 <input type="checkbox" id="newActive" checked />
                 <span class="toggle-slider"></span>
               </label>
@@ -1414,15 +1525,29 @@
         <div class="tab-panel" id="tab-yourneed">
           <div class="sync-bar">🔴 Live — YourNeed requests auto-update!</div>
           <div class="order-filter-bar">
-            <div class="filter-chip active" onclick="filterYN('all', this)">🗂️ All</div>
-            <div class="filter-chip" onclick="filterYN('pending', this)">⏳ Pending</div>
-            <div class="filter-chip" onclick="filterYN('confirmed', this)">✅ Confirmed</div>
-            <div class="filter-chip" onclick="filterYN('rejected', this)">❌ Rejected</div>
-            <div class="filter-chip" onclick="filterYN('custom_item', this)">🛍️ Custom Items</div>
-            <div class="filter-chip" onclick="filterYN('pickup_drop', this)">🏍️ Pickup & Drop</div>
+            <div class="filter-chip active" onclick="filterYN('all', this)">
+              🗂️ All
+            </div>
+            <div class="filter-chip" onclick="filterYN('pending', this)">
+              ⏳ Pending
+            </div>
+            <div class="filter-chip" onclick="filterYN('confirmed', this)">
+              ✅ Confirmed
+            </div>
+            <div class="filter-chip" onclick="filterYN('rejected', this)">
+              ❌ Rejected
+            </div>
+            <div class="filter-chip" onclick="filterYN('custom_item', this)">
+              🛍️ Custom Items
+            </div>
+            <div class="filter-chip" onclick="filterYN('pickup_drop', this)">
+              🏍️ Pickup & Drop
+            </div>
           </div>
           <div id="yourNeedContainer">
-            <div class="no-orders-admin"><p>⏳ YourNeed requests load ho rahe hain...</p></div>
+            <div class="no-orders-admin">
+              <p>⏳ YourNeed requests load ho rahe hain...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1520,7 +1645,10 @@
         </div>
         <div class="form-group">
           <label class="form-label">Show on Homepage</label>
-          <label class="toggle" style="margin-top:4px;display:inline-flex;align-items:center;">
+          <label
+            class="toggle"
+            style="margin-top: 4px; display: inline-flex; align-items: center"
+          >
             <input type="checkbox" id="editActive" />
             <span class="toggle-slider"></span>
           </label>
@@ -1579,8 +1707,14 @@
       }
 
       async function doLogout() {
-        if (unsubOrders) { unsubOrders(); unsubOrders = null; }
-        if (unsubYN) { unsubYN(); unsubYN = null; }
+        if (unsubOrders) {
+          unsubOrders();
+          unsubOrders = null;
+        }
+        if (unsubYN) {
+          unsubYN();
+          unsubYN = null;
+        }
         await window.fbSignOut();
         // UI update handled by onAuthStateChanged
       }
@@ -1621,9 +1755,9 @@
         // Live YourNeed listener
         if (unsubYN) unsubYN();
         unsubYN = window.startYourNeedListener((reqs) => {
-          const prev = allYourNeed.filter(r => r.status === "pending").length;
+          const prev = allYourNeed.filter((r) => r.status === "pending").length;
           allYourNeed = reqs;
-          if (reqs.filter(r => r.status === "pending").length > prev)
+          if (reqs.filter((r) => r.status === "pending").length > prev)
             showToast("🎯 New YourNeed request!");
           renderYourNeed();
           updateYNBadge();
@@ -1698,7 +1832,9 @@
       let allOrders = [],
         orderFilter = "all",
         unsubOrders = null;
-      let allYourNeed = [], ynFilter = "all", unsubYN = null;
+      let allYourNeed = [],
+        ynFilter = "all",
+        unsubYN = null;
       let storeIsOpen = true;
 
       function switchTab(id, btn) {
@@ -1927,31 +2063,92 @@
                   )
                   .join("<br>")
               : "";
-            return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
-      <div class="oc-top">
-        <div><div class="oc-id">🔖 #${o.id.slice(-6).toUpperCase()}</div><div class="oc-time">⏰ ${dt}</div></div>
-        <span class="order-status-badge s-${status}">${statusMap[status] || status}</span>
-      </div>
-      <div class="oc-cust">
-        <div class="oc-cust-item">👤 <strong>${o.name || "-"}</strong></div>
-        <div class="oc-cust-item">📞 <a href="tel:${o.phone}" style="color:var(--pr);font-weight:700">${o.phone || "-"}</a></div>
-        <div class="oc-cust-item">🏠 ${o.address || "-"}</div>
-      </div>
-      <div class="oc-items">${itemsList}</div>
-      <div class="oc-footer">
-        <div class="oc-total">₹${o.total} <span style="font-size:11px;color:var(--muted);font-family:'Inter'">${o.delivery === 0 ? "Free Del" : "Del: ₹" + (o.delivery || 20)}</span></div>
-        <div class="oc-actions">
-          ${status === "pending" ? `<button class="oc-btn btn-confirm" onclick="updateStatus('${o.id}','confirmed')">✅ Confirm</button>` : ""}
-          ${status === "confirmed" ? `<button class="oc-btn btn-otd" onclick="updateStatus('${o.id}','out_for_delivery')">🛵 Send</button>` : ""}
-          ${status === "out_for_delivery" ? `<button class="oc-btn btn-delivered" onclick="updateStatus('${o.id}','delivered')">🎉 Done</button>` : ""}
-          ${status !== "delivered" && status !== "cancelled" ? `<button class="oc-btn btn-cancel-o" onclick="updateStatus('${o.id}','cancelled')">❌</button>` : ""}
-          <button class="oc-btn btn-wa" onclick="sendWA('${o.phone}','${o.name}','${status}')">📲</button>
-        </div>
-      </div>
-    </div>`;
+
+              // copy detail js
+           return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
+
+  <!-- TOP: ID + Status + Arrow -->
+  <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleOrder('${o.id}')">
+    <div>
+      <div class="oc-id">🔖 #${o.id.slice(-6).toUpperCase()}</div>
+      <div class="oc-time">⏰ ${dt}</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span class="order-status-badge s-${status}">${statusMap[status] || status}</span>
+      <button class="oc-toggle" id="arrow-${o.id}">▼</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY: Hamesha dikh raha -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid #f5f5f5;">
+    <div style="font-size:13px; line-height:1.6;">
+      <strong>👤 ${o.name || "-"}</strong><br/>
+      <span style="color:#666;">📞 ${o.phone || "-"}</span>
+    </div>
+    <div style="font-size:15px; font-weight:800; color:var(--pr);">₹${o.total}</div>
+  </div>
+
+  <!-- DETAILS: Arrow pe click karne pe khulega -->
+  <div class="oc-details" id="details-${o.id}">
+    <div style="font-size:13px; color:#555; margin-bottom:8px;">🏠 ${o.address || "-"}</div>
+    <div class="oc-items">${itemsList}</div>
+    <div style="font-size:13px; font-weight:600; margin-top:8px; color:#333;">
+      🚚 Delivery: ${o.delivery === 0 ? "<span style='color:green'>FREE</span>" : "₹" + (o.delivery || 20)} &nbsp;|&nbsp; ✅ Total: <strong>₹${o.total}</strong>
+    </div>
+    <button class="mini-copy" onclick="copyOrderDetails('${o.id}')">📋 Copy</button>
+  </div>
+
+  <!-- BUTTONS: Hamesha neeche dikhenge -->
+  <div class="oc-footer" style="margin-top:10px; padding-top:10px; border-top:1px solid #f0f0f0;">
+    <div class="oc-actions">
+      ${status === "pending" ? `<button class="oc-btn btn-confirm" onclick="updateStatus('${o.id}','confirmed')">✅ Confirm</button>` : ""}
+      ${status === "confirmed" ? `<button class="oc-btn btn-otd" onclick="updateStatus('${o.id}','out_for_delivery')">🛵 Send</button>` : ""}
+      ${status === "out_for_delivery" ? `<button class="oc-btn btn-delivered" onclick="updateStatus('${o.id}','delivered')">🎉 Done</button>` : ""}
+      ${status !== "delivered" && status !== "cancelled" ? `<button class="oc-btn btn-cancel-o" onclick="updateStatus('${o.id}','cancelled')">❌</button>` : ""}
+      <button class="oc-btn btn-wa" onclick="sendWA('${o.phone}','${o.name}','${status}')">📲</button>
+    </div>
+  </div>
+
+</div>`;
+
           })
           .join("");
       }
+
+
+       function toggleOrder(id) {
+        const details = document.getElementById("details-" + id);
+        const arrow = document.getElementById("arrow-" + id);
+        details.classList.toggle("open");
+        arrow.classList.toggle("open");
+      }
+
+      function copyOrderDetails(orderId) {
+        const o = allOrders.find((x) => x.id === orderId);
+        if (!o) return;
+        const items = (o.items || [])
+          .map((i) => `• ${i.name} x${i.qty} — ₹${i.price * i.qty}`)
+          .join("\n");
+        const text = `🛒 ORDER — S_Quick Mart
+🔖 ID: #${o.id.slice(-6).toUpperCase()}
+
+👤 Name: ${o.name || "-"}
+📞 Phone: ${o.phone || "-"}
+🏠 Address: ${o.address || "-"}
+
+📦 ITEMS:
+${items}
+
+💰 Total: ₹${o.total}
+🚚 Delivery: ${o.delivery === 0 ? "FREE" : "₹" + (o.delivery || 20)}
+💳 Cash on Delivery`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("✅ Order copied!");
+        });
+      }
+
+
 
       async function updateStatus(orderId, status) {
         const ok = await window.fbUpdateOrder(orderId, status);
@@ -2025,23 +2222,42 @@
         // ── YourNeed stats ──
         try {
           const totalYN = allYourNeed.length;
-          const ynPending = allYourNeed.filter(r => (r.status||'pending') === 'pending').length;
-          const ynConfirmed = allYourNeed.filter(r => r.status === 'confirmed').length;
-          const ynOTD = allYourNeed.filter(r => r.status === 'out_for_delivery').length;
-          const ynDelivered = allYourNeed.filter(r => r.status === 'delivered').length;
-          const ynRejected = allYourNeed.filter(r => r.status === 'rejected').length;
-          const ynCustom = allYourNeed.filter(r => r.type === 'custom_item').length;
-          const ynPD = allYourNeed.filter(r => r.type === 'pickup_drop').length;
-          const setIf = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
-          setIf('yn_total', totalYN);
-          setIf('yn_pending', ynPending);
-          setIf('yn_confirmed', ynConfirmed);
-          setIf('yn_otd', ynOTD);
-          setIf('yn_delivered', ynDelivered);
-          setIf('yn_rejected', ynRejected);
-          setIf('yn_custom', ynCustom);
-          setIf('yn_pd', ynPD);
-        } catch (e) { console.error('YN stats error', e); }
+          const ynPending = allYourNeed.filter(
+            (r) => (r.status || "pending") === "pending",
+          ).length;
+          const ynConfirmed = allYourNeed.filter(
+            (r) => r.status === "confirmed",
+          ).length;
+          const ynOTD = allYourNeed.filter(
+            (r) => r.status === "out_for_delivery",
+          ).length;
+          const ynDelivered = allYourNeed.filter(
+            (r) => r.status === "delivered",
+          ).length;
+          const ynRejected = allYourNeed.filter(
+            (r) => r.status === "rejected",
+          ).length;
+          const ynCustom = allYourNeed.filter(
+            (r) => r.type === "custom_item",
+          ).length;
+          const ynPD = allYourNeed.filter(
+            (r) => r.type === "pickup_drop",
+          ).length;
+          const setIf = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+          };
+          setIf("yn_total", totalYN);
+          setIf("yn_pending", ynPending);
+          setIf("yn_confirmed", ynConfirmed);
+          setIf("yn_otd", ynOTD);
+          setIf("yn_delivered", ynDelivered);
+          setIf("yn_rejected", ynRejected);
+          setIf("yn_custom", ynCustom);
+          setIf("yn_pd", ynPD);
+        } catch (e) {
+          console.error("YN stats error", e);
+        }
       }
 
       function updateProductStats() {
@@ -2124,7 +2340,9 @@
           lbl.textContent = val ? "ON" : "OFF";
           lbl.className = "toggle-lbl " + (val ? "on" : "off");
         }
-        showToast(ok ? `✅ ${val ? "Available" : "Out of stock"}!` : "❌ Failed!");
+        showToast(
+          ok ? `✅ ${val ? "Available" : "Out of stock"}!` : "❌ Failed!",
+        );
       }
 
       async function toggleVisible(id, val) {
@@ -2274,137 +2492,191 @@
       }
 
       // ── YOURNEED ──────────────────────────────────────────────────
-      function updateYNBadge(){
-        const n=allYourNeed.filter(r=>r.status==='pending').length;
-        const b=document.getElementById('yourNeedBadge');
-        if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+      function updateYNBadge() {
+        const n = allYourNeed.filter((r) => r.status === "pending").length;
+        const b = document.getElementById("yourNeedBadge");
+        if (b) {
+          b.textContent = n;
+          b.classList.toggle("show", n > 0);
+        }
       }
 
-      function filterYN(filter, el){
-        ynFilter=filter;
-        document.querySelectorAll('#tab-yourneed .filter-chip').forEach(c=>c.classList.remove('active'));
-        if(el) el.classList.add('active');
+      function filterYN(filter, el) {
+        ynFilter = filter;
+        document
+          .querySelectorAll("#tab-yourneed .filter-chip")
+          .forEach((c) => c.classList.remove("active"));
+        if (el) el.classList.add("active");
         renderYourNeed();
       }
 
-      function openYN(filter){
-        const tabBtn = Array.from(document.querySelectorAll('.admin-tab')).find(b=>b && b.getAttribute('onclick') && b.getAttribute('onclick').includes("yourneed"));
-        if(tabBtn) switchTab('yourneed', tabBtn);
+      function openYN(filter) {
+        const tabBtn = Array.from(document.querySelectorAll(".admin-tab")).find(
+          (b) =>
+            b &&
+            b.getAttribute("onclick") &&
+            b.getAttribute("onclick").includes("yourneed"),
+        );
+        if (tabBtn) switchTab("yourneed", tabBtn);
         // find the chip element inside yourneed tab to mark active
-        const chip = Array.from(document.querySelectorAll('#tab-yourneed .filter-chip')).find(c=>c && c.getAttribute('onclick') && c.getAttribute('onclick').includes("'"+filter+"'"));
-        filterYN(filter, chip||null);
+        const chip = Array.from(
+          document.querySelectorAll("#tab-yourneed .filter-chip"),
+        ).find(
+          (c) =>
+            c &&
+            c.getAttribute("onclick") &&
+            c.getAttribute("onclick").includes("'" + filter + "'"),
+        );
+        filterYN(filter, chip || null);
       }
 
-      function renderYourNeed(){
-        const con=document.getElementById('yourNeedContainer');
-        if(!con) return;
-        let reqs=allYourNeed;
-        if(ynFilter==='pending'||ynFilter==='confirmed'||ynFilter==='rejected' || ynFilter==='out_for_delivery' || ynFilter==='delivered'){
-          reqs=allYourNeed.filter(r=>(r.status||'pending')===ynFilter);
-        } else if(ynFilter==='custom_item'||ynFilter==='pickup_drop'){
-          reqs=allYourNeed.filter(r=>r.type===ynFilter);
+      function renderYourNeed() {
+        const con = document.getElementById("yourNeedContainer");
+        if (!con) return;
+        let reqs = allYourNeed;
+        if (
+          ynFilter === "pending" ||
+          ynFilter === "confirmed" ||
+          ynFilter === "rejected" ||
+          ynFilter === "out_for_delivery" ||
+          ynFilter === "delivered"
+        ) {
+          reqs = allYourNeed.filter(
+            (r) => (r.status || "pending") === ynFilter,
+          );
+        } else if (ynFilter === "custom_item" || ynFilter === "pickup_drop") {
+          reqs = allYourNeed.filter((r) => r.type === ynFilter);
         }
-        if(!reqs.length){
-          con.innerHTML='<div class="no-orders-admin"><p>📭 No YourNeed requests found</p></div>';
+        if (!reqs.length) {
+          con.innerHTML =
+            '<div class="no-orders-admin"><p>📭 No YourNeed requests found</p></div>';
           return;
         }
-        const statusMap={pending:'⏳ Pending',confirmed:'✅ Confirmed',out_for_delivery:'🛵 Sent',delivered:'🎉 Done',rejected:'❌ Rejected'};
-        con.innerHTML=reqs.map(r=>{
-          const status=r.status||'pending';
-          const dt=r.createdAt?new Date(r.createdAt.seconds*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-          const isCustom=r.type==='custom_item';
-          const typeLabel=isCustom?'🛍️ Custom Item Request':'🏍️ Pickup & Drop';
-          let detailHTML='';
-          if(isCustom){
-            const itemsHTML=(r.items||[]).map(i=>`${i.name} ×${i.qty}${i.brand?' — '+i.brand:''}`).join('<br>');
-            detailHTML=`
+        const statusMap = {
+          pending: "⏳ Pending",
+          confirmed: "✅ Confirmed",
+          out_for_delivery: "🛵 Sent",
+          delivered: "🎉 Done",
+          rejected: "❌ Rejected",
+        };
+        con.innerHTML = reqs
+          .map((r) => {
+            const status = r.status || "pending";
+            const dt = r.createdAt
+              ? new Date(r.createdAt.seconds * 1000).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "";
+            const isCustom = r.type === "custom_item";
+            const typeLabel = isCustom
+              ? "🛍️ Custom Item Request"
+              : "🏍️ Pickup & Drop";
+            let detailHTML = "";
+            if (isCustom) {
+              const itemsHTML = (r.items || [])
+                .map(
+                  (i) => `${i.name} ×${i.qty}${i.brand ? " — " + i.brand : ""}`,
+                )
+                .join("<br>");
+              detailHTML = `
               <div class="oc-items">
-                <strong>📂 Category:</strong> ${r.category||'-'}<br>
-                <strong>📦 Items:</strong><br>${itemsHTML||'-'}
-                ${r.note?'<br><strong>📝 Note:</strong> '+r.note:''}
+                <strong>📂 Category:</strong> ${r.category || "-"}<br>
+                <strong>📦 Items:</strong><br>${itemsHTML || "-"}
+                ${r.note ? "<br><strong>📝 Note:</strong> " + r.note : ""}
               </div>
               <div class="oc-cust">
-                <div class="oc-cust-item">👤 <strong>${r.name||'-'}</strong></div>
-                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone||'-'}</a></div>
-                <div class="oc-cust-item">📍 ${r.area||'-'}</div>
-                <div class="oc-cust-item">🏠 ${r.address||'-'}</div>
-                <div class="oc-cust-item">⏰ ${r.deliverySlot||'-'}</div>
+                <div class="oc-cust-item">👤 <strong>${r.name || "-"}</strong></div>
+                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone || "-"}</a></div>
+                <div class="oc-cust-item">📍 ${r.area || "-"}</div>
+                <div class="oc-cust-item">🏠 ${r.address || "-"}</div>
+                <div class="oc-cust-item">⏰ ${r.deliverySlot || "-"}</div>
               </div>`;
-          } else {
-            detailHTML=`
+            } else {
+              detailHTML = `
               <div class="oc-items">
-                <strong>📦 Item Type:</strong> ${r.itemType||'-'}<br>
-                <strong>📝 Description:</strong> ${r.itemDesc||'-'}<br>
-                <strong>📍 Pickup:</strong> ${r.pickupArea||'-'} — ${r.pickupAddr||'-'}<br>
-                <strong>👤 Pickup Person:</strong> ${r.pickupName||'-'} — 📞 ${r.pickupPhone||'-'}<br>
-                <strong>🏁 Drop:</strong> ${r.dropArea||'-'} — ${r.dropAddr||'-'}
-                ${r.note?'<br><strong>📝 Note:</strong> '+r.note:''}
+                <strong>📦 Item Type:</strong> ${r.itemType || "-"}<br>
+                <strong>📝 Description:</strong> ${r.itemDesc || "-"}<br>
+                <strong>📍 Pickup:</strong> ${r.pickupArea || "-"} — ${r.pickupAddr || "-"}<br>
+                <strong>👤 Pickup Person:</strong> ${r.pickupName || "-"} — 📞 ${r.pickupPhone || "-"}<br>
+                <strong>🏁 Drop:</strong> ${r.dropArea || "-"} — ${r.dropAddr || "-"}
+                ${r.note ? "<br><strong>📝 Note:</strong> " + r.note : ""}
               </div>
               <div class="oc-cust">
-                <div class="oc-cust-item">👤 <strong>${r.name||'-'}</strong></div>
-                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone||'-'}</a></div>
-                <div class="oc-cust-item">⏰ ${r.deliverySlot||'-'}</div>
+                <div class="oc-cust-item">👤 <strong>${r.name || "-"}</strong></div>
+                <div class="oc-cust-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700">${r.phone || "-"}</a></div>
+                <div class="oc-cust-item">⏰ ${r.deliverySlot || "-"}</div>
               </div>`;
-          }
-          return `<div class="order-card ${status==='pending'?'new-order':''}">
+            }
+            return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
             <div class="oc-top">
               <div>
                 <div class="oc-id">${typeLabel}</div>
                 <div class="oc-time">⏰ ${dt}</div>
                 <div class="oc-time" style="font-size:10px;color:#aaa">ID: ${r.id.slice(-8).toUpperCase()}</div>
               </div>
-              <span class="order-status-badge s-${status}">${statusMap[status]||status}</span>
+              <span class="order-status-badge s-${status}">${statusMap[status] || status}</span>
             </div>
             ${detailHTML}
-            ${r.adminNote?`<div style="background:#fff3cd;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:8px;color:#856404">📋 Admin Note: ${r.adminNote}</div>`:''}
+            ${r.adminNote ? `<div style="background:#fff3cd;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:8px;color:#856404">📋 Admin Note: ${r.adminNote}</div>` : ""}
             <div class="oc-footer">
               <div></div>
               <div class="oc-actions">
-                ${status==='pending'?`<button class="oc-btn btn-confirm" onclick="ynAccept('${r.id}')">✅ Confirm</button>`:''}
-                ${status==='pending'?`<button class="oc-btn btn-cancel-o" onclick="ynReject('${r.id}')">❌ Reject</button>`:''}
-                ${status==='confirmed'?`<button class="oc-btn btn-otd" onclick="ynSend('${r.id}')">🛵 Send</button>`:''}
-                ${status==='out_for_delivery'?`<button class="oc-btn btn-delivered" onclick="ynDone('${r.id}')">🎉 Done</button>`:''}
+                ${status === "pending" ? `<button class="oc-btn btn-confirm" onclick="ynAccept('${r.id}')">✅ Confirm</button>` : ""}
+                ${status === "pending" ? `<button class="oc-btn btn-cancel-o" onclick="ynReject('${r.id}')">❌ Reject</button>` : ""}
+                ${status === "confirmed" ? `<button class="oc-btn btn-otd" onclick="ynSend('${r.id}')">🛵 Send</button>` : ""}
+                ${status === "out_for_delivery" ? `<button class="oc-btn btn-delivered" onclick="ynDone('${r.id}')">🎉 Done</button>` : ""}
                 <button class="oc-btn btn-wa" onclick="ynWA('${r.phone}','${r.name}','${status}')">📲 WA</button>
               </div>
             </div>
           </div>`;
-        }).join('');
-      }
-      
-      async function ynAccept(id){
-        const note=prompt('Add a note for customer (optional):','')||'';
-        const ok=await window.fbUpdateYourNeed(id,'confirmed',note);
-        showToast(ok?'✅ Request Confirmed!':'❌ Failed!');
+          })
+          .join("");
       }
 
-      async function ynReject(id){
-        const note=prompt('Reason for rejection (optional):','')||'';
-        const ok=await window.fbUpdateYourNeed(id,'rejected',note);
-        showToast(ok?'❌ Request Rejected':'❌ Failed!');
+      async function ynAccept(id) {
+        const note = prompt("Add a note for customer (optional):", "") || "";
+        const ok = await window.fbUpdateYourNeed(id, "confirmed", note);
+        showToast(ok ? "✅ Request Confirmed!" : "❌ Failed!");
       }
 
-      async function ynSend(id){
-        const note=prompt('Optional note to customer (e.g. "Driver assigned")','')||'';
-        const ok=await window.fbUpdateYourNeed(id,'out_for_delivery',note);
-        showToast(ok?'🛵 Request marked Sent!':'❌ Failed!');
+      async function ynReject(id) {
+        const note = prompt("Reason for rejection (optional):", "") || "";
+        const ok = await window.fbUpdateYourNeed(id, "rejected", note);
+        showToast(ok ? "❌ Request Rejected" : "❌ Failed!");
       }
 
-      async function ynDone(id){
-        const note=prompt('Delivery note (optional):','')||'';
-        const ok=await window.fbUpdateYourNeed(id,'delivered',note);
-        showToast(ok?'🎉 Request marked Done!':'❌ Failed!');
+      async function ynSend(id) {
+        const note =
+          prompt('Optional note to customer (e.g. "Driver assigned")', "") ||
+          "";
+        const ok = await window.fbUpdateYourNeed(id, "out_for_delivery", note);
+        showToast(ok ? "🛵 Request marked Sent!" : "❌ Failed!");
       }
 
-      function ynWA(phone, name, status){
-        const msgs={
-          confirmed:`Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart`,
-          out_for_delivery:`Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
-          delivered:`Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
-          rejected:`Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart`,
-          pending:`Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart`,
+      async function ynDone(id) {
+        const note = prompt("Delivery note (optional):", "") || "";
+        const ok = await window.fbUpdateYourNeed(id, "delivered", note);
+        showToast(ok ? "🎉 Request marked Done!" : "❌ Failed!");
+      }
+
+      function ynWA(phone, name, status) {
+        const msgs = {
+          confirmed: `Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart`,
+          out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
+          delivered: `Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
+          rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart`,
+          pending: `Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart`,
         };
-        const msg=msgs[status]||`Hello ${name}! Update on your request: ${status}. — S_Quick Mart`;
-        window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+        const msg =
+          msgs[status] ||
+          `Hello ${name}! Update on your request: ${status}. — S_Quick Mart`;
+        window.open(
+          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
       }
 
       // ── TOAST ─────────────────────────────────────────────────────
