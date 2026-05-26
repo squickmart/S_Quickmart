@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S_Quick Mart — Grocery Delivery in Parbhani</title>
-    <link rel="icon" type="image/png" href="S2.PNG">
+    <link rel="icon" type="image/png" href="S2.PNG" />
     <!-- SEO Meta Tags -->
     <meta
       name="description"
       content="S_Quick Mart — Parbhani ki sabse fast grocery delivery. Groceries, daily essentials aur bahut kuch 20-30 minutes mein doorstep pe. Order now!"
     />
-    <meta name="description" content="Order groceries online in Parbhani. Fresh groceries & daily essentials delivered to your doorstep in just 20-30 minutes. Cash on Delivery available. Order now!" />
+    <meta
+      name="description"
+      content="Order groceries online in Parbhani. Fresh groceries & daily essentials delivered to your doorstep in just 20-30 minutes. Cash on Delivery available. Order now!"
+    />
     <meta
       name="keywords"
       content="grocery delivery Parbhani, S Quick Mart, online grocery Parbhani, daily essentials Parbhani, fast delivery Parbhani, ghar baithe grocery, Parbhani online store"
@@ -42,7 +45,6 @@
       instant grocery Parbhani,
       S Quick Mart Parbhani
       "
-      
     />
 
     <link
@@ -1942,6 +1944,65 @@
         white-space: nowrap;
         flex-shrink: 0;
       }
+
+      /* MY ORDERS PANEL */
+      .orders-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        display: none;
+      }
+      .orders-overlay.open {
+        display: block;
+      }
+      .orders-panel {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        height: 100%;
+        width: min(400px, 100%);
+        background: #fff;
+        z-index: 2001;
+        transition: right 0.3s;
+        display: flex;
+        flex-direction: column;
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+      }
+      .orders-panel.open {
+        right: 0;
+      }
+      .orders-panel-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--dark), #16213e);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .orders-panel-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .orders-panel-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .orders-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
     </style>
   </head>
   <body>
@@ -1997,13 +2058,12 @@
       </div>
     </div>
     <section class="hero">
-
-      <p style="display:none;">
-          S_Quick Mart is Parbhani's fastest online grocery delivery service. 
-          We deliver fresh groceries, vegetables, dairy, snacks and daily 
-          essentials to your doorstep in 20-30 minutes. Serving Parbhani 
-          city PIN 431401 including nearby areas like Pedgaon and Dharmapuri. 
-          Cash on delivery available. Order online now!
+      <p style="display: none">
+        S_Quick Mart is Parbhani's fastest online grocery delivery service. We
+        deliver fresh groceries, vegetables, dairy, snacks and daily essentials
+        to your doorstep in 20-30 minutes. Serving Parbhani city PIN 431401
+        including nearby areas like Pedgaon and Dharmapuri. Cash on delivery
+        available. Order online now!
       </p>
 
       <div class="hero-badge">⚡ Parbhani's Fastest Delivery Store</div>
@@ -2314,6 +2374,24 @@
       </div>
     </div>
 
+
+    <!-- MY ORDERS PANEL -->
+<div class="orders-overlay" id="ordersOverlay" onclick="closeMyOrders()"></div>
+<div class="orders-panel" id="ordersPanel">
+  <div class="orders-panel-header">
+    <div class="orders-panel-title">📦 My Orders</div>
+    <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
+  </div>
+  <div class="orders-panel-body">
+    <div id="orderHistoryList">
+      <div class="no-orders">
+        <div class="no-orders-icon">📭</div>
+        <p>No orders yet</p>
+      </div>
+    </div>
+  </div>
+</div>
+
     <!-- SUCCESS -->
     <div class="suc-overlay" id="sucOverlay">
       <div class="suc-box">
@@ -2410,8 +2488,6 @@
             Delivered to your doorstep in just 20–30 minutes.
           </div>
         </div>
-
-      
 
         <!-- Nav Links -->
         <div
@@ -3272,6 +3348,31 @@
           )
           .join("");
       }
+
+
+
+
+
+      function openMyOrders() {
+  closeCart();
+  if (!currentUser.phone) {
+    openProfile();
+    showToast("⚠️ Please login first!");
+    return;
+  }
+  document.getElementById("ordersOverlay").classList.add("open");
+  document.getElementById("ordersPanel").classList.add("open");
+  loadOrderHistory(currentUser.phone);
+}
+
+function closeMyOrders() {
+  document.getElementById("ordersOverlay").classList.remove("open");
+  document.getElementById("ordersPanel").classList.remove("open");
+  if (orderHistoryUnsub) {
+    orderHistoryUnsub();
+    orderHistoryUnsub = null;
+  }
+}
       function openCart() {
         document.getElementById("cOverlay").classList.add("open");
         document.getElementById("cSidebar").classList.add("open");
