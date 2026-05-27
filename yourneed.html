@@ -13,8 +13,6 @@
         getFirestore,
         collection,
         addDoc,
-        doc,
-        onSnapshot,
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
       const firebaseConfig = {
@@ -27,8 +25,6 @@
       };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-
-      // Save yourneed request to Firebase
       window.fbSaveYourNeed = async (data) => {
         try {
           const ref = await addDoc(collection(db, "yourneed_requests"), {
@@ -42,15 +38,6 @@
           return null;
         }
       };
-
-      // Real-time listener — jab bhi admin areas badlega, yahan turant update hoga
-      onSnapshot(doc(db, "store", "yourneed_areas"), (snap) => {
-        const areas = snap.exists() ? (snap.data().list || []) : null;
-        if (areas && areas.length) {
-          // Fire custom event so regular script can rebuild grids
-          document.dispatchEvent(new CustomEvent("areasUpdated", { detail: areas }));
-        }
-      });
     </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
@@ -119,7 +106,7 @@
         align-items: center;
         justify-content: center;
         font-size: 17px;
-        box-shadow: 0 4px 10px rgba(255, 107, 0, 0.32);
+        
         flex-shrink: 0;
       }
       .logo-text .brand {
@@ -504,6 +491,38 @@
         text-transform: uppercase;
         letter-spacing: 0.6px;
       }
+      .area-search-wrap {
+        position: relative;
+        margin-bottom: 10px;
+      }
+      .area-search-wrap .search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        pointer-events: none;
+      }
+      .area-search-input {
+        width: 100%;
+        padding: 9px 12px 9px 34px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--text);
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.18s;
+      }
+      .area-search-input:focus { border-color: var(--primary); }
+      .area-no-result {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 14px 0;
+        display: none;
+      }
       .area-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -533,7 +552,7 @@
         font-size: 12.5px;
         font-weight: 600;
         color: var(--muted);
-        min-height: 52px;
+        min-height: 40px;
       }
       .area-btn:active {
         transform: scale(0.96);
@@ -553,48 +572,6 @@
       }
       .area-btn.selected .area-dot {
         background: var(--primary);
-      }
-      /* Not Available area */
-      .area-btn.not-available {
-        opacity: 0.45;
-        filter: blur(1.5px);
-        cursor: not-allowed;
-        pointer-events: none;
-        position: relative;
-      }
-      .area-btn-wrap {
-        position: relative;
-        display: contents;
-      }
-      .area-btn-outer {
-        position: relative;
-      }
-      .area-btn-outer.not-available .area-btn {
-        opacity: 1;
-        filter: none;
-        pointer-events: none;
-        user-select: none;
-        border-color: #fca5a5;
-        background: #fff5f5;
-        color: #020305;
-      }
-      .area-btn-outer.not-available .area-dot {
-        background: #fca5a5;
-      }
-      .area-btn-outer.not-available::after {
-        content: "🚫 Not Available";
-        position: absolute;
-        bottom: 4px;
-        left: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 9px;
-        font-weight: 800;
-        color: #b91c1c;
-        letter-spacing: 0.2px;
-        pointer-events: none;
       }
 
       /* ── TIME SLOTS ── */
@@ -1508,6 +1485,11 @@
                   >📍 Select Your Area <span class="req">*</span></label
                 >
               </div>
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="area-search-input" id="cr-area-search" placeholder="Search area..." oninput="filterAreaSearch('cr-area-grid', 'cr-area-no-result', this.value)" autocomplete="off"/>
+              </div>
+              <div class="area-no-result" id="cr-area-no-result">😕 No area found</div>
               <div class="area-grid" id="cr-area-grid">
                 <div
                   class="area-btn"
@@ -1810,6 +1792,11 @@
               <label class="fl"
                 >📍 Pickup From — Area <span class="req">*</span></label
               >
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="area-search-input" id="pd-from-area-search" placeholder="Search area..." oninput="filterAreaSearch('pd-from-area-grid', 'pd-from-area-no-result', this.value)" autocomplete="off"/>
+              </div>
+              <div class="area-no-result" id="pd-from-area-no-result">😕 No area found</div>
               <div class="area-grid" id="pd-from-area-grid">
                 <div
                   class="area-btn"
@@ -1935,6 +1922,11 @@
               <label class="fl"
                 >🏁 Deliver To — Area <span class="req">*</span></label
               >
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="area-search-input" id="pd-to-area-search" placeholder="Search area..." oninput="filterAreaSearch('pd-to-area-grid', 'pd-to-area-no-result', this.value)" autocomplete="off"/>
+              </div>
+              <div class="area-no-result" id="pd-to-area-no-result">😕 No area found</div>
               <div class="area-grid" id="pd-to-area-grid">
                 <div
                   class="area-btn"
@@ -2812,56 +2804,24 @@ _Please confirm charge & timing._`;
         }, 2800);
       }
 
-      initItems();
-
-      // ── DYNAMIC AREA LOADING FROM FIREBASE (Real-time) ───────────
-      const DEFAULT_AREAS = [
-        "Parbhani Main","Ganesh Nagar","Shivaji Nagar","Padmapura",
-        "Bhagyanagar","Vasant Nagar","Sadar Bazar","Railway Station",
-        "Anand Nagar","Camp Area","Jintur Road","Other"
-      ].map(function(n){ return { name: n, available: true }; });
-
-      function buildAreaGrid(gridId, onClickFn, areas) {
-        var el = document.getElementById(gridId);
-        if (!el) return;
-        // Remember currently selected area to restore after rebuild
-        var prevSelected = el.querySelector('.area-btn.selected');
-        var prevArea = prevSelected ? prevSelected.getAttribute('data-area') : null;
-        el.innerHTML = areas.map(function(a) {
-          return '<div class="area-btn-outer' + (a.available ? '' : ' not-available') + '">' +
-            '<div class="area-btn" data-area="' + a.name + '">' +
-            '<span class="area-dot"></span>' + a.name +
-            '</div></div>';
-        }).join('');
-        // Restore previous selection if area still available
-        if (prevArea) {
-          var btn = el.querySelector('.area-btn[data-area="' + prevArea + '"]');
-          if (btn && !btn.closest('.not-available')) btn.classList.add('selected');
-        }
-        // Attach clicks only to available areas
-        el.querySelectorAll('.area-btn-outer:not(.not-available) .area-btn').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            el.querySelectorAll('.area-btn').forEach(function(b){ b.classList.remove('selected'); });
-            btn.classList.add('selected');
-            onClickFn(btn.getAttribute('data-area'));
-          });
+      // ── AREA SEARCH FILTER ───────────────────────────────────────
+      function filterAreaSearch(gridId, noResultId, query) {
+        const grid = document.getElementById(gridId);
+        const noRes = document.getElementById(noResultId);
+        if (!grid) return;
+        const q = query.trim().toLowerCase();
+        const btns = grid.querySelectorAll('.area-btn');
+        let visible = 0;
+        btns.forEach(function(btn) {
+          const name = btn.getAttribute('data-area') || '';
+          const match = q === '' || name.toLowerCase().includes(q);
+          btn.style.display = match ? '' : 'none';
+          if (match) visible++;
         });
+        if (noRes) noRes.style.display = (visible === 0 && q.length > 0) ? 'block' : 'none';
       }
 
-      function renderAllAreaGrids(areas) {
-        buildAreaGrid('cr-area-grid',      function(a){ selectArea('cr', a); },     areas);
-        buildAreaGrid('pd-from-area-grid', function(a){ selectAreaPD('from', a); }, areas);
-        buildAreaGrid('pd-to-area-grid',   function(a){ selectAreaPD('to', a); },   areas);
-      }
-
-      // Show defaults immediately on page load (no delay)
-      renderAllAreaGrids(DEFAULT_AREAS);
-
-      // Listen for Firebase real-time update — fires on first load AND whenever admin changes areas
-      document.addEventListener('areasUpdated', function(e) {
-        renderAllAreaGrids(e.detail);
-      });
-
+      initItems();
     </script>
   </body>
 </html>
