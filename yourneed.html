@@ -6,13 +6,15 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Your Need — QuickMart Parbhani</title>
+    <title>Your Need — SQuickMart Parbhani</title>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
       import {
         getFirestore,
         collection,
         addDoc,
+        doc,
+        onSnapshot,
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
       const firebaseConfig = {
@@ -25,6 +27,8 @@
       };
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
+
+      // YourNeed request save
       window.fbSaveYourNeed = async (data) => {
         try {
           const ref = await addDoc(collection(db, "yourneed_requests"), {
@@ -38,6 +42,16 @@
           return null;
         }
       };
+
+      // Real-time areas listener — admin se save karo toh yahan turant update
+      onSnapshot(doc(db, "store", "yourneed_areas"), (snap) => {
+        if (snap.exists()) {
+          const areas = snap.data().list || [];
+          if (areas.length > 0) {
+            document.dispatchEvent(new CustomEvent("ynAreasUpdated", { detail: areas }));
+          }
+        }
+      });
     </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
@@ -54,8 +68,8 @@
         --dark: #08080f;
         --bg: #f2f3f7;
         --text: #111827;
-        --muted: #6b7280;
-        --border: #e5e7eb;
+        --muted: #000000;
+        --border: #c4bebe;
         --radius: 16px;
         --header-h: 64px;
       }
@@ -551,7 +565,7 @@
         transition: 0.18s;
         font-size: 12.5px;
         font-weight: 600;
-        color: var(--muted);
+        color: #000000;
         min-height: 40px;
       }
       .area-btn:active {
@@ -2822,6 +2836,54 @@ _Please confirm charge & timing._`;
       }
 
       initItems();
+
+      // ── FIREBASE AREAS REAL-TIME CONNECT ─────────────────────────
+      // Yeh function admin se save kiye areas ko yourneed page pe apply karta hai
+      function applyAreasToGrids(areas) {
+        var grids = [
+          { id: 'cr-area-grid',       selFn: function(a){ selectArea('cr', a); } },
+          { id: 'pd-from-area-grid',  selFn: function(a){ selectAreaPD('from', a); } },
+          { id: 'pd-to-area-grid',    selFn: function(a){ selectAreaPD('to', a); } },
+        ];
+        grids.forEach(function(g) {
+          var grid = document.getElementById(g.id);
+          if (!grid) return;
+
+          // Remember current selection
+          var sel = grid.querySelector('.area-btn.selected');
+          var prevArea = sel ? sel.getAttribute('data-area') : null;
+
+          // Rebuild buttons
+          grid.innerHTML = areas.map(function(a) {
+            var na = !a.available;
+            return '<div class="area-btn' + (na ? ' area-na' : '') + '" data-area="' + a.name + '" ' +
+              (na ? 'style="opacity:1.5;pointer-events:none;border-color:#f10505;background:#fff5f5;color:#000000;position:relative;"' : '') + '>' +
+              '<span class="area-dot"></span>' + a.name +
+              (na ? '<span style="position:absolute;bottom:2px;right:6px;font-size:9px;font-weight:800;color:#b91c1c;">🚫 N/A</span>' : '') +
+              '</div>';
+          }).join('');
+
+          // Restore selection if still available
+          if (prevArea) {
+            var btn = grid.querySelector('.area-btn[data-area="' + prevArea + '"]:not(.area-na)');
+            if (btn) btn.classList.add('selected');
+          }
+
+          // Attach click listeners
+          grid.querySelectorAll('.area-btn:not(.area-na)').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              grid.querySelectorAll('.area-btn').forEach(function(b){ b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              g.selFn(btn.getAttribute('data-area'));
+            });
+          });
+        });
+      }
+
+      // Jab bhi Firebase se areas aaye (page load + admin change) — apply karo
+      document.addEventListener('ynAreasUpdated', function(e) {
+        applyAreasToGrids(e.detail);
+      });
     </script>
   </body>
 </html>
