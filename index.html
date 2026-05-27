@@ -208,7 +208,7 @@
         font-family: "Inter", sans-serif;
         background: var(--bg);
         color: var(--text);
-        overflow-x: hidden;
+        /* overflow-x: hidden; */
       }
       .timing-bar {
         background: var(--dark);
@@ -1604,6 +1604,9 @@
       .phone-modal-overlay.open {
         display: flex;
       }
+      body.overlay-open footer {
+        display: none !important;
+      }
       .phone-modal {
         position: relative;
         background: #fff;
@@ -2012,7 +2015,7 @@
         <div class="logo">
           <div class="logo-icon">
             <img
-              src="image copy.png"
+              src="image.png"
               alt="Logo"
               onerror="
                 this.style.display = 'none';
@@ -2342,7 +2345,7 @@
             />
           </div>
           <div class="profile-input-group">
-            <label class="profile-label">Default Address</label
+            <label class="profile-label">Address</label
             ><textarea
               class="profile-input"
               id="pAddr"
@@ -2354,7 +2357,7 @@
             💾 Save
           </button>
         </div>
-        
+      </div>
     </div>
 
 
@@ -2485,7 +2488,7 @@
           "
         >
           <a
-            href="help.html"
+            href="help.html#about"
             style="
               color: rgba(255, 255, 255, 0.55);
               text-decoration: none;
@@ -2696,6 +2699,9 @@
         }
       }
 
+      function setOverlayFooterState(hidden) {
+        document.body.classList.toggle("overlay-open", hidden);
+      }
       function savePhoneLogin() {
         const ph = document.getElementById("phoneModalInput").value.trim();
         if (ph.length !== 10) {
@@ -2705,11 +2711,13 @@
         currentUser.phone = ph;
         localStorage.setItem("sqm_user", JSON.stringify(currentUser));
         document.getElementById("phoneModal").classList.remove("open");
+        setOverlayFooterState(false);
         updateProfileUI();
         showToast("✅ Number saved!");
       }
       function skipPhoneLogin() {
         document.getElementById("phoneModal").classList.remove("open");
+        setOverlayFooterState(false);
       }
 
       function saveProfile() {
@@ -2775,12 +2783,14 @@
         document.getElementById("profileOverlay").classList.add("open");
         document.getElementById("profileSidebar").classList.add("open");
         document.body.style.overflow = "hidden";
+        setOverlayFooterState(true);
         if (currentUser.phone) loadOrderHistory(currentUser.phone);
       }
       function closeProfile() {
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
         document.body.style.overflow = "";
+        setOverlayFooterState(false);
         if (orderHistoryUnsub) {
           orderHistoryUnsub();
           orderHistoryUnsub = null;
