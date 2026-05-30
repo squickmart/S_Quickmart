@@ -2274,5 +2274,58 @@
         }, 2800);
       }
     </script>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-messaging.js";
+
+    const fcmConfig = {
+      apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+      authDomain: "quickmart-b117e.firebaseapp.com",
+      projectId: "quickmart-b117e",
+      storageBucket: "quickmart-b117e.firebasestorage.app",
+      messagingSenderId: "128330058901",
+      appId: "1:128330058901:web:2bbd1eae9231308ef79f9c"
+    };
+
+    const fcmApp = getApps().length ? getApps()[0] : initializeApp(fcmConfig, "fcm-app");
+    const messaging = getMessaging(fcmApp);
+
+    async function setupNotifications() {
+      try {
+        const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { console.log("Notification permission denied"); return; }
+        const token = await getToken(messaging, {
+          vapidKey: "BGtCoyevUrRPsnoJgIu-uvzJGsvvQPsUveVWq_eoYUOpfk_hFKJAOHlRVb2_t2WmaRZJbBBHezf8485wN8zxqD8",
+          serviceWorkerRegistration: reg
+        });
+        if (token) {
+          console.log("FCM Token:", token);
+          localStorage.setItem("fcm_token", token);
+        }
+      } catch (err) {
+        console.error("FCM setup error:", err);
+      }
+    }
+
+    if ("Notification" in window && "serviceWorker" in navigator) {
+      setupNotifications();
+    }
+
+    onMessage(messaging, function(payload) {
+      const title = payload.notification.title || "🛒 New Order — S_Quick Mart!";
+      const body  = payload.notification.body  || "A new order has been placed. Open app to assign delivery.!";
+      if (Notification.permission === "granted") {
+        new Notification(title, {
+          body: body,
+          icon: "/icon.png",
+          tag: "new-order",
+          renotify: true,
+          vibrate: [200, 100, 200]
+        });
+      }
+    });
+  </script>
   </body>
 </html>
