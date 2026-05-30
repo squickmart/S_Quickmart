@@ -5,41 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S_Quick Mart — Grocery Delivery in Parbhani | 20-30 Min</title>
     <link rel="icon" type="image/png" href="S2.PNG" />
-<!-- Primary SEO -->
-<meta name="description" content="S_Quick Mart — Parbhani ka sabse fast grocery delivery service. Groceries, daily essentials 20-30 minutes mein ghar pe. Cash on Delivery available. Order karo abhi!" />
-<meta name="keywords" content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart,Quick Mart,QuickMart, fast delivery Parbhani, ghar pe grocery Parbhani, 431401 grocery" />
-<meta name="author" content="S_Quick Mart, Parbhani" />
-<meta name="robots" content="index, follow" />
-<link rel="canonical" href="https://squickmart.com/" />
+    <!-- Primary SEO -->
+    <meta
+      name="description"
+      content="S_Quick Mart — Parbhani ka sabse fast grocery delivery service. Groceries, daily essentials 20-30 minutes mein ghar pe. Cash on Delivery available. Order karo abhi!"
+    />
+    <meta
+      name="keywords"
+      content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart,Quick Mart,QuickMart, fast delivery Parbhani, ghar pe grocery Parbhani, 431401 grocery"
+    />
+    <meta name="author" content="S_Quick Mart, Parbhani" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://squickmart.com/" />
 
-<!-- Open Graph (WhatsApp, Facebook preview) -->
-<meta property="og:title" content="S_Quick Mart — Grocery Delivery in Parbhani" />
-<meta property="og:description" content="Parbhani ka sabse fast grocery delivery. 20-30 minutes mein doorstep pe. Cash on Delivery." />
-<meta property="og:url" content="https://squickmart.com/" />
-<meta property="og:type" content="website" />
-<meta property="og:locale" content="en_IN" />
+    <!-- Open Graph (WhatsApp, Facebook preview) -->
+    <meta
+      property="og:title"
+      content="S_Quick Mart — Grocery Delivery in Parbhani"
+    />
+    <meta
+      property="og:description"
+      content="Parbhani ka sabse fast grocery delivery. 20-30 minutes mein doorstep pe. Cash on Delivery."
+    />
+    <meta property="og:url" content="https://squickmart.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_IN" />
 
-<!-- Local Business Schema -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "S_Quick Mart",
-  "description": "Parbhani's fastest grocery delivery service",
-  "url": "https://squickmart.com",
-  "telephone": "+917249148205",
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Parbhani",
-    "addressRegion": "Maharashtra",
-    "postalCode": "431401",
-    "addressCountry": "IN"
-  },
-  "openingHours": "Mo-Su 07:00-22:00",
-  "servesCuisine": "Grocery",
-  "priceRange": "₹"
-}
-</script>
+    <!-- Local Business Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "S_Quick Mart",
+        "description": "Parbhani's fastest grocery delivery service",
+        "url": "https://squickmart.com",
+        "telephone": "+917249148205",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Parbhani",
+          "addressRegion": "Maharashtra",
+          "postalCode": "431401",
+          "addressCountry": "IN"
+        },
+        "openingHours": "Mo-Su 07:00-22:00",
+        "servesCuisine": "Grocery",
+        "priceRange": "₹"
+      }
+    </script>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -153,13 +165,16 @@
         const s = snap.data();
         window._storeOpen = s.open !== false;
         window._storeMsg = s.message || "";
-        const wasOpen = window._productsClosed === false || window._productsClosed === undefined;
+        const wasOpen =
+          window._productsClosed === false ||
+          window._productsClosed === undefined;
         window._productsClosed = s.productsClosed === true;
         applyStoreStatus();
         window.renderProducts && window.renderProducts();
         // Show popup when products just got closed
         const popup = document.getElementById("productsClosedOverlay");
-        if (popup) popup.style.display = window._productsClosed ? "flex" : "none";
+        if (popup)
+          popup.style.display = window._productsClosed ? "flex" : "none";
       });
 
       window.applyStoreStatus = function () {
@@ -1361,7 +1376,9 @@
         box-sizing: border-box;
         transition: border-color 0.18s;
       }
-      .area-search-input:focus { border-color: var(--primary); }
+      .area-search-input:focus {
+        border-color: var(--primary);
+      }
       .area-no-result {
         text-align: center;
         color: var(--muted);
@@ -2400,33 +2417,130 @@
             />
           </div>
           <div class="fg">
-            <label class="fl" style="margin-bottom:8px;">📍 Your Area <span style="color:red">*</span></label>
-            <div id="chkAreaBadgeWrap" style="display:none; margin-bottom:8px;">
+            <label class="fl" style="margin-bottom: 8px"
+              >📍 Your Area <span style="color: red">*</span></label
+            >
+            <div
+              id="chkAreaBadgeWrap"
+              style="display: none; margin-bottom: 8px"
+            >
               <span class="profile-area-selected-badge">
                 <span class="badge-dot"></span>
                 <span id="chkAreaBadgeText"></span>
               </span>
-              <button class="profile-area-change-btn" onclick="openChkAreaPicker()">Change</button>
+              <button
+                class="profile-area-change-btn"
+                onclick="openChkAreaPicker()"
+              >
+                Change
+              </button>
             </div>
             <div id="chkAreaPicker">
               <div class="area-search-wrap">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="area-search-input" id="chk-area-search" placeholder="Search area..." oninput="filterAreaSearch('chk-area-grid', 'chk-area-no-result', this.value)" autocomplete="off"/>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="chk-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'chk-area-grid',
+                      'chk-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
               </div>
-              <div class="area-no-result" id="chk-area-no-result">😕 No area found</div>
+              <div class="area-no-result" id="chk-area-no-result">
+                😕 No area found
+              </div>
               <div class="area-grid" id="chk-area-grid">
-                <div class="area-btn" onclick="selectAreaChk('Parbhani Main')" data-area="Parbhani Main"><span class="area-dot"></span>Parbhani Main</div>
-                <div class="area-btn" onclick="selectAreaChk('Ganesh Nagar')" data-area="Ganesh Nagar"><span class="area-dot"></span>Ganesh Nagar</div>
-                <div class="area-btn" onclick="selectAreaChk('Shivaji Nagar')" data-area="Shivaji Nagar"><span class="area-dot"></span>Shivaji Nagar</div>
-                <div class="area-btn" onclick="selectAreaChk('Padmapura')" data-area="Padmapura"><span class="area-dot"></span>Padmapura</div>
-                <div class="area-btn" onclick="selectAreaChk('Bhagyanagar')" data-area="Bhagyanagar"><span class="area-dot"></span>Bhagyanagar</div>
-                <div class="area-btn" onclick="selectAreaChk('Vasant Nagar')" data-area="Vasant Nagar"><span class="area-dot"></span>Vasant Nagar</div>
-                <div class="area-btn" onclick="selectAreaChk('Sadar Bazar')" data-area="Sadar Bazar"><span class="area-dot"></span>Sadar Bazar</div>
-                <div class="area-btn" onclick="selectAreaChk('Railway Station')" data-area="Railway Station"><span class="area-dot"></span>Railway Station</div>
-                <div class="area-btn" onclick="selectAreaChk('Anand Nagar')" data-area="Anand Nagar"><span class="area-dot"></span>Anand Nagar</div>
-                <div class="area-btn" onclick="selectAreaChk('Camp Area')" data-area="Camp Area"><span class="area-dot"></span>Camp Area</div>
-                <div class="area-btn" onclick="selectAreaChk('Jintur Road')" data-area="Jintur Road"><span class="area-dot"></span>Jintur Road</div>
-                <div class="area-btn" onclick="selectAreaChk('Other')" data-area="Other"><span class="area-dot"></span>Other Area</div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaChk('Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
               </div>
             </div>
             <label class="fl">Delivery Address *</label
@@ -2552,27 +2666,104 @@
           </div>
           <div class="profile-input-group">
             <span class="profile-area-label">📍 Your Area</span>
-            <div id="pAreaBadgeWrap" style="display:none; margin-bottom:8px;">
+            <div id="pAreaBadgeWrap" style="display: none; margin-bottom: 8px">
               <span class="profile-area-selected-badge">
                 <span class="badge-dot"></span>
                 <span id="pAreaBadgeText"></span>
               </span>
-              <button class="profile-area-change-btn" onclick="openProfileAreaPicker()">Change</button>
+              <button
+                class="profile-area-change-btn"
+                onclick="openProfileAreaPicker()"
+              >
+                Change
+              </button>
             </div>
             <div class="profile-area-picker open" id="pAreaPicker">
               <div class="profile-area-grid" id="pAreaGrid">
-                <div class="profile-area-btn" onclick="selectProfileArea('Parbhani Main')" data-area="Parbhani Main"><span class="area-dot"></span>Parbhani Main</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Ganesh Nagar')" data-area="Ganesh Nagar"><span class="area-dot"></span>Ganesh Nagar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Shivaji Nagar')" data-area="Shivaji Nagar"><span class="area-dot"></span>Shivaji Nagar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Padmapura')" data-area="Padmapura"><span class="area-dot"></span>Padmapura</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Bhagyanagar')" data-area="Bhagyanagar"><span class="area-dot"></span>Bhagyanagar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Vasant Nagar')" data-area="Vasant Nagar"><span class="area-dot"></span>Vasant Nagar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Sadar Bazar')" data-area="Sadar Bazar"><span class="area-dot"></span>Sadar Bazar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Railway Station')" data-area="Railway Station"><span class="area-dot"></span>Railway Station</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Anand Nagar')" data-area="Anand Nagar"><span class="area-dot"></span>Anand Nagar</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Camp Area')" data-area="Camp Area"><span class="area-dot"></span>Camp Area</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Jintur Road')" data-area="Jintur Road"><span class="area-dot"></span>Jintur Road</div>
-                <div class="profile-area-btn" onclick="selectProfileArea('Other')" data-area="Other"><span class="area-dot"></span>Other Area</div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="profile-area-btn"
+                  onclick="selectProfileArea('Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
               </div>
             </div>
           </div>
@@ -2583,24 +2774,26 @@
       </div>
     </div>
 
-
-
     <!-- MY ORDERS PANEL -->
-<div class="orders-overlay" id="ordersOverlay" onclick="closeMyOrders()"></div>
-<div class="orders-panel" id="ordersPanel">
-  <div class="orders-panel-header">
-    <div class="orders-panel-title">📦 My Orders</div>
-    <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
-  </div>
-  <div class="orders-panel-body">
-    <div id="orderHistoryList">
-      <div class="no-orders">
-        <div class="no-orders-icon">📭</div>
-        <p>No orders yet</p>
+    <div
+      class="orders-overlay"
+      id="ordersOverlay"
+      onclick="closeMyOrders()"
+    ></div>
+    <div class="orders-panel" id="ordersPanel">
+      <div class="orders-panel-header">
+        <div class="orders-panel-title">📦 My Orders</div>
+        <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
+      </div>
+      <div class="orders-panel-body">
+        <div id="orderHistoryList">
+          <div class="no-orders">
+            <div class="no-orders-icon">📭</div>
+            <p>No orders yet</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
     <!-- SUCCESS -->
     <div class="suc-overlay" id="sucOverlay">
       <div class="suc-box">
@@ -2697,9 +2890,6 @@
             Delivered to your doorstep in just 20–30 minutes.
           </div>
         </div>
-
-      
-      
 
         <!-- Nav Links -->
         <div
@@ -2946,9 +3136,12 @@
       let selectedProfileArea = "";
       function selectProfileArea(area) {
         selectedProfileArea = area;
-        document.getElementById("pAreaGrid").querySelectorAll(".profile-area-btn").forEach(function(b) {
-          b.classList.toggle("selected", b.dataset.area === area);
-        });
+        document
+          .getElementById("pAreaGrid")
+          .querySelectorAll(".profile-area-btn")
+          .forEach(function (b) {
+            b.classList.toggle("selected", b.dataset.area === area);
+          });
         // After select, collapse picker and show badge
         document.getElementById("pAreaPicker").classList.remove("open");
         document.getElementById("pAreaBadgeText").textContent = area;
@@ -2961,9 +3154,12 @@
       function loadProfileAreaUI(area) {
         if (!area) return;
         selectedProfileArea = area;
-        document.getElementById("pAreaGrid").querySelectorAll(".profile-area-btn").forEach(function(b) {
-          b.classList.toggle("selected", b.dataset.area === area);
-        });
+        document
+          .getElementById("pAreaGrid")
+          .querySelectorAll(".profile-area-btn")
+          .forEach(function (b) {
+            b.classList.toggle("selected", b.dataset.area === area);
+          });
         document.getElementById("pAreaBadgeText").textContent = area;
         document.getElementById("pAreaBadgeWrap").style.display = "block";
         document.getElementById("pAreaPicker").classList.remove("open");
@@ -2992,7 +3188,12 @@
           document.getElementById("pAddr").focus();
           return;
         }
-        currentUser = { phone: ph, name: nm, address: addr, area: selectedProfileArea };
+        currentUser = {
+          phone: ph,
+          name: nm,
+          address: addr,
+          area: selectedProfileArea,
+        };
         localStorage.setItem("sqm_user", JSON.stringify(currentUser));
         updateProfileUI();
         autoFillCheckout();
@@ -3000,6 +3201,8 @@
         // Auto close
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
+        document.body.style.overflow = "";
+        setOverlayFooterState(false);
       }
 
       function updateProfileUI() {
@@ -3033,10 +3236,17 @@
           document.getElementById("cAddr").value = currentUser.address;
         if (currentUser.area) {
           selectedCheckoutArea = currentUser.area;
-          document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) {
-            b.classList.toggle("selected", b.dataset.area === currentUser.area);
-          });
-          document.getElementById("chkAreaBadgeText").textContent = currentUser.area;
+          document
+            .getElementById("chk-area-grid")
+            .querySelectorAll(".area-btn")
+            .forEach(function (b) {
+              b.classList.toggle(
+                "selected",
+                b.dataset.area === currentUser.area,
+              );
+            });
+          document.getElementById("chkAreaBadgeText").textContent =
+            currentUser.area;
           document.getElementById("chkAreaBadgeWrap").style.display = "block";
           document.getElementById("chkAreaPicker").style.display = "none";
         }
@@ -3287,7 +3497,7 @@
             .map((p) => {
               const oos = p.active === false;
               const pclosed = window._productsClosed === true && !oos;
-              return `<div class="sr-item" style="${pclosed ? 'opacity:0.85;' : ''}"><div class="sr-img" style="position:relative;">${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `${p.emoji}`}</div><div style="flex:1"><div class="sr-name">${p.name}${oos ? ` <span style="color:#e74c3c;font-size:11px">(Out of Stock)</span>` : ""}${pclosed ? ` <span style="color:#e74c3c;font-size:11px;">(Closed)</span>` : ""}</div><div class="sr-unit">${p.unit}</div></div><div class="sr-price">₹${p.price}</div>${p.active !== false && !pclosed ? `<button class="sr-add" onclick="event.stopPropagation();addFromSearch(${p.id})">ADD</button>` : p.active !== false && pclosed ? `<button class="sr-add" style="background:#c0392b;cursor:not-allowed;" disabled></button>` : ""}</div>`;
+              return `<div class="sr-item" style="${pclosed ? "opacity:0.85;" : ""}"><div class="sr-img" style="position:relative;">${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `${p.emoji}`}</div><div style="flex:1"><div class="sr-name">${p.name}${oos ? ` <span style="color:#e74c3c;font-size:11px">(Out of Stock)</span>` : ""}${pclosed ? ` <span style="color:#e74c3c;font-size:11px;">(Closed)</span>` : ""}</div><div class="sr-unit">${p.unit}</div></div><div class="sr-price">₹${p.price}</div>${p.active !== false && !pclosed ? `<button class="sr-add" onclick="event.stopPropagation();addFromSearch(${p.id})">ADD</button>` : p.active !== false && pclosed ? `<button class="sr-add" style="background:#c0392b;cursor:not-allowed;" disabled></button>` : ""}</div>`;
             })
             .join("");
         }
@@ -3381,9 +3591,17 @@
         const oos = p.active === false;
         const pclosed = window._productsClosed === true && !oos;
         const imgWrap = `<div class="pc-img-wrap">${p.img ? `<img src="${p.img}" onerror="this.style.display='none';this.nextSibling.style.display='block'" alt="${p.name}"><span style="display:none;font-size:34px">${p.emoji}</span>` : `<span style="font-size:34px">${p.emoji}</span>`}</div>`;
-        const closedOverlayInner = pclosed ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;border-radius:14px;"><span style="background:rgba(180,0,0,0.78);color:#fff;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:7px 18px;border-radius:50px;box-shadow:0 2px 12px rgba(0,0,0,0.18);">Closed</span></div>` : "";
+        const closedOverlayInner = pclosed
+          ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;border-radius:14px;"><span style="background:rgba(180,0,0,0.78);color:#fff;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:7px 18px;border-radius:50px;box-shadow:0 2px 12px rgba(0,0,0,0.18);">Closed</span></div>`
+          : "";
         const cardStyle = `style="position:relative;"`;
-        const actionHTML = oos ? `<button class="oos-btn">Not Available</button>` : pclosed ? `<div class="pc-btns" style="pointer-events:none;opacity:0.5;"><button class="btn-add">+ Add</button><button class="btn-order">⚡ Order</button></div>` : qty > 0 ? `<div class="qty-ctrl"><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},-1)">−</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},1)">+</button></div>` : `<div class="pc-btns"><button class="btn-add" onclick="event.stopPropagation();addToCart(${p.id})">+ Add</button><button class="btn-order" onclick="event.stopPropagation();quickOrder(${p.id})">⚡ Order</button></div>`;
+        const actionHTML = oos
+          ? `<button class="oos-btn">Not Available</button>`
+          : pclosed
+            ? `<div class="pc-btns" style="pointer-events:none;opacity:0.5;"><button class="btn-add">+ Add</button><button class="btn-order">⚡ Order</button></div>`
+            : qty > 0
+              ? `<div class="qty-ctrl"><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},-1)">−</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},1)">+</button></div>`
+              : `<div class="pc-btns"><button class="btn-add" onclick="event.stopPropagation();addToCart(${p.id})">+ Add</button><button class="btn-order" onclick="event.stopPropagation();quickOrder(${p.id})">⚡ Order</button></div>`;
         return `<div ${cardStyle}>${oos ? `<div class="oos-badge">Out of Stock</div>` : ""}${closedOverlayInner}${imgWrap}<div class="pc-time">🕐 20–30 mins</div><div class="pc-name">${p.name}</div><div class="pc-unit">${p.unit}</div><div class="pc-price">₹${p.price}</div><div id="act-${p.id}">${actionHTML}</div></div>`;
       }
 
@@ -3610,26 +3828,26 @@
       }
 
       // My order
-     function openMyOrders() {
-  closeCart();
-  if (!currentUser.phone) {
-    openProfile();
-    showToast("⚠️ Please login first!");
-    return;
-  }
-  document.getElementById("ordersOverlay").classList.add("open");
-  document.getElementById("ordersPanel").classList.add("open");
-  loadOrderHistory(currentUser.phone);
-}
+      function openMyOrders() {
+        closeCart();
+        if (!currentUser.phone) {
+          openProfile();
+          showToast("⚠️ Please login first!");
+          return;
+        }
+        document.getElementById("ordersOverlay").classList.add("open");
+        document.getElementById("ordersPanel").classList.add("open");
+        loadOrderHistory(currentUser.phone);
+      }
 
-function closeMyOrders() {
-  document.getElementById("ordersOverlay").classList.remove("open");
-  document.getElementById("ordersPanel").classList.remove("open");
-  if (orderHistoryUnsub) {
-    orderHistoryUnsub();
-    orderHistoryUnsub = null;
-  }
-}
+      function closeMyOrders() {
+        document.getElementById("ordersOverlay").classList.remove("open");
+        document.getElementById("ordersPanel").classList.remove("open");
+        if (orderHistoryUnsub) {
+          orderHistoryUnsub();
+          orderHistoryUnsub = null;
+        }
+      }
       function openCart() {
         document.getElementById("cOverlay").classList.add("open");
         document.getElementById("cSidebar").classList.add("open");
@@ -3696,9 +3914,12 @@ function closeMyOrders() {
       let selectedCheckoutArea = "";
       function selectAreaChk(area) {
         selectedCheckoutArea = area;
-        document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) {
-          b.classList.toggle("selected", b.dataset.area === area);
-        });
+        document
+          .getElementById("chk-area-grid")
+          .querySelectorAll(".area-btn")
+          .forEach(function (b) {
+            b.classList.toggle("selected", b.dataset.area === area);
+          });
         // Collapse picker, show badge
         document.getElementById("chkAreaPicker").style.display = "none";
         document.getElementById("chkAreaBadgeText").textContent = area;
@@ -3713,15 +3934,17 @@ function closeMyOrders() {
         const noRes = document.getElementById(noResultId);
         if (!grid) return;
         const q = query.trim().toLowerCase();
-        const btns = grid.querySelectorAll('.area-btn');
+        const btns = grid.querySelectorAll(".area-btn");
         let visible = 0;
-        btns.forEach(function(btn) {
-          const name = btn.getAttribute('data-area') || '';
-          const match = q === '' || name.toLowerCase().includes(q);
-          btn.style.display = match ? '' : 'none';
+        btns.forEach(function (btn) {
+          const name = btn.getAttribute("data-area") || "";
+          const match = q === "" || name.toLowerCase().includes(q);
+          btn.style.display = match ? "" : "none";
           if (match) visible++;
         });
-        if (noRes) noRes.style.display = (visible === 0 && q.length > 0) ? 'block' : 'none';
+        if (noRes)
+          noRes.style.display =
+            visible === 0 && q.length > 0 ? "block" : "none";
       }
       async function placeOrder() {
         if (!isOpen()) {
@@ -3803,7 +4026,12 @@ function closeMyOrders() {
         document.getElementById("cPin").className = "fi";
         // Reset area then re-apply saved user area
         selectedCheckoutArea = "";
-        document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) { b.classList.remove("selected"); });
+        document
+          .getElementById("chk-area-grid")
+          .querySelectorAll(".area-btn")
+          .forEach(function (b) {
+            b.classList.remove("selected");
+          });
         document.getElementById("chk-area-search").value = "";
         filterAreaSearch("chk-area-grid", "chk-area-no-result", "");
         document.getElementById("chkAreaBadgeWrap").style.display = "none";
@@ -3833,14 +4061,72 @@ function closeMyOrders() {
     </script>
 
     <!-- PRODUCTS CLOSED POPUP -->
-    <div id="productsClosedOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:800;align-items:center;justify-content:center;">
-      <div style="background:#fff;border-radius:20px;padding:36px 28px;max-width:320px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-        <div style="font-size:52px;margin-bottom:10px;">🔒</div>
-        <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:#c0392b;margin-bottom:8px;">Website Closed</div>
-        <div style="font-size:14px;color:#666;line-height:1.6;margin-bottom:20px;">We are temporarily closed right now.<br>Please check back soon! 🙏</div>
-        <button onclick="document.getElementById('productsClosedOverlay').style.display='none';" style="background:#c0392b;color:#fff;border:none;border-radius:12px;padding:12px 28px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:700;cursor:pointer;width:100%;">OK, Got It!</button>
+    <div
+      id="productsClosedOverlay"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 800;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          border-radius: 20px;
+          padding: 36px 28px;
+          max-width: 320px;
+          width: 90%;
+          text-align: center;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        "
+      >
+        <div style="font-size: 52px; margin-bottom: 10px">🔒</div>
+        <div
+          style="
+            font-family: &quot;Baloo 2&quot;, cursive;
+            font-size: 22px;
+            font-weight: 800;
+            color: #c0392b;
+            margin-bottom: 8px;
+          "
+        >
+          Website Closed
+        </div>
+        <div
+          style="
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+          "
+        >
+          We are temporarily closed right now.<br />Please check back soon! 🙏
+        </div>
+        <button
+          onclick="
+            document.getElementById('productsClosedOverlay').style.display =
+              'none'
+          "
+          style="
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-family: &quot;Baloo 2&quot;, cursive;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+          "
+        >
+          OK, Got It!
+        </button>
       </div>
     </div>
-
   </body>
 </html>
