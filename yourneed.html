@@ -58,9 +58,16 @@
         if (snap.exists()) {
           const areas = snap.data().list || [];
           if (areas.length > 0) {
-            document.dispatchEvent(
-              new CustomEvent("ynAreasUpdated", { detail: areas }),
-            );
+            window._latestYnAreas = areas;
+            // Direct call if regular script already loaded
+            if (typeof window.applyAreasToGrids === "function") {
+              window.applyAreasToGrids(areas);
+            } else {
+              // Fallback event for late-loading
+              document.dispatchEvent(
+                new CustomEvent("ynAreasUpdated", { detail: areas }),
+              );
+            }
           }
         }
       });
@@ -2976,10 +2983,18 @@ _Please confirm charge & timing._`;
         });
       }
 
-      // When areas arrive from Firebase (page load + admin update) — apply them
+      // Expose globally so module script can call directly
+      window.applyAreasToGrids = applyAreasToGrids;
+
+      // When areas arrive from Firebase via event fallback
       document.addEventListener("ynAreasUpdated", function (e) {
         applyAreasToGrids(e.detail);
       });
+
+      // If Firebase already fired before this script loaded, apply cached areas now
+      if (window._latestYnAreas && window._latestYnAreas.length > 0) {
+        applyAreasToGrids(window._latestYnAreas);
+      }
     </script>
   </body>
 </html>

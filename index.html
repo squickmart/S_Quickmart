@@ -177,6 +177,18 @@
           popup.style.display = window._productsClosed ? "flex" : "none";
       });
 
+      // add code
+
+      // ── AREAS REAL-TIME LISTENER ──────────────────────────────
+      onSnapshot(doc(db, "store", "yourneed_areas"), (snap) => {
+        if (!snap.exists()) return;
+        const areas = snap.data().list || [];
+        if (areas.length > 0) {
+          window._ynAreas = areas;
+          window.applyAreasToCheckout && window.applyAreasToCheckout(areas);
+        }
+      });
+
       window.applyStoreStatus = function () {
         const manualClosed = window._storeOpen === false;
         const timeClosed = !isOpen();
@@ -2456,92 +2468,7 @@
               <div class="area-no-result" id="chk-area-no-result">
                 😕 No area found
               </div>
-              <div class="area-grid" id="chk-area-grid">
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Parbhani Main')"
-                  data-area="Parbhani Main"
-                >
-                  <span class="area-dot"></span>Parbhani Main
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Ganesh Nagar')"
-                  data-area="Ganesh Nagar"
-                >
-                  <span class="area-dot"></span>Ganesh Nagar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Shivaji Nagar')"
-                  data-area="Shivaji Nagar"
-                >
-                  <span class="area-dot"></span>Shivaji Nagar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Padmapura')"
-                  data-area="Padmapura"
-                >
-                  <span class="area-dot"></span>Padmapura
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Bhagyanagar')"
-                  data-area="Bhagyanagar"
-                >
-                  <span class="area-dot"></span>Bhagyanagar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Vasant Nagar')"
-                  data-area="Vasant Nagar"
-                >
-                  <span class="area-dot"></span>Vasant Nagar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Sadar Bazar')"
-                  data-area="Sadar Bazar"
-                >
-                  <span class="area-dot"></span>Sadar Bazar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Railway Station')"
-                  data-area="Railway Station"
-                >
-                  <span class="area-dot"></span>Railway Station
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Anand Nagar')"
-                  data-area="Anand Nagar"
-                >
-                  <span class="area-dot"></span>Anand Nagar
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Camp Area')"
-                  data-area="Camp Area"
-                >
-                  <span class="area-dot"></span>Camp Area
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Jintur Road')"
-                  data-area="Jintur Road"
-                >
-                  <span class="area-dot"></span>Jintur Road
-                </div>
-                <div
-                  class="area-btn"
-                  onclick="selectAreaChk('Other')"
-                  data-area="Other"
-                >
-                  <span class="area-dot"></span>Other Area
-                </div>
-              </div>
+              <div class="area-grid" id="chk-area-grid"></div>
             </div>
             <label class="fl">Delivery Address *</label
             ><textarea
@@ -2679,92 +2606,7 @@
               </button>
             </div>
             <div class="profile-area-picker open" id="pAreaPicker">
-              <div class="profile-area-grid" id="pAreaGrid">
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Parbhani Main')"
-                  data-area="Parbhani Main"
-                >
-                  <span class="area-dot"></span>Parbhani Main
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Ganesh Nagar')"
-                  data-area="Ganesh Nagar"
-                >
-                  <span class="area-dot"></span>Ganesh Nagar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Shivaji Nagar')"
-                  data-area="Shivaji Nagar"
-                >
-                  <span class="area-dot"></span>Shivaji Nagar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Padmapura')"
-                  data-area="Padmapura"
-                >
-                  <span class="area-dot"></span>Padmapura
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Bhagyanagar')"
-                  data-area="Bhagyanagar"
-                >
-                  <span class="area-dot"></span>Bhagyanagar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Vasant Nagar')"
-                  data-area="Vasant Nagar"
-                >
-                  <span class="area-dot"></span>Vasant Nagar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Sadar Bazar')"
-                  data-area="Sadar Bazar"
-                >
-                  <span class="area-dot"></span>Sadar Bazar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Railway Station')"
-                  data-area="Railway Station"
-                >
-                  <span class="area-dot"></span>Railway Station
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Anand Nagar')"
-                  data-area="Anand Nagar"
-                >
-                  <span class="area-dot"></span>Anand Nagar
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Camp Area')"
-                  data-area="Camp Area"
-                >
-                  <span class="area-dot"></span>Camp Area
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Jintur Road')"
-                  data-area="Jintur Road"
-                >
-                  <span class="area-dot"></span>Jintur Road
-                </div>
-                <div
-                  class="profile-area-btn"
-                  onclick="selectProfileArea('Other')"
-                  data-area="Other"
-                >
-                  <span class="area-dot"></span>Other Area
-                </div>
-              </div>
+              <div class="profile-area-grid" id="pAreaGrid"></div>
             </div>
           </div>
           <button class="save-profile-btn" onclick="saveProfile()">
@@ -3201,8 +3043,6 @@
         // Auto close
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
-        document.body.style.overflow = "";
-        setOverlayFooterState(false);
       }
 
       function updateProfileUI() {
@@ -3910,6 +3750,79 @@
           inp.className = "fi invalid";
         }
       }
+
+      window.applyAreasToCheckout = function (areas) {
+        // Checkout area grid rebuild
+        const chkGrid = document.getElementById("chk-area-grid");
+        if (chkGrid) {
+          const prevSel = selectedCheckoutArea;
+          chkGrid.innerHTML = areas
+            .map(function (a) {
+              const na = !a.available;
+              return (
+                '<div class="area-btn' +
+                (na ? " area-na" : "") +
+                '" data-area="' +
+                a.name +
+                '" ' +
+                (na
+                  ? 'style="opacity:1.5;pointer-events:none;border-color:#f10505;background:#fff5f5;color:#000;position:relative;"'
+                  : "onclick=\"selectAreaChk('" +
+                    a.name.replace(/'/g, "\\'") +
+                    "')\"") +
+                ">" +
+                '<span class="area-dot"></span>' +
+                a.name +
+                (na
+                  ? '<span style="position:absolute;bottom:2px;right:6px;font-size:9px;font-weight:800;color:#b91c1c;">🚫 N/A</span>'
+                  : "") +
+                "</div>"
+              );
+            })
+            .join("");
+          // Agar selected area ab available nahi, toh reset karo
+          if (prevSel) {
+            const btn = chkGrid.querySelector(
+              '.area-btn[data-area="' + prevSel + '"]:not(.area-na)',
+            );
+            if (!btn) {
+              selectedCheckoutArea = "";
+              const badgeWrap = document.getElementById("chkAreaBadgeWrap");
+              const picker = document.getElementById("chkAreaPicker");
+              if (badgeWrap) badgeWrap.style.display = "none";
+              if (picker) picker.style.display = "block";
+            }
+          }
+        }
+        // Profile area grid rebuild
+        const pGrid = document.getElementById("pAreaGrid");
+        if (pGrid) {
+          pGrid.innerHTML = areas
+            .map(function (a) {
+              const na = !a.available;
+              return (
+                '<div class="profile-area-btn' +
+                (na ? " area-na" : "") +
+                '" data-area="' +
+                a.name +
+                '" ' +
+                (na
+                  ? 'style="opacity:1.5;pointer-events:none;border-color:#f10505;background:#fff5f5;color:#625252;"'
+                  : "onclick=\"selectProfileArea('" +
+                    a.name.replace(/'/g, "\\'") +
+                    "')\"") +
+                ">" +
+                '<span class="area-dot"></span>' +
+                a.name +
+                (na
+                  ? '<span style="font-size:9px;font-weight:800;color:#b91c1c;margin-left:4px;">🚫 N/A</span>'
+                  : "") +
+                "</div>"
+              );
+            })
+            .join("");
+        }
+      };
 
       let selectedCheckoutArea = "";
       function selectAreaChk(area) {
