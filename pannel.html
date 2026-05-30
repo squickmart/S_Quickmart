@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S_Quick Mart — Admin Panel</title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta name="robots" content="noindex, nofollow" />
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -180,14 +182,41 @@
         try {
           await setDoc(doc(db, "store", "yourneed_areas"), { list: areas });
           return true;
-        } catch (e) { return false; }
+        } catch (e) {
+          return false;
+        }
       };
 
       window.fbLoadAreas = async () => {
         try {
           const s = await getDoc(doc(db, "store", "yourneed_areas"));
           return s.exists() ? s.data().list || [] : [];
-        } catch (e) { return []; }
+        } catch (e) {
+          return [];
+        }
+      };
+
+      // ── DELIVERY BOYS ─────────────────────────────────────────
+      window.fbSaveBoys = async (boys) => {
+        try {
+          await setDoc(doc(db, "store", "delivery_boys"), { list: boys });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbLoadBoys = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "delivery_boys"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbWatchBoys = (cb) => {
+        return onSnapshot(doc(db, "store", "delivery_boys"), (snap) => {
+          cb(snap.exists() ? snap.data().list || [] : []);
+        });
       };
 
       onSnapshot(doc(db, "store", "status"), (snap) => {
@@ -328,7 +357,15 @@
         color: var(--pr);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+      }
+      .admin-logo img {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #fff;
+        padding: 4px;
       }
       .admin-badge {
         background: var(--pr);
@@ -696,9 +733,6 @@
       .toggle-lbl.on {
         color: var(--green);
       }
-      .toggle-lbl.off {
-        color: var(--danger);
-      }
       .search-bar {
         display: flex;
         gap: 8px;
@@ -999,68 +1033,111 @@
       }
       /* AREA CARD */
       .area-admin-card {
-        background:#fff;border:1.5px solid #eee;border-radius:12px;
-        padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;
-        transition:.2s;
+        background: #fff;
+        border: 1.5px solid #eee;
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        transition: 0.2s;
       }
-      .area-admin-card.unavailable { background:#fff5f5;border-color:#fecaca; }
-      .area-admin-name { font-size:14px;font-weight:600;color:var(--text);flex:1; }
+      .area-admin-card.unavailable {
+        background: #fff5f5;
+        border-color: #fecaca;
+      }
+      .area-admin-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        flex: 1;
+      }
       .area-admin-badge {
-        font-size:11px;font-weight:700;padding:3px 9px;border-radius:50px;white-space:nowrap;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 50px;
+        white-space: nowrap;
       }
-      .area-admin-badge.avail { background:#d1fae5;color:#065f46; }
-      .area-admin-badge.unavail { background:#fee2e2;color:#991b1b; }
-      .area-admin-actions { display:flex;gap:6px;align-items:center; }
+      .area-admin-badge.avail {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .area-admin-badge.unavail {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .area-admin-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
       .section-divider {
         border: none;
         border-top: 2px solid var(--bg);
         margin: 16px 0;
       }
 
-      .oc-details { 
-  display: none; 
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #f0f0f0;
-  animation: slideDown 0.25s ease;
-}
-.oc-details.open { display: block; }
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.oc-toggle { 
-  background: #f5f5f5; 
-  border: none; 
-  border-radius: 50%;
-  width: 28px; height: 28px;
-  font-size: 12px;
-  cursor: pointer; 
-  color: #666;
-  transition: transform 0.3s, background 0.2s;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.oc-toggle.open { 
-  transform: rotate(180deg); 
-  background: #e8f4f5;
-  color: var(--pr);
-}
-.mini-copy {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 10px;
-  color: #333;
-}
-.mini-copy:active { background: #ddd; }
+      .oc-details {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        animation: slideDown 0.25s ease;
+      }
+      .oc-details.open {
+        display: block;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .oc-toggle {
+        background: #f5f5f5;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        cursor: pointer;
+        color: #666;
+        transition:
+          transform 0.3s,
+          background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .oc-toggle.open {
+        transform: rotate(180deg);
+        background: #e8f4f5;
+        color: var(--pr);
+      }
+      .mini-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+        color: #333;
+      }
+      .mini-copy:active {
+        background: #ddd;
+      }
       /* REVENUE FILTER */
       .rev-filters {
         display: flex;
@@ -1075,8 +1152,8 @@
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
-        border: 1.5px solid rgba(255,255,255,0.35);
-        background: rgba(255,255,255,0.12);
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.12);
         color: #fff;
         transition: 0.2s;
         font-family: "Inter", sans-serif;
@@ -1091,10 +1168,12 @@
         display: none;
         justify-content: center;
       }
-      .rev-date-input.show { display: flex; }
+      .rev-date-input.show {
+        display: flex;
+      }
       .rev-date-input input {
-        background: rgba(255,255,255,0.15);
-        border: 1.5px solid rgba(255,255,255,0.35);
+        background: rgba(255, 255, 255, 0.15);
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
         border-radius: 10px;
         padding: 7px 14px;
         color: #fff;
@@ -1102,7 +1181,9 @@
         font-family: "Inter", sans-serif;
         outline: none;
       }
-      .rev-date-input input::-webkit-calendar-picker-indicator { filter: invert(1); }
+      .rev-date-input input::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+      }
     </style>
   </head>
   <body>
@@ -1134,7 +1215,8 @@
     <div class="admin-screen" id="adminScreen">
       <div class="admin-header">
         <div class="admin-logo">
-          🛒 S_Quick Mart <span class="admin-badge">ADMIN</span>
+          <img src="SLOGO.png" alt="QuickMart Logo" onerror="this.style.display='none'" />
+          S_Quick Mart <span class="admin-badge">ADMIN</span>
         </div>
         <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
       </div>
@@ -1157,8 +1239,9 @@
         <div class="admin-tab" onclick="switchTab('yourneed', this)">
           🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
         </div>
-        <div class="admin-tab" onclick="switchTab('areas', this)">
-          🗺️ Areas
+        <div class="admin-tab" onclick="switchTab('areas', this)">🗺️ Areas</div>
+        <div class="admin-tab" onclick="switchTab('boys', this)">
+          🏍️ Delivery Boys
         </div>
       </div>
       <div class="admin-content">
@@ -1190,7 +1273,7 @@
           </div>
           <div id="ordersContainer">
             <div class="no-orders-admin">
-              <p>⏳ Orders load ho rahe hain...</p>
+              <p>⏳ Orders are loading...</p>
             </div>
           </div>
         </div>
@@ -1202,14 +1285,31 @@
             <div class="rev-num" id="todayRevenue">₹0</div>
             <div class="rev-sub" id="todayOrderCount">0 orders</div>
             <div class="rev-filters">
-              <div class="rev-chip active" onclick="setRevFilter('today', this)">Today</div>
-              <div class="rev-chip" onclick="setRevFilter('yesterday', this)">Yesterday</div>
-              <div class="rev-chip" onclick="setRevFilter('week', this)">This Week</div>
-              <div class="rev-chip" onclick="setRevFilter('month', this)">This Month</div>
-              <div class="rev-chip" onclick="setRevFilter('custom', this)">📅 Date</div>
+              <div
+                class="rev-chip active"
+                onclick="setRevFilter('today', this)"
+              >
+                Today
+              </div>
+              <div class="rev-chip" onclick="setRevFilter('yesterday', this)">
+                Yesterday
+              </div>
+              <div class="rev-chip" onclick="setRevFilter('week', this)">
+                This Week
+              </div>
+              <div class="rev-chip" onclick="setRevFilter('month', this)">
+                This Month
+              </div>
+              <div class="rev-chip" onclick="setRevFilter('custom', this)">
+                📅 Date
+              </div>
             </div>
             <div class="rev-date-input" id="revDatePicker">
-              <input type="date" id="customDateInput" onchange="updateDashboardStats()" />
+              <input
+                type="date"
+                id="customDateInput"
+                onchange="updateDashboardStats()"
+              />
             </div>
           </div>
 
@@ -1258,17 +1358,109 @@
             </div>
           </div>
 
-          <div class="admin-card" style="margin-top:14px;">
+          <div class="admin-card" style="margin-top: 14px">
             <div class="admin-card-title">📍 Area Wise Orders</div>
-            <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">Selected period ke orders — area ke hisaab se</div>
-            <div style="display:flex; gap:12px; margin-bottom:10px; flex-wrap:wrap;">
-              <span style="font-size:11px; display:flex; align-items:center; gap:4px;"><span style="background:#e8f7f0; color:#1a9e5c; border-radius:50px; padding:2px 8px; font-weight:700;">✅ N</span> Delivered</span>
-              <span style="font-size:11px; display:flex; align-items:center; gap:4px;"><span style="background:#fff3ec; color:#ff6b00; border-radius:50px; padding:2px 8px; font-weight:700;">⏳ N</span> Pending</span>
-              <span style="font-size:11px; display:flex; align-items:center; gap:4px;"><span style="background:#fff0f0; color:#e53935; border-radius:50px; padding:2px 8px; font-weight:700;">❌ N</span> Cancelled</span>
-              <span style="font-size:11px; display:flex; align-items:center; gap:4px;"><span style="background:#e8f4f5; color:var(--pr); border-radius:50px; padding:2px 8px; font-weight:700;">₹</span> Revenue</span>
+            <div
+              style="font-size: 12px; color: var(--muted); margin-bottom: 12px"
+            >
+              Orders for selected period — by area
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                margin-bottom: 10px;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                style="
+                  font-size: 11px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+                ><span
+                  style="
+                    background: #e8f7f0;
+                    color: #1a9e5c;
+                    border-radius: 50px;
+                    padding: 2px 8px;
+                    font-weight: 700;
+                  "
+                  >✅ N</span
+                >
+                Delivered</span
+              >
+              <span
+                style="
+                  font-size: 11px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+                ><span
+                  style="
+                    background: #fff3ec;
+                    color: #ff6b00;
+                    border-radius: 50px;
+                    padding: 2px 8px;
+                    font-weight: 700;
+                  "
+                  >⏳ N</span
+                >
+                Pending</span
+              >
+              <span
+                style="
+                  font-size: 11px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+                ><span
+                  style="
+                    background: #fff0f0;
+                    color: #e53935;
+                    border-radius: 50px;
+                    padding: 2px 8px;
+                    font-weight: 700;
+                  "
+                  >❌ N</span
+                >
+                Cancelled</span
+              >
+              <span
+                style="
+                  font-size: 11px;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                "
+                ><span
+                  style="
+                    background: #e8f4f5;
+                    color: var(--pr);
+                    border-radius: 50px;
+                    padding: 2px 8px;
+                    font-weight: 700;
+                  "
+                  >₹</span
+                >
+                Revenue</span
+              >
             </div>
             <div id="areaStatsContainer">
-              <p style="text-align:center;color:#aaa;padding:16px;font-size:13px;">Loading...</p>
+              <p
+                style="
+                  text-align: center;
+                  color: #aaa;
+                  padding: 16px;
+                  font-size: 13px;
+                "
+              >
+                Loading...
+              </p>
             </div>
           </div>
 
@@ -1380,6 +1572,20 @@
 
         <!-- ── PRODUCTS TAB ── -->
         <div class="tab-panel" id="tab-products">
+          <!-- CLOSED MODE CARD -->
+          <div class="admin-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="productsClosedIcon" style="font-size:20px;">🔓</span>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:var(--dark);">Products Closed Mode</div>
+                <div id="productsClosedSub" style="font-size:12px;color:var(--muted);margin-top:1px;">OFF — Customers can order normally</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button id="productsClosedButton" class="btn-primary" onclick="toggleProductsClosed(!window._storeStatus?.productsClosed)">OFF</button>
+            </div>
+          </div>
+
           <div class="admin-card">
             <div class="admin-card-title">
               📦 All Products
@@ -1407,13 +1613,6 @@
               >
                 <option value="all">All</option>
               </select>
-              <button
-                class="btn-primary"
-                onclick="toggleAllProducts()"
-                style="white-space: nowrap"
-              >
-                Toggle All ON/OFF
-              </button>
             </div>
             <div style="overflow-x: auto">
               <table class="product-table">
@@ -1504,10 +1703,10 @@
                   class="img-tab active"
                   onclick="switchImgTab('url', 'new')"
                 >
-                  🔗 URL se
+                  🔗 From URL
                 </div>
                 <div class="img-tab" onclick="switchImgTab('file', 'new')">
-                  📁 File se
+                  📁 From File
                 </div>
               </div>
               <div class="img-panel active" id="new-url-panel">
@@ -1626,7 +1825,7 @@
           </div>
           <div id="yourNeedContainer">
             <div class="no-orders-admin">
-              <p>⏳ YourNeed requests load ho rahe hain...</p>
+              <p>⏳ Loading YourNeed requests...</p>
             </div>
           </div>
         </div>
@@ -1635,21 +1834,128 @@
         <div class="tab-panel" id="tab-areas">
           <div class="admin-card">
             <div class="admin-card-title">🗺️ Manage YourNeed Areas</div>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
-              Areas add/remove karo. Kisi area ko <strong>Not Available</strong> karne ke liye toggle off karo — woh yourneed page pe blur dikhega aur select nahi hoga.
+            <p
+              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
+            >
+              Add or remove areas here. Toggle off an area to mark
+              <strong>Not Available</strong> — it will appear blurred on the
+              YourNeed page and cannot be selected.
             </p>
 
             <!-- Add new area row -->
-            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-              <input type="text" id="newAreaName" class="form-input" placeholder="New area name (e.g. Sailu Road)" style="flex:1;min-width:160px;" onkeydown="if(event.key==='Enter')addArea()"/>
-              <button class="btn-primary" onclick="addArea()">＋ Add Area</button>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+              "
+            >
+              <input
+                type="text"
+                id="newAreaName"
+                class="form-input"
+                placeholder="New area name (e.g. Sailu Road)"
+                style="flex: 1; min-width: 160px"
+                onkeydown="if (event.key === 'Enter') addArea();"
+              />
+              <button class="btn-primary" onclick="addArea()">
+                ＋ Add Area
+              </button>
             </div>
 
-            <div id="areasList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-              <div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:20px;">⏳ Loading areas...</div>
+            <div
+              id="areasList"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"
+            >
+              <div
+                style="
+                  text-align: center;
+                  color: var(--muted);
+                  grid-column: 1/-1;
+                  padding: 20px;
+                "
+              >
+                ⏳ Loading areas...
+              </div>
             </div>
 
-            <button class="btn-primary" style="margin-top:16px;width:100%;" onclick="saveAreas()">💾 Save All Areas</button>
+            <button
+              class="btn-primary"
+              style="margin-top: 16px; width: 100%"
+              onclick="saveAreas()"
+            >
+              💾 Save All Areas
+            </button>
+          </div>
+        </div>
+
+        <!-- ── DELIVERY BOYS TAB ── -->
+        <div class="tab-panel" id="tab-boys">
+          <div class="admin-card">
+            <div class="admin-card-title">🏍️ Delivery Boys Management</div>
+            <p
+              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
+            >
+              Add delivery boys — they will log in with their phone number in
+              miniadmin. Each boy's today and total delivered counts are shown
+              here.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+              "
+            >
+              <input
+                type="text"
+                id="newBoyName"
+                class="form-input"
+                placeholder="Delivery boy name (e.g. Rahul)"
+                style="flex: 1; min-width: 140px"
+                onkeydown="if (event.key === 'Enter') addBoy();"
+              />
+              <input
+                type="tel"
+                id="newBoyPhone"
+                class="form-input"
+                placeholder="10-digit phone"
+                style="width: 160px"
+                onkeydown="if (event.key === 'Enter') addBoy();"
+              />
+              <button class="btn-primary" onclick="addBoy()">➕ Add Boy</button>
+            </div>
+            <div
+              id="boysListAdmin"
+              style="display: flex; flex-direction: column; gap: 10px"
+            >
+              <p style="text-align: center; color: var(--muted); padding: 20px">
+                ⏳ Loading...
+              </p>
+            </div>
+            <button
+              class="btn-primary"
+              style="margin-top: 16px; width: 100%"
+              onclick="saveBoys()"
+            >
+              💾 Save Changes
+            </button>
+          </div>
+
+          <div class="admin-card" style="margin-top: 14px">
+            <div class="admin-card-title">📊 Delivery Performance</div>
+            <div
+              style="font-size: 12px; color: var(--muted); margin-bottom: 12px"
+            >
+              Today's and total delivered orders — by each delivery boy
+            </div>
+            <div id="boysStatsContainer">
+              <p style="text-align: center; color: var(--muted); padding: 20px">
+                ⏳ Loading stats...
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -1699,10 +2005,10 @@
           <label class="form-label">📷 Product Image</label>
           <div class="img-upload-tabs">
             <div class="img-tab active" onclick="switchImgTab('url', 'edit')">
-              🔗 URL se
+              🔗 From URL
             </div>
             <div class="img-tab" onclick="switchImgTab('file', 'edit')">
-              📁 File se
+              📁 From File
             </div>
           </div>
           <div class="img-panel active" id="edit-url-panel">
@@ -1790,7 +2096,7 @@
         errEl.style.display = "none";
 
         if (!email || !pass) {
-          errEl.textContent = "❌ Email aur password dono bharein!";
+          errEl.textContent = "❌ Please fill both email and password!";
           errEl.style.display = "block";
           return;
         }
@@ -1799,9 +2105,9 @@
         if (!result.success) {
           let msg = "❌ Wrong email or password!";
           if (result.code === "auth/too-many-requests")
-            msg = "❌ Bahut zyada attempts! Thodi der baad try karo.";
+            msg = "❌ Too many attempts! Please try again later.";
           else if (result.code === "auth/invalid-email")
-            msg = "❌ Email sahi format mein dalo!";
+            msg = "❌ Please enter a valid email!";
           errEl.textContent = msg;
           errEl.style.display = "block";
         }
@@ -1852,6 +2158,7 @@
           renderOrders();
           updateDashboardStats();
           updateOrderBadge();
+          renderBoysStats();
         });
 
         // Live YourNeed listener
@@ -1875,12 +2182,27 @@
         } else {
           // Default areas seed
           ynAreas = [
-            "Parbhani Main","Ganesh Nagar","Shivaji Nagar","Padmapura",
-            "Bhagyanagar","Vasant Nagar","Sadar Bazar","Railway Station",
-            "Anand Nagar","Camp Area","Jintur Road","Other"
-          ].map(n => ({ name: n, available: true }));
+            "Parbhani Main",
+            "Ganesh Nagar",
+            "Shivaji Nagar",
+            "Padmapura",
+            "Bhagyanagar",
+            "Vasant Nagar",
+            "Sadar Bazar",
+            "Railway Station",
+            "Anand Nagar",
+            "Camp Area",
+            "Jintur Road",
+            "Other",
+          ].map((n) => ({ name: n, available: true }));
         }
         renderAreasList();
+
+        // Load delivery boys
+        const savedBoys = await window.fbLoadBoys();
+        deliveryBoys = savedBoys;
+        renderBoysAdmin();
+        renderBoysStats();
       }
       const defaultCategories = [
         {
@@ -1952,6 +2274,7 @@
         ynFilter = "all",
         unsubYN = null;
       let ynAreas = [];
+      let deliveryBoys = [];
       let storeIsOpen = true;
 
       function switchTab(id, btn) {
@@ -2172,22 +2495,54 @@
                   minute: "2-digit",
                 })
               : "";
+            const getOrderItemImage = (item) => {
+              if (!item) return "";
+              return (
+                item.img || item.image || item.photo || item.productImage || ""
+              );
+            };
+            const findProductImage = (item) => {
+              if (!item || !item.name) return "";
+              const prod = products.find(
+                (p) =>
+                  (p.id !== undefined && p.id === item.id) ||
+                  (p.name &&
+                    item.name &&
+                    p.name.toLowerCase() === item.name.toLowerCase()),
+              );
+              return prod ? prod.img || prod.image || prod.photo || "" : "";
+            };
+            const firstItem = o.items && o.items.length ? o.items[0] : null;
+            const orderImage = firstItem
+              ? getOrderItemImage(firstItem) || findProductImage(firstItem)
+              : "";
+            const orderImageBox = orderImage
+              ? `<img src="${orderImage}" style="width:56px;height:56px;object-fit:cover;display:block;" onerror="this.parentNode.innerHTML='<div style=\'width:56px;height:56px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:14px;font-size:24px;\'>' + (${firstItem && firstItem.emoji ? JSON.stringify(firstItem.emoji) : "🛒"}) + '</div>'">`
+              : `<div style="width:56px;height:56px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:14px;font-size:24px;">${firstItem && firstItem.emoji ? firstItem.emoji : "🛒"}</div>`;
             const itemsList = o.items
               ? o.items
                   .map(
-                    (i) =>
-                      `${i.emoji || "📦"} ${i.name} (${i.unit}) ×${i.qty} = ₹${i.price * i.qty}`,
+                    (i) => `
+                    <div style="margin-bottom:6px; font-size:12px; color:#333;">
+                      <strong>${i.name}</strong><br>
+                      <span style="color:#666;">${i.unit} ×${i.qty} = ₹${(i.price || 0) * i.qty}</span>
+                    </div>`,
                   )
-                  .join("<br>")
+                  .join("")
               : "";
 
             return `<div class="order-card ${status === "pending" ? "new-order" : ""}">
 
   <!-- TOP: ID + Status + Arrow -->
   <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleOrder('${o.id}')">
-    <div>
-      <div class="oc-id">🔖 #${o.id.slice(-6).toUpperCase()}</div>
-      <div class="oc-time">⏰ ${dt}</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex-shrink:0;">
+        ${orderImageBox}
+      </div>
+      <div>
+        <div class="oc-id">🔖 #${o.id.slice(-6).toUpperCase()}</div>
+        <div class="oc-time">⏰ ${dt}</div>
+      </div>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
       <span class="order-status-badge s-${status}">${statusMap[status] || status}</span>
@@ -2195,7 +2550,7 @@
     </div>
   </div>
 
-  <!-- SUMMARY: Hamesha dikh raha -->
+  <!-- SUMMARY: Always visible -->
   <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid #f5f5f5;">
     <div style="font-size:13px; line-height:1.6;">
       <strong>👤 ${o.name || "-"}</strong><br/>
@@ -2214,7 +2569,7 @@
     <button class="mini-copy" onclick="copyOrderDetails('${o.id}')">📋 Copy</button>
   </div>
 
-  <!-- BUTTONS: Hamesha neeche dikhenge -->
+  <!-- BUTTONS: Always shown below -->
   <div class="oc-footer" style="margin-top:10px; padding-top:10px; border-top:1px solid #f0f0f0;">
     <div class="oc-actions">
       ${status === "pending" ? `<button class="oc-btn btn-confirm" onclick="updateStatus('${o.id}','confirmed')">✅ Confirm</button>` : ""}
@@ -2226,13 +2581,10 @@
   </div>
 
 </div>`;
-
-   })
+          })
           .join("");
       }
 
-           
-       
       function toggleOrder(id) {
         const details = document.getElementById("details-" + id);
         const arrow = document.getElementById("arrow-" + id);
@@ -2277,15 +2629,17 @@ ${items}
       }
 
       function sendWA(phone, name, status) {
+        const locationNote =
+          "\n\n📍 Please share your live location on WhatsApp";
         const msgs = {
           confirmed: `Hello ${name}! 🎉 Your order has been confirmed! We will deliver it soon. — S_Quick Mart`,
-          out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart`,
-          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart`,
-          cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 7058204462 — S_Quick Mart`,
+          out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart${locationNote}`,
+          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart${locationNote}`,
+          cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 7058204462 — S_Quick Mart${locationNote}`,
         };
         const msg =
           msgs[status] ||
-          `Hello ${name}! Your order update: ${status}. — S_Quick Mart`;
+          `Hello ${name}! Your order update: ${status}. — S_Quick Mart${locationNote}`;
         window.open(
           `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
           "_blank",
@@ -2297,20 +2651,29 @@ ${items}
 
       function setRevFilter(filter, btn) {
         currentRevFilter = filter;
-        document.querySelectorAll(".rev-chip").forEach(c => c.classList.remove("active"));
+        document
+          .querySelectorAll(".rev-chip")
+          .forEach((c) => c.classList.remove("active"));
         btn.classList.add("active");
         const picker = document.getElementById("revDatePicker");
         if (filter === "custom") {
           picker.classList.add("show");
           if (!document.getElementById("customDateInput").value) {
-            document.getElementById("customDateInput").value =
-              new Date().toISOString().split("T")[0];
+            document.getElementById("customDateInput").value = new Date()
+              .toISOString()
+              .split("T")[0];
           }
         } else {
           picker.classList.remove("show");
         }
         // Update Parcels label
-        const labels = { today:"Parcels Today", yesterday:"Parcels Yesterday", week:"Parcels This Week", month:"Parcels This Month", custom:"Parcels" };
+        const labels = {
+          today: "Parcels Today",
+          yesterday: "Parcels Yesterday",
+          week: "Parcels This Week",
+          month: "Parcels This Month",
+          custom: "Parcels",
+        };
         const lbl = document.getElementById("labelParcels");
         if (lbl) lbl.textContent = labels[filter] || "Parcels";
         updateDashboardStats();
@@ -2318,30 +2681,43 @@ ${items}
 
       function getRevFilteredOrders() {
         const now = new Date();
-        let from, to = new Date();
+        let from,
+          to = new Date();
         if (currentRevFilter === "today") {
-          from = new Date(); from.setHours(0,0,0,0);
-          document.getElementById("revTitle").textContent = "Today's Revenue 💰";
+          from = new Date();
+          from.setHours(0, 0, 0, 0);
+          document.getElementById("revTitle").textContent =
+            "Today's Revenue 💰";
         } else if (currentRevFilter === "yesterday") {
-          from = new Date(); from.setDate(from.getDate()-1); from.setHours(0,0,0,0);
-          to = new Date(); to.setHours(0,0,0,0);
-          document.getElementById("revTitle").textContent = "Yesterday's Revenue 💰";
+          from = new Date();
+          from.setDate(from.getDate() - 1);
+          from.setHours(0, 0, 0, 0);
+          to = new Date();
+          to.setHours(0, 0, 0, 0);
+          document.getElementById("revTitle").textContent =
+            "Yesterday's Revenue 💰";
         } else if (currentRevFilter === "week") {
-          from = new Date(); from.setDate(from.getDate()-7); from.setHours(0,0,0,0);
-          document.getElementById("revTitle").textContent = "This Week's Revenue 💰";
+          from = new Date();
+          from.setDate(from.getDate() - 7);
+          from.setHours(0, 0, 0, 0);
+          document.getElementById("revTitle").textContent =
+            "This Week's Revenue 💰";
         } else if (currentRevFilter === "month") {
           from = new Date(now.getFullYear(), now.getMonth(), 1);
-          document.getElementById("revTitle").textContent = "This Month's Revenue 💰";
+          document.getElementById("revTitle").textContent =
+            "This Month's Revenue 💰";
         } else if (currentRevFilter === "custom") {
           const val = document.getElementById("customDateInput").value;
           if (!val) return [];
-          from = new Date(val); from.setHours(0,0,0,0);
-          to = new Date(val); to.setHours(23,59,59,999);
+          from = new Date(val);
+          from.setHours(0, 0, 0, 0);
+          to = new Date(val);
+          to.setHours(23, 59, 59, 999);
           const d = new Date(val);
           document.getElementById("revTitle").textContent =
-            `${d.getDate()} ${d.toLocaleString("en",{month:"short"})} Revenue 💰`;
+            `${d.getDate()} ${d.toLocaleString("en", { month: "short" })} Revenue 💰`;
         }
-        return allOrders.filter(o => {
+        return allOrders.filter((o) => {
           if (!o.createdAt) return false;
           const t = new Date(o.createdAt.seconds * 1000);
           return t >= from && t <= to;
@@ -2354,25 +2730,43 @@ ${items}
         const con = document.getElementById("areaStatsContainer");
         if (!con) return;
         if (!orders.length) {
-          con.innerHTML = '<p style="text-align:center;color:#aaa;padding:16px;font-size:13px;">No orders in this period</p>';
+          con.innerHTML =
+            '<p style="text-align:center;color:#aaa;padding:16px;font-size:13px;">No orders in this period</p>';
           return;
         }
 
         // Group by area field (new) or address (old)
         const areaMap = {};
-        orders.forEach(o => {
-          const key = o.area || (o.address ? (o.address.substring(0,20) + (o.address.length > 20 ? "..." : "")) : "Unknown");
-          if (!areaMap[key]) areaMap[key] = { total:0, delivered:0, cancelled:0, pending:0, revenue:0, orders:[] };
+        orders.forEach((o) => {
+          const key =
+            o.area ||
+            (o.address
+              ? o.address.substring(0, 20) +
+                (o.address.length > 20 ? "..." : "")
+              : "Unknown");
+          if (!areaMap[key])
+            areaMap[key] = {
+              total: 0,
+              delivered: 0,
+              cancelled: 0,
+              pending: 0,
+              revenue: 0,
+              orders: [],
+            };
           areaMap[key].total++;
           areaMap[key].orders.push(o);
-          if (["delivered","out_for_delivery"].includes(o.status)) areaMap[key].delivered++;
+          if (["delivered", "out_for_delivery"].includes(o.status))
+            areaMap[key].delivered++;
           if (o.status === "cancelled") areaMap[key].cancelled++;
           if (!o.status || o.status === "pending") areaMap[key].pending++;
-          if (["delivered","out_for_delivery","confirmed"].includes(o.status)) areaMap[key].revenue += o.total || 0;
+          if (["delivered", "out_for_delivery", "confirmed"].includes(o.status))
+            areaMap[key].revenue += o.total || 0;
         });
         _areaOrdersData = areaMap;
 
-        const sorted = Object.entries(areaMap).sort((a,b) => b[1].total - a[1].total);
+        const sorted = Object.entries(areaMap).sort(
+          (a, b) => b[1].total - a[1].total,
+        );
 
         con.innerHTML = `
           <!-- Search -->
@@ -2396,8 +2790,10 @@ ${items}
       }
 
       function renderAreaRows(sorted) {
-        return sorted.map(([area, d]) => `
-          <div onclick="showAreaOrders('${area.replace(/'/g,"\\'")}') " style="display:flex; align-items:center; justify-content:space-between; padding:12px 8px; border-bottom:1px solid #f0f0f0; cursor:pointer; border-radius:8px; transition:0.15s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'" class="area-stat-row" data-area="${area}">
+        return sorted
+          .map(
+            ([area, d]) => `
+          <div onclick="showAreaOrders('${area.replace(/'/g, "\\'")}') " style="display:flex; align-items:center; justify-content:space-between; padding:12px 8px; border-bottom:1px solid #f0f0f0; cursor:pointer; border-radius:8px; transition:0.15s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='none'" class="area-stat-row" data-area="${area}">
             <div style="font-size:13px; font-weight:600; color:var(--dark); flex:1;">📍 ${area}</div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span style="background:#e8f7f0; color:#1a9e5c; border-radius:50px; padding:3px 9px; font-size:11px; font-weight:700;">✅ ${d.delivered}</span>
@@ -2407,14 +2803,17 @@ ${items}
               <span style="color:#aaa; font-size:16px;">›</span>
             </div>
           </div>
-        `).join("");
+        `,
+          )
+          .join("");
       }
 
       function filterAreaStats(query) {
         const sorted = Object.entries(_areaOrdersData)
           .filter(([area]) => area.toLowerCase().includes(query.toLowerCase()))
-          .sort((a,b) => b[1].total - a[1].total);
-        document.getElementById("areaStatsList").innerHTML = renderAreaRows(sorted);
+          .sort((a, b) => b[1].total - a[1].total);
+        document.getElementById("areaStatsList").innerHTML =
+          renderAreaRows(sorted);
         closeAreaOrders();
       }
 
@@ -2422,13 +2821,16 @@ ${items}
         const data = _areaOrdersData[area];
         if (!data) return;
         const modal = document.getElementById("areaOrdersModal");
-        document.getElementById("areaModalTitle").textContent = `📍 ${area} — ${data.total} orders`;
+        document.getElementById("areaModalTitle").textContent =
+          `📍 ${area} — ${data.total} orders`;
         modal.style.display = "block";
-        document.getElementById("areaOrdersList").innerHTML = data.orders.map(o => `
+        document.getElementById("areaOrdersList").innerHTML = data.orders
+          .map(
+            (o) => `
           <div style="background:#fff; border-radius:10px; padding:12px; margin-bottom:8px; box-shadow:0 1px 6px rgba(0,0,0,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <div style="font-size:13px; font-weight:700; color:var(--dark);">👤 ${o.name || "-"}</div>
-              <span style="font-size:11px; font-weight:700; padding:3px 9px; border-radius:50px; background:${o.status==='delivered'?'#e8f7f0':o.status==='cancelled'?'#fff0f0':o.status==='pending'?'#fff3ec':'#e8f4f5'}; color:${o.status==='delivered'?'#1a9e5c':o.status==='cancelled'?'#e53935':o.status==='pending'?'#ff6b00':'var(--pr)'};">
+              <span style="font-size:11px; font-weight:700; padding:3px 9px; border-radius:50px; background:${o.status === "delivered" ? "#e8f7f0" : o.status === "cancelled" ? "#fff0f0" : o.status === "pending" ? "#fff3ec" : "#e8f4f5"}; color:${o.status === "delivered" ? "#1a9e5c" : o.status === "cancelled" ? "#e53935" : o.status === "pending" ? "#ff6b00" : "var(--pr)"};">
                 ${o.status || "pending"}
               </span>
             </div>
@@ -2436,7 +2838,9 @@ ${items}
             <div style="font-size:12px; color:#555; margin-bottom:3px;">🏠 ${o.address || "-"}</div>
             <div style="font-size:12px; font-weight:700; color:var(--pr);">💰 ₹${o.total || 0}</div>
           </div>
-        `).join("");
+        `,
+          )
+          .join("");
       }
 
       function closeAreaOrders() {
@@ -2450,7 +2854,9 @@ ${items}
 
         // Revenue
         const filteredRev = filteredOrders
-          .filter(o => ["delivered","out_for_delivery","confirmed"].includes(o.status))
+          .filter((o) =>
+            ["delivered", "out_for_delivery", "confirmed"].includes(o.status),
+          )
           .reduce((s, o) => s + o.total, 0);
         document.getElementById("todayRevenue").textContent = "₹" + filteredRev;
         document.getElementById("todayOrderCount").textContent =
@@ -2458,22 +2864,28 @@ ${items}
 
         // All stat cards — filtered
         document.getElementById("statParcelsToday").textContent =
-          filteredOrders.filter(o => ["delivered","out_for_delivery"].includes(o.status)).length;
+          filteredOrders.filter((o) =>
+            ["delivered", "out_for_delivery"].includes(o.status),
+          ).length;
         document.getElementById("statDeliveredTotal").textContent =
-          filteredOrders.filter(o => o.status === "delivered").length;
+          filteredOrders.filter((o) => o.status === "delivered").length;
         document.getElementById("statPending").textContent =
-          filteredOrders.filter(o => !o.status || o.status === "pending").length;
+          filteredOrders.filter(
+            (o) => !o.status || o.status === "pending",
+          ).length;
         document.getElementById("statConfirmed").textContent =
-          filteredOrders.filter(o => o.status === "confirmed").length;
-        document.getElementById("statOTD").textContent =
-          filteredOrders.filter(o => o.status === "out_for_delivery").length;
+          filteredOrders.filter((o) => o.status === "confirmed").length;
+        document.getElementById("statOTD").textContent = filteredOrders.filter(
+          (o) => o.status === "out_for_delivery",
+        ).length;
         document.getElementById("statCancelled").textContent =
-          filteredOrders.filter(o => o.status === "cancelled").length;
+          filteredOrders.filter((o) => o.status === "cancelled").length;
         document.getElementById("statTotalOrders").textContent =
           filteredOrders.length;
         document.getElementById("statTotalRevenue").textContent =
-          "₹" + filteredOrders
-            .filter(o => o.status === "delivered")
+          "₹" +
+          filteredOrders
+            .filter((o) => o.status === "delivered")
             .reduce((s, o) => s + o.total, 0);
 
         // Area wise stats
@@ -2888,7 +3300,7 @@ ${items}
                 ${status === "pending" ? `<button class="oc-btn btn-cancel-o" onclick="ynReject('${r.id}')">❌ Reject</button>` : ""}
                 ${status === "confirmed" ? `<button class="oc-btn btn-otd" onclick="ynSend('${r.id}')">🛵 Send</button>` : ""}
                 ${status === "out_for_delivery" ? `<button class="oc-btn btn-delivered" onclick="ynDone('${r.id}')">🎉 Done</button>` : ""}
-                <button class="oc-btn btn-wa" onclick="ynWA('${r.phone}','${r.name}','${status}')">📲 WA</button>
+                <button class="oc-btn btn-wa" onclick="ynWA('${r.phone}','${r.name}','${status}')">📲</button>
               </div>
             </div>
           </div>`;
@@ -2897,38 +3309,32 @@ ${items}
       }
 
       async function ynAccept(id) {
-        const note = prompt("Add a note for customer (optional):", "") || "";
-        const ok = await window.fbUpdateYourNeed(id, "confirmed", note);
+        const ok = await window.fbUpdateYourNeed(id, "confirmed", "");
         showToast(ok ? "✅ Request Confirmed!" : "❌ Failed!");
       }
 
       async function ynReject(id) {
-        const note = prompt("Reason for rejection (optional):", "") || "";
-        const ok = await window.fbUpdateYourNeed(id, "rejected", note);
+        const ok = await window.fbUpdateYourNeed(id, "rejected", "");
         showToast(ok ? "❌ Request Rejected" : "❌ Failed!");
       }
 
       async function ynSend(id) {
-        const note =
-          prompt('Optional note to customer (e.g. "Driver assigned")', "") ||
-          "";
-        const ok = await window.fbUpdateYourNeed(id, "out_for_delivery", note);
+        const ok = await window.fbUpdateYourNeed(id, "out_for_delivery", "");
         showToast(ok ? "🛵 Request marked Sent!" : "❌ Failed!");
       }
 
       async function ynDone(id) {
-        const note = prompt("Delivery note (optional):", "") || "";
-        const ok = await window.fbUpdateYourNeed(id, "delivered", note);
+        const ok = await window.fbUpdateYourNeed(id, "delivered", "");
         showToast(ok ? "🎉 Request marked Done!" : "❌ Failed!");
       }
 
       function ynWA(phone, name, status) {
         const msgs = {
-          confirmed: `Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart`,
-          out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
+          confirmed: `Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart \n\n📍 Please share your live location on WhatsApp`,
+          out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart \n\n📍 Please share your live location on WhatsApp`,
           delivered: `Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
-          rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart`,
-          pending: `Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart`,
+          rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart \n\n📍 Please share your live location on WhatsApp if you need assistance.`,
+          pending: `Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart\n\n📍 Please share your live location on WhatsApp`,
         };
         const msg =
           msgs[status] ||
@@ -2944,21 +3350,26 @@ ${items}
         const el = document.getElementById("areasList");
         if (!el) return;
         if (!ynAreas.length) {
-          el.innerHTML = '<div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:20px;">No areas yet. Add one above!</div>';
+          el.innerHTML =
+            '<div style="text-align:center;color:var(--muted);grid-column:1/-1;padding:20px;">No areas yet. Add one above!</div>';
           return;
         }
-        el.innerHTML = ynAreas.map((a, i) => `
-          <div class="area-admin-card ${a.available ? '' : 'unavailable'}">
+        el.innerHTML = ynAreas
+          .map(
+            (a, i) => `
+          <div class="area-admin-card ${a.available ? "" : "unavailable"}">
             <span class="area-admin-name">📍 ${a.name}</span>
             <div class="area-admin-actions">
-              <span class="area-admin-badge ${a.available ? 'avail' : 'unavail'}">${a.available ? '✅ Available' : '🚫 Not Available'}</span>
+              <span class="area-admin-badge ${a.available ? "avail" : "unavail"}">${a.available ? "✅ Available" : "🚫 Not Available"}</span>
               <label class="toggle" title="Toggle availability">
-                <input type="checkbox" ${a.available ? 'checked' : ''} onchange="toggleAreaAvail(${i}, this.checked)">
+                <input type="checkbox" ${a.available ? "checked" : ""} onchange="toggleAreaAvail(${i}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
               <button class="btn-danger" onclick="deleteArea(${i})" style="padding:5px 10px;font-size:12px;">🗑️</button>
             </div>
-          </div>`).join('');
+          </div>`,
+          )
+          .join("");
       }
 
       function toggleAreaAvail(i, val) {
@@ -2969,14 +3380,18 @@ ${items}
       function addArea() {
         const inp = document.getElementById("newAreaName");
         const name = inp.value.trim();
-        if (!name) { showToast("❌ Area name likhna padega!"); return; }
-        if (ynAreas.find(a => a.name.toLowerCase() === name.toLowerCase())) {
-          showToast("❌ Yeh area already hai!"); return;
+        if (!name) {
+          showToast("❌ Please enter an area name!");
+          return;
+        }
+        if (ynAreas.find((a) => a.name.toLowerCase() === name.toLowerCase())) {
+          showToast("❌ This area already exists!");
+          return;
         }
         ynAreas.push({ name, available: true });
         inp.value = "";
         renderAreasList();
-        showToast(`✅ "${name}" added! Save karna mat bhulo.`);
+        showToast(`✅ "${name}" added! Don't forget to save.`);
       }
 
       function deleteArea(i) {
@@ -2987,8 +3402,178 @@ ${items}
 
       async function saveAreas() {
         const ok = await window.fbSaveAreas(ynAreas);
-        showToast(ok ? "✅ Areas saved! Yourneed page pe live ho gaya." : "❌ Save failed!");
+        showToast(
+          ok
+            ? "✅ Areas saved! Live on the YourNeed page."
+            : "❌ Save failed!",
+        );
       }
+
+      // ── DELIVERY BOYS ─────────────────────────────────────────────
+      function renderBoysAdmin() {
+        const el = document.getElementById("boysListAdmin");
+        if (!el) return;
+        if (!deliveryBoys.length) {
+          el.innerHTML =
+            '<p style="text-align:center;color:var(--muted);padding:20px;">No delivery boys found. Add one above.</p>';
+          return;
+        }
+        el.innerHTML = deliveryBoys
+          .map(
+            (b, i) => `
+          <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border:1.5px solid #eee;border-radius:12px;padding:12px 14px;flex-wrap:wrap;">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;">${(b.name || "?")[0].toUpperCase()}</div>
+            <div style="flex:1;min-width:120px;">
+              <div style="font-weight:700;font-size:14px;">${b.name || "—"}</div>
+              <div style="font-size:12px;color:var(--muted);">📞 ${b.phone || "—"}</div>
+            </div>
+            <label class="toggle" title="Active/Inactive">
+              <input type="checkbox" ${b.active !== false ? "checked" : ""} onchange="deliveryBoys[${i}].active=this.checked;renderBoysAdmin();">
+              <span class="toggle-slider"></span>
+            </label>
+            <button class="btn-danger" onclick="deleteBoy(${i})" style="padding:6px 12px;font-size:12px;border-radius:8px;">🗑️</button>
+          </div>`,
+          )
+          .join("");
+      }
+
+      function renderBoysStats() {
+        const el = document.getElementById("boysStatsContainer");
+        if (!el) return;
+        if (!deliveryBoys.length) {
+          el.innerHTML =
+            '<p style="text-align:center;color:var(--muted);padding:16px;">No delivery boys.</p>';
+          return;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+        const delivered = allOrders.filter(
+          (o) => o.status === "delivered" && o.deliveredBy,
+        );
+        el.innerHTML = deliveryBoys
+          .map((b) => {
+            const byBoy = delivered.filter((o) => o.deliveredBy === b.phone);
+            const todayCount = byBoy.filter((o) => {
+              const ts = o.deliveredAt || o.createdAt;
+              if (!ts) return false;
+              const d = new Date((ts.seconds || ts._seconds) * 1000);
+              return d >= today && d <= todayEnd;
+            }).length;
+            const totalCount = byBoy.length;
+            return `
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1.5px solid #eee;border-radius:12px;background:#fff;margin-bottom:10px;flex-wrap:wrap;">
+              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;">${(b.name || "?")[0].toUpperCase()}</div>
+              <div style="flex:1;min-width:100px;">
+                <div style="font-weight:700;font-size:14px;color:#1a1a2e;">${b.name}</div>
+                <div style="font-size:12px;color:var(--muted);">📞 ${b.phone}</div>
+              </div>
+              <div style="text-align:center;background:#fff3ec;border-radius:10px;padding:8px 14px;min-width:70px;">
+                <div style="font-size:22px;font-weight:800;color:var(--pr);font-family:'Baloo 2',cursive;">${todayCount}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">Today</div>
+              </div>
+              <div style="text-align:center;background:#e8f7f0;border-radius:10px;padding:8px 14px;min-width:70px;">
+                <div style="font-size:22px;font-weight:800;color:#1a9e5c;font-family:'Baloo 2',cursive;">${totalCount}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">Total</div>
+              </div>
+              <div style="width:100%;margin-top:6px;display:${todayCount > 0 ? "block" : "none"}">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;">Today's orders:</div>
+                ${byBoy
+                  .filter((o) => {
+                    const ts = o.deliveredAt || o.createdAt;
+                    if (!ts) return false;
+                    const d = new Date((ts.seconds || ts._seconds) * 1000);
+                    return d >= today && d <= todayEnd;
+                  })
+                  .map(
+                    (o) => `
+                  <div style="font-size:12px;background:#f8f9fa;border-radius:8px;padding:5px 10px;margin-bottom:4px;display:flex;justify-content:space-between;">
+                    <span>#${o.id.slice(-6).toUpperCase()} — ${o.name || "—"}</span>
+                    <span style="color:#1a9e5c;font-weight:700;">₹${o.total || 0}</span>
+                  </div>`,
+                  )
+                  .join("")}
+              </div>
+            </div>`;
+          })
+          .join("");
+      }
+
+      function addBoy() {
+        const name = document.getElementById("newBoyName").value.trim();
+        const phone = document.getElementById("newBoyPhone").value.trim();
+        if (!name) {
+          showToast("❌ Please enter the delivery boy's name!");
+          return;
+        }
+        if (phone.length !== 10 || isNaN(phone)) {
+          showToast("❌ A 10-digit phone number is required!");
+          return;
+        }
+        if (deliveryBoys.find((b) => b.phone === phone)) {
+          showToast("❌ This number is already registered!");
+          return;
+        }
+        deliveryBoys.push({ name, phone, active: true });
+        document.getElementById("newBoyName").value = "";
+        document.getElementById("newBoyPhone").value = "";
+        renderBoysAdmin();
+        renderBoysStats();
+        showToast(`✅ ${name} has been added! Don't forget to save.`);
+      }
+
+      function deleteBoy(i) {
+        if (
+          !confirm(
+            `Delete "${deliveryBoys[i].name}" (${deliveryBoys[i].phone})?`,
+          )
+        )
+          return;
+        deliveryBoys.splice(i, 1);
+        renderBoysAdmin();
+        renderBoysStats();
+      }
+
+      async function saveBoys() {
+        const ok = await window.fbSaveBoys(deliveryBoys);
+        showToast(
+          ok
+            ? "✅ Boys saved! They can now log in via miniadmin."
+            : "❌ Save failed!",
+        );
+      }
+
+      // ── PRODUCTS CLOSED MODE ──────────────────────────────────────────────
+      async function toggleProductsClosed(checked) {
+        applyProductsClosedUI({ ...(window._storeStatus || {}), productsClosed: checked });
+        const existing = window._storeStatus || {};
+        const newStatus = Object.assign({}, existing, { productsClosed: checked });
+        const ok = await window.fbSaveStoreStatus(newStatus);
+        if (ok && window._storeStatus) window._storeStatus.productsClosed = checked;
+        showToast(ok ? (checked ? "🔒 Products locked!" : "✅ Products unlocked!") : "❌ Save failed!");
+      }
+
+      function applyProductsClosedUI(data) {
+        const button = document.getElementById("productsClosedButton");
+        const sub = document.getElementById("productsClosedSub");
+        const icon = document.getElementById("productsClosedIcon");
+        if (!button) return;
+        const closed = data && data.productsClosed === true;
+        if (sub) sub.textContent = closed ? "ON — Products are locked for customers" : "OFF — Customers can order normally";
+        if (icon) icon.textContent = closed ? "🔒" : "🔓";
+        button.textContent = closed ? "ON" : "OFF";
+        button.style.background = closed ? "var(--danger)" : "#1bdf3e";
+      }
+
+      (function() {
+        let _val = undefined;
+        Object.defineProperty(window, "_storeStatus", {
+          get: function() { return _val; },
+          set: function(v) { _val = v; applyProductsClosedUI(v); },
+          configurable: true
+        });
+      })();
 
       // ── TOAST ─────────────────────────────────────────────────────
       let toastTmr = null;

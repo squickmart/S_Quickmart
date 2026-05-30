@@ -6,7 +6,17 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Your Need — SQuickMart Parbhani</title>
+
+    <title>
+      YourNeed — Custom Delivery & Pickup Drop | S_Quick Mart Parbhani
+    </title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta
+      name="description"
+      content="Koi bhi item jo store pe nahi — hum layenge! Custom item request ya Pickup & Drop service Parbhani mein. S_Quick Mart YourNeed."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://squickmart.com/yourneed.html" />
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
       import {
@@ -43,12 +53,14 @@
         }
       };
 
-      // Real-time areas listener — admin se save karo toh yahan turant update
+      // Real-time areas listener — when admin saves areas, update here immediately
       onSnapshot(doc(db, "store", "yourneed_areas"), (snap) => {
         if (snap.exists()) {
           const areas = snap.data().list || [];
           if (areas.length > 0) {
-            document.dispatchEvent(new CustomEvent("ynAreasUpdated", { detail: areas }));
+            document.dispatchEvent(
+              new CustomEvent("ynAreasUpdated", { detail: areas }),
+            );
           }
         }
       });
@@ -120,7 +132,7 @@
         align-items: center;
         justify-content: center;
         font-size: 17px;
-        
+
         flex-shrink: 0;
       }
       .logo-text .brand {
@@ -529,7 +541,9 @@
         box-sizing: border-box;
         transition: border-color 0.18s;
       }
-      .area-search-input:focus { border-color: var(--primary); }
+      .area-search-input:focus {
+        border-color: var(--primary);
+      }
       .area-no-result {
         text-align: center;
         color: var(--muted);
@@ -1097,13 +1111,14 @@
         font-size: 11px;
         color: rgba(255, 255, 255, 0.38);
       }
+
       .trust-contact {
         text-align: center;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.38);
+        width: 100%;
       }
       .trust-contact strong {
         color: var(--primary);
+        display: inline-block;
       }
 
       /* ── SUCCESS OVERLAY ── */
@@ -1232,7 +1247,6 @@
         background: var(--border);
       }
 
-
       .logo {
         display: flex;
         align-items: center;
@@ -1242,7 +1256,7 @@
       .logo-mark {
         width: 38px;
         height: 38px;
-        background: var(--primary);
+        background: none;
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -1270,16 +1284,16 @@
     <!-- HEADER -->
     <div class="header">
       <a class="logo" href="#">
-        <div class="logo-mark"> 
-            <img
-              src="icon&logo/S2.PNG"
-              alt="Logo"
-              onerror="
-                this.style.display = 'none';
-                this.parentNode.innerHTML = '🛒';
-              "
-            />
-          </div>
+        <div class="logo-mark">
+          <img
+            src="SLOGO.png"
+            alt="Logo"
+            onerror="
+              this.style.display = 'none';
+              this.parentNode.innerHTML = '🛒';
+            "
+          />
+        </div>
         <div class="logo-text">
           <div class="logo-brand">S_Quick Mart</div>
           <div class="tagline">Parbhani's Trusted Local Service</div>
@@ -1501,9 +1515,24 @@
               </div>
               <div class="area-search-wrap">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="area-search-input" id="cr-area-search" placeholder="Search area..." oninput="filterAreaSearch('cr-area-grid', 'cr-area-no-result', this.value)" autocomplete="off"/>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="cr-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'cr-area-grid',
+                      'cr-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
               </div>
-              <div class="area-no-result" id="cr-area-no-result">😕 No area found</div>
+              <div class="area-no-result" id="cr-area-no-result">
+                😕 No area found
+              </div>
               <div class="area-grid" id="cr-area-grid">
                 <div
                   class="area-btn"
@@ -1808,9 +1837,24 @@
               >
               <div class="area-search-wrap">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="area-search-input" id="pd-from-area-search" placeholder="Search area..." oninput="filterAreaSearch('pd-from-area-grid', 'pd-from-area-no-result', this.value)" autocomplete="off"/>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="pd-from-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'pd-from-area-grid',
+                      'pd-from-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
               </div>
-              <div class="area-no-result" id="pd-from-area-no-result">😕 No area found</div>
+              <div class="area-no-result" id="pd-from-area-no-result">
+                😕 No area found
+              </div>
               <div class="area-grid" id="pd-from-area-grid">
                 <div
                   class="area-btn"
@@ -1938,9 +1982,24 @@
               >
               <div class="area-search-wrap">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="area-search-input" id="pd-to-area-search" placeholder="Search area..." oninput="filterAreaSearch('pd-to-area-grid', 'pd-to-area-no-result', this.value)" autocomplete="off"/>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="pd-to-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'pd-to-area-grid',
+                      'pd-to-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
               </div>
-              <div class="area-no-result" id="pd-to-area-no-result">😕 No area found</div>
+              <div class="area-no-result" id="pd-to-area-no-result">
+                😕 No area found
+              </div>
               <div class="area-grid" id="pd-to-area-grid">
                 <div
                   class="area-btn"
@@ -2262,7 +2321,7 @@
           </div>
         </div>
         <div class="trust-contact">
-          Questions? WhatsApp us at <strong>7058204462</strong>
+          <strong>Welcome to S_Quick Mart</strong>
         </div>
       </div>
     </div>
@@ -2824,64 +2883,101 @@ _Please confirm charge & timing._`;
         const noRes = document.getElementById(noResultId);
         if (!grid) return;
         const q = query.trim().toLowerCase();
-        const btns = grid.querySelectorAll('.area-btn');
+        const btns = grid.querySelectorAll(".area-btn");
         let visible = 0;
-        btns.forEach(function(btn) {
-          const name = btn.getAttribute('data-area') || '';
-          const match = q === '' || name.toLowerCase().includes(q);
-          btn.style.display = match ? '' : 'none';
+        btns.forEach(function (btn) {
+          const name = btn.getAttribute("data-area") || "";
+          const match = q === "" || name.toLowerCase().includes(q);
+          btn.style.display = match ? "" : "none";
           if (match) visible++;
         });
-        if (noRes) noRes.style.display = (visible === 0 && q.length > 0) ? 'block' : 'none';
+        if (noRes)
+          noRes.style.display =
+            visible === 0 && q.length > 0 ? "block" : "none";
       }
 
       initItems();
 
       // ── FIREBASE AREAS REAL-TIME CONNECT ─────────────────────────
-      // Yeh function admin se save kiye areas ko yourneed page pe apply karta hai
+      // This function applies admin-saved areas to the YourNeed page
       function applyAreasToGrids(areas) {
         var grids = [
-          { id: 'cr-area-grid',       selFn: function(a){ selectArea('cr', a); } },
-          { id: 'pd-from-area-grid',  selFn: function(a){ selectAreaPD('from', a); } },
-          { id: 'pd-to-area-grid',    selFn: function(a){ selectAreaPD('to', a); } },
+          {
+            id: "cr-area-grid",
+            selFn: function (a) {
+              selectArea("cr", a);
+            },
+          },
+          {
+            id: "pd-from-area-grid",
+            selFn: function (a) {
+              selectAreaPD("from", a);
+            },
+          },
+          {
+            id: "pd-to-area-grid",
+            selFn: function (a) {
+              selectAreaPD("to", a);
+            },
+          },
         ];
-        grids.forEach(function(g) {
+        grids.forEach(function (g) {
           var grid = document.getElementById(g.id);
           if (!grid) return;
 
           // Remember current selection
-          var sel = grid.querySelector('.area-btn.selected');
-          var prevArea = sel ? sel.getAttribute('data-area') : null;
+          var sel = grid.querySelector(".area-btn.selected");
+          var prevArea = sel ? sel.getAttribute("data-area") : null;
 
           // Rebuild buttons
-          grid.innerHTML = areas.map(function(a) {
-            var na = !a.available;
-            return '<div class="area-btn' + (na ? ' area-na' : '') + '" data-area="' + a.name + '" ' +
-              (na ? 'style="opacity:1.5;pointer-events:none;border-color:#f10505;background:#fff5f5;color:#000000;position:relative;"' : '') + '>' +
-              '<span class="area-dot"></span>' + a.name +
-              (na ? '<span style="position:absolute;bottom:2px;right:6px;font-size:9px;font-weight:800;color:#b91c1c;">🚫 N/A</span>' : '') +
-              '</div>';
-          }).join('');
+          grid.innerHTML = areas
+            .map(function (a) {
+              var na = !a.available;
+              return (
+                '<div class="area-btn' +
+                (na ? " area-na" : "") +
+                '" data-area="' +
+                a.name +
+                '" ' +
+                (na
+                  ? 'style="opacity:1.5;pointer-events:none;border-color:#f10505;background:#fff5f5;color:#000000;position:relative;"'
+                  : "") +
+                ">" +
+                '<span class="area-dot"></span>' +
+                a.name +
+                (na
+                  ? '<span style="position:absolute;bottom:2px;right:6px;font-size:9px;font-weight:800;color:#b91c1c;">🚫 N/A</span>'
+                  : "") +
+                "</div>"
+              );
+            })
+            .join("");
 
           // Restore selection if still available
           if (prevArea) {
-            var btn = grid.querySelector('.area-btn[data-area="' + prevArea + '"]:not(.area-na)');
-            if (btn) btn.classList.add('selected');
+            var btn = grid.querySelector(
+              '.area-btn[data-area="' + prevArea + '"]:not(.area-na)',
+            );
+            if (btn) btn.classList.add("selected");
           }
 
           // Attach click listeners
-          grid.querySelectorAll('.area-btn:not(.area-na)').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-              grid.querySelectorAll('.area-btn').forEach(function(b){ b.classList.remove('selected'); });
-              btn.classList.add('selected');
-              g.selFn(btn.getAttribute('data-area'));
+          grid
+            .querySelectorAll(".area-btn:not(.area-na)")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                grid.querySelectorAll(".area-btn").forEach(function (b) {
+                  b.classList.remove("selected");
+                });
+                btn.classList.add("selected");
+                g.selFn(btn.getAttribute("data-area"));
+              });
             });
-          });
         });
       }
 
-      // Jab bhi Firebase se areas aaye (page load + admin change) — apply karo
-      document.addEventListener('ynAreasUpdated', function(e) {
+      // When areas arrive from Firebase (page load + admin update) — apply them
+      document.addEventListener("ynAreasUpdated", function (e) {
         applyAreasToGrids(e.detail);
       });
     </script>

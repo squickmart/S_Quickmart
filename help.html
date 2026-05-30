@@ -3,8 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>S_Quick Mart — Help & About</title>
-    <link rel="icon" type="image/png" href="S2.PNG">
+    <title>Help & About — S_Quick Mart Parbhani</title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta
+      name="description"
+      content="S_Quick Mart ke baare mein jaano — Parbhani ka fastest grocery delivery. FAQ, delivery policy, contact, aur How it Works."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://squickmart.com/help.html" />
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -61,7 +67,14 @@
         text-decoration: none;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+      }
+      .logo img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #fff;
       }
       .logo small {
         color: rgba(255, 255, 255, 0.55);
@@ -100,9 +113,21 @@
         right: -60px;
       }
       .hero-icon {
-        font-size: 46px;
-        margin-bottom: 10px;
-        display: block;
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.16);
+        /* box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); */
+      }
+      .hero-icon img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border-radius: 18%;
       }
       .hero-title {
         font-family: "Baloo 2", cursive;
@@ -492,6 +517,12 @@
         font-size: 24px;
         flex-shrink: 0;
         box-shadow: 0 4px 14px rgba(78, 205, 196, 0.35);
+        overflow: hidden;
+      }
+      .director-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
       .director-info {
         flex: 1;
@@ -633,15 +664,26 @@
   <body>
     <!-- HEADER -->
     <div class="header">
-      <a class="logo" href="index.html"
-        >🛒 S_Quick Mart <small>Parbhani</small></a
-      >
+      <a class="logo" href="index.html">
+        <img
+          src="SLOGO.png"
+          alt="S_Quick Mart logo"
+          onerror="this.style.display = 'none'"
+        />
+        🛒 S_Quick Mart <small>Parbhani</small>
+      </a>
       <a class="back-btn" href="index.html">← Shop</a>
     </div>
 
     <!-- HERO -->
     <div class="hero">
-      <span class="hero-icon">🛒</span>
+      <span class="hero-icon">
+        <img
+          src="BG.png"
+          alt="QuickMart logo"
+          onerror="this.style.display = 'none'"
+        />
+      </span>
       <div class="hero-title">Help & <span>About Us</span></div>
       <div class="hero-sub">
         Parbhani's fastest grocery delivery — order from home in minutes!
@@ -936,12 +978,11 @@
           </div>
         </div> -->
         <div class="faq-item" onclick="toggleFaq(this)">
-          <div class="faq-q">
-            Wrong Item? <span class="faq-arrow">▼</span>
-          </div>
+          <div class="faq-q">Wrong Item? <span class="faq-arrow">▼</span></div>
           <div class="faq-a">
-            
-            Please open and verify your order in front of the delivery partner before they leave. Once the delivery partner has left, returns and replacements will not be accepted under any circumstances.
+            Please open and verify your order in front of the delivery partner
+            before they leave. Once the delivery partner has left, returns and
+            replacements will not be accepted under any circumstances.
           </div>
         </div>
         <div class="faq-item" onclick="toggleFaq(this)">
@@ -1051,7 +1092,13 @@
 
         <!-- Director Card -->
         <div class="director-card">
-          <div class="director-avatar">👤</div>
+          <div class="director-avatar">
+            <img
+              src="BG.png"
+              alt="Director logo"
+              onerror="this.style.display = 'none'"
+            />
+          </div>
           <div class="director-info">
             <div class="director-title">Director — S_Quick Mart</div>
             <div class="director-name">Mr. Shaikh Azeem</div>
@@ -1156,14 +1203,22 @@
           <div class="policy-item">
             <div class="policy-dot"></div>
             <div class="policy-text">
-              <strong>Wrong Item:</strong> Check your items immediately when the delivery partner is at your door. If anything is wrong, inform the delivery partner on the spot — returns are only accepted at the time of delivery, not after.
+              <strong>Wrong Item:</strong> Check your items immediately when the
+              delivery partner is at your door. If anything is wrong, inform the
+              delivery partner on the spot — returns are only accepted at the
+              time of delivery, not after.
             </div>
           </div>
-         
+
           <div class="policy-item">
             <div class="policy-dot"></div>
             <div class="policy-text">
-              <strong>Please Note:</strong> S_Quick Mart processes every order carefully before dispatch. Since we deliver fresh groceries and daily essentials, we do not accept cancellations once the order is placed — as items are packed and dispatched quickly. We request you to review your cart carefully before placing your order. Thank you for understanding! 🙏
+              <strong>Please Note:</strong> S_Quick Mart processes every order
+              carefully before dispatch. Since we deliver fresh groceries and
+              daily essentials, we do not accept cancellations once the order is
+              placed — as items are packed and dispatched quickly. We request
+              you to review your cart carefully before placing your order. Thank
+              you for understanding! 🙏
             </div>
           </div>
           <div class="policy-item">
@@ -1179,7 +1234,7 @@
 
     <!-- FOOTER -->
     <div class="footer">
-      © 2025 S_Quick Mart, Parbhani &nbsp;|&nbsp;
+      © 2026 S_Quick Mart, Parbhani &nbsp;|&nbsp;
       <a href="index.html">Shop</a> &nbsp;|&nbsp;
       <a href="yourneed.html">YourNeed</a> &nbsp;|&nbsp;
       <a href="https://wa.me/917249148205">WhatsApp</a>

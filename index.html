@@ -3,49 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>S_Quick Mart — Grocery Delivery in Parbhani</title>
+    <title>S_Quick Mart — Grocery Delivery in Parbhani | 20-30 Min</title>
     <link rel="icon" type="image/png" href="S2.PNG" />
-    <!-- SEO Meta Tags -->
-    <meta
-      name="description"
-      content="S_Quick Mart — Parbhani ki sabse fast grocery delivery. Groceries, daily essentials aur bahut kuch 20-30 minutes mein doorstep pe. Order now!"
-    />
-    <meta
-      name="description"
-      content="Order groceries online in Parbhani. Fresh groceries & daily essentials delivered to your doorstep in just 20-30 minutes. Cash on Delivery available. Order now!"
-    />
-    <meta
-      name="keywords"
-      content="grocery delivery Parbhani, S Quick Mart, online grocery Parbhani, daily essentials Parbhani, fast delivery Parbhani, ghar baithe grocery, Parbhani online store"
-    />
-    <meta name="author" content="S_Quick Mart" />
-    <meta name="robots" content="index, follow" />
+<!-- Primary SEO -->
+<meta name="description" content="S_Quick Mart — Parbhani ka sabse fast grocery delivery service. Groceries, daily essentials 20-30 minutes mein ghar pe. Cash on Delivery available. Order karo abhi!" />
+<meta name="keywords" content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart,Quick Mart,QuickMart, fast delivery Parbhani, ghar pe grocery Parbhani, 431401 grocery" />
+<meta name="author" content="S_Quick Mart, Parbhani" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://squickmart.com/" />
 
-    <meta
-      name="keywords"
-      content="
-      grocery delivery Parbhani,
-      online grocery Parbhani,
-      fast delivery Parbhani,
-      ghar baithe grocery Parbhani,
-      daily essentials Parbhani,
-      sabzi delivery Parbhani,
-      milk delivery Parbhani,
-      atta dal chawal delivery Parbhani,
-      grocery home delivery Parbhani,
-      Parbhani online store,
-      Parbhani grocery shop,
-      quick delivery Parbhani,
-      20 minute delivery Parbhani,
-      cash on delivery grocery Parbhani,
-      Parbhani ki grocery,
-      Pedgaon grocery delivery,
-      Dharmapuri grocery delivery,
-      431401 grocery delivery,
-      instant grocery Parbhani,
-      S Quick Mart Parbhani
-      "
-    />
+<!-- Open Graph (WhatsApp, Facebook preview) -->
+<meta property="og:title" content="S_Quick Mart — Grocery Delivery in Parbhani" />
+<meta property="og:description" content="Parbhani ka sabse fast grocery delivery. 20-30 minutes mein doorstep pe. Cash on Delivery." />
+<meta property="og:url" content="https://squickmart.com/" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_IN" />
+
+<!-- Local Business Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "S_Quick Mart",
+  "description": "Parbhani's fastest grocery delivery service",
+  "url": "https://squickmart.com",
+  "telephone": "+917249148205",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Parbhani",
+    "addressRegion": "Maharashtra",
+    "postalCode": "431401",
+    "addressCountry": "IN"
+  },
+  "openingHours": "Mo-Su 07:00-22:00",
+  "servesCuisine": "Grocery",
+  "priceRange": "₹"
+}
+</script>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -159,7 +153,13 @@
         const s = snap.data();
         window._storeOpen = s.open !== false;
         window._storeMsg = s.message || "";
+        const wasOpen = window._productsClosed === false || window._productsClosed === undefined;
+        window._productsClosed = s.productsClosed === true;
         applyStoreStatus();
+        window.renderProducts && window.renderProducts();
+        // Show popup when products just got closed
+        const popup = document.getElementById("productsClosedOverlay");
+        if (popup) popup.style.display = window._productsClosed ? "flex" : "none";
       });
 
       window.applyStoreStatus = function () {
@@ -1331,6 +1331,94 @@
       .fi.invalid {
         border-color: #e74c3c;
       }
+      .area-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .area-search-wrap {
+        position: relative;
+        margin-bottom: 10px;
+      }
+      .area-search-wrap .search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        pointer-events: none;
+      }
+      .area-search-input {
+        width: 100%;
+        padding: 9px 12px 9px 34px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border);
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--text);
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.18s;
+      }
+      .area-search-input:focus { border-color: var(--primary); }
+      .area-no-result {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 14px 0;
+        display: none;
+      }
+      .area-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+        margin-bottom: 10px;
+      }
+      @media (min-width: 400px) {
+        .area-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (min-width: 560px) {
+        .area-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .area-btn {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        transition: 0.18s;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #000000;
+        min-height: 40px;
+      }
+      .area-btn:active {
+        transform: scale(0.96);
+      }
+      .area-btn.selected {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .area-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--border);
+        flex-shrink: 0;
+        transition: 0.18s;
+      }
+      .area-btn.selected .area-dot {
+        background: var(--primary);
+      }
       .pin-hint {
         font-size: 12px;
         margin-top: 4px;
@@ -1518,6 +1606,86 @@
         font-weight: 700;
         cursor: pointer;
         margin-top: 4px;
+      }
+      .profile-area-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        display: block;
+      }
+      .profile-area-selected-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--primary-light, #fff3e8);
+        color: var(--primary);
+        border: 1.5px solid var(--primary);
+        border-radius: 20px;
+        padding: 5px 13px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .profile-area-selected-badge .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--primary);
+        flex-shrink: 0;
+      }
+      .profile-area-change-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0;
+        margin-left: 6px;
+      }
+      .profile-area-picker {
+        display: none;
+      }
+      .profile-area-picker.open {
+        display: block;
+      }
+      .profile-area-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .profile-area-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 9px;
+        border-radius: 9px;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        color: #000;
+        transition: 0.16s;
+      }
+      .profile-area-btn.selected {
+        border-color: var(--primary);
+        background: var(--primary-light, #fff3e8);
+        color: var(--primary);
+      }
+      .profile-area-btn .area-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--border);
+        flex-shrink: 0;
+        transition: 0.16s;
+      }
+      .profile-area-btn.selected .area-dot {
+        background: var(--primary);
       }
       /* ORDER HISTORY */
       .order-card {
@@ -2232,12 +2400,41 @@
             />
           </div>
           <div class="fg">
+            <label class="fl" style="margin-bottom:8px;">📍 Your Area <span style="color:red">*</span></label>
+            <div id="chkAreaBadgeWrap" style="display:none; margin-bottom:8px;">
+              <span class="profile-area-selected-badge">
+                <span class="badge-dot"></span>
+                <span id="chkAreaBadgeText"></span>
+              </span>
+              <button class="profile-area-change-btn" onclick="openChkAreaPicker()">Change</button>
+            </div>
+            <div id="chkAreaPicker">
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="area-search-input" id="chk-area-search" placeholder="Search area..." oninput="filterAreaSearch('chk-area-grid', 'chk-area-no-result', this.value)" autocomplete="off"/>
+              </div>
+              <div class="area-no-result" id="chk-area-no-result">😕 No area found</div>
+              <div class="area-grid" id="chk-area-grid">
+                <div class="area-btn" onclick="selectAreaChk('Parbhani Main')" data-area="Parbhani Main"><span class="area-dot"></span>Parbhani Main</div>
+                <div class="area-btn" onclick="selectAreaChk('Ganesh Nagar')" data-area="Ganesh Nagar"><span class="area-dot"></span>Ganesh Nagar</div>
+                <div class="area-btn" onclick="selectAreaChk('Shivaji Nagar')" data-area="Shivaji Nagar"><span class="area-dot"></span>Shivaji Nagar</div>
+                <div class="area-btn" onclick="selectAreaChk('Padmapura')" data-area="Padmapura"><span class="area-dot"></span>Padmapura</div>
+                <div class="area-btn" onclick="selectAreaChk('Bhagyanagar')" data-area="Bhagyanagar"><span class="area-dot"></span>Bhagyanagar</div>
+                <div class="area-btn" onclick="selectAreaChk('Vasant Nagar')" data-area="Vasant Nagar"><span class="area-dot"></span>Vasant Nagar</div>
+                <div class="area-btn" onclick="selectAreaChk('Sadar Bazar')" data-area="Sadar Bazar"><span class="area-dot"></span>Sadar Bazar</div>
+                <div class="area-btn" onclick="selectAreaChk('Railway Station')" data-area="Railway Station"><span class="area-dot"></span>Railway Station</div>
+                <div class="area-btn" onclick="selectAreaChk('Anand Nagar')" data-area="Anand Nagar"><span class="area-dot"></span>Anand Nagar</div>
+                <div class="area-btn" onclick="selectAreaChk('Camp Area')" data-area="Camp Area"><span class="area-dot"></span>Camp Area</div>
+                <div class="area-btn" onclick="selectAreaChk('Jintur Road')" data-area="Jintur Road"><span class="area-dot"></span>Jintur Road</div>
+                <div class="area-btn" onclick="selectAreaChk('Other')" data-area="Other"><span class="area-dot"></span>Other Area</div>
+              </div>
+            </div>
             <label class="fl">Delivery Address *</label
             ><textarea
               class="fi"
               id="cAddr"
               rows="3"
-              placeholder="Enter your full delivery address..."
+              placeholder="House no., street, landmark..."
             ></textarea>
           </div>
           <div class="fg">
@@ -2352,6 +2549,32 @@
               rows="3"
               placeholder="Enter your address..."
             ></textarea>
+          </div>
+          <div class="profile-input-group">
+            <span class="profile-area-label">📍 Your Area</span>
+            <div id="pAreaBadgeWrap" style="display:none; margin-bottom:8px;">
+              <span class="profile-area-selected-badge">
+                <span class="badge-dot"></span>
+                <span id="pAreaBadgeText"></span>
+              </span>
+              <button class="profile-area-change-btn" onclick="openProfileAreaPicker()">Change</button>
+            </div>
+            <div class="profile-area-picker open" id="pAreaPicker">
+              <div class="profile-area-grid" id="pAreaGrid">
+                <div class="profile-area-btn" onclick="selectProfileArea('Parbhani Main')" data-area="Parbhani Main"><span class="area-dot"></span>Parbhani Main</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Ganesh Nagar')" data-area="Ganesh Nagar"><span class="area-dot"></span>Ganesh Nagar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Shivaji Nagar')" data-area="Shivaji Nagar"><span class="area-dot"></span>Shivaji Nagar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Padmapura')" data-area="Padmapura"><span class="area-dot"></span>Padmapura</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Bhagyanagar')" data-area="Bhagyanagar"><span class="area-dot"></span>Bhagyanagar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Vasant Nagar')" data-area="Vasant Nagar"><span class="area-dot"></span>Vasant Nagar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Sadar Bazar')" data-area="Sadar Bazar"><span class="area-dot"></span>Sadar Bazar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Railway Station')" data-area="Railway Station"><span class="area-dot"></span>Railway Station</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Anand Nagar')" data-area="Anand Nagar"><span class="area-dot"></span>Anand Nagar</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Camp Area')" data-area="Camp Area"><span class="area-dot"></span>Camp Area</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Jintur Road')" data-area="Jintur Road"><span class="area-dot"></span>Jintur Road</div>
+                <div class="profile-area-btn" onclick="selectProfileArea('Other')" data-area="Other"><span class="area-dot"></span>Other Area</div>
+              </div>
+            </div>
           </div>
           <button class="save-profile-btn" onclick="saveProfile()">
             💾 Save
@@ -2683,7 +2906,7 @@
         CLOSE_HOUR = 22;
 
       // ── USER DATA (localStorage) ──────────────────────────────
-      let currentUser = { phone: "", name: "", address: "" };
+      let currentUser = { phone: "", name: "", address: "", area: "" };
       let orderHistoryUnsub = null;
 
       function loadUser() {
@@ -2720,6 +2943,31 @@
         setOverlayFooterState(false);
       }
 
+      let selectedProfileArea = "";
+      function selectProfileArea(area) {
+        selectedProfileArea = area;
+        document.getElementById("pAreaGrid").querySelectorAll(".profile-area-btn").forEach(function(b) {
+          b.classList.toggle("selected", b.dataset.area === area);
+        });
+        // After select, collapse picker and show badge
+        document.getElementById("pAreaPicker").classList.remove("open");
+        document.getElementById("pAreaBadgeText").textContent = area;
+        document.getElementById("pAreaBadgeWrap").style.display = "block";
+      }
+      function openProfileAreaPicker() {
+        document.getElementById("pAreaPicker").classList.add("open");
+        document.getElementById("pAreaBadgeWrap").style.display = "none";
+      }
+      function loadProfileAreaUI(area) {
+        if (!area) return;
+        selectedProfileArea = area;
+        document.getElementById("pAreaGrid").querySelectorAll(".profile-area-btn").forEach(function(b) {
+          b.classList.toggle("selected", b.dataset.area === area);
+        });
+        document.getElementById("pAreaBadgeText").textContent = area;
+        document.getElementById("pAreaBadgeWrap").style.display = "block";
+        document.getElementById("pAreaPicker").classList.remove("open");
+      }
       function saveProfile() {
         const ph = document.getElementById("pPhone").value.trim();
         const nm = document.getElementById("pName").value.trim();
@@ -2734,12 +2982,17 @@
           document.getElementById("pName").focus();
           return;
         }
+        if (!selectedProfileArea) {
+          showToast("❌ Please select your area!");
+          openProfileAreaPicker();
+          return;
+        }
         if (!addr) {
           showToast("❌ Please fill your address!");
           document.getElementById("pAddr").focus();
           return;
         }
-        currentUser = { phone: ph, name: nm, address: addr };
+        currentUser = { phone: ph, name: nm, address: addr, area: selectedProfileArea };
         localStorage.setItem("sqm_user", JSON.stringify(currentUser));
         updateProfileUI();
         autoFillCheckout();
@@ -2768,6 +3021,7 @@
         document.getElementById("pPhone").value = currentUser.phone || "";
         document.getElementById("pName").value = currentUser.name || "";
         document.getElementById("pAddr").value = currentUser.address || "";
+        if (currentUser.area) loadProfileAreaUI(currentUser.area);
       }
 
       function autoFillCheckout() {
@@ -2777,6 +3031,15 @@
           document.getElementById("cPhone").value = currentUser.phone;
         if (currentUser.address)
           document.getElementById("cAddr").value = currentUser.address;
+        if (currentUser.area) {
+          selectedCheckoutArea = currentUser.area;
+          document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) {
+            b.classList.toggle("selected", b.dataset.area === currentUser.area);
+          });
+          document.getElementById("chkAreaBadgeText").textContent = currentUser.area;
+          document.getElementById("chkAreaBadgeWrap").style.display = "block";
+          document.getElementById("chkAreaPicker").style.display = "none";
+        }
       }
 
       function openProfile() {
@@ -3023,7 +3286,8 @@
           drop.innerHTML = results
             .map((p) => {
               const oos = p.active === false;
-              return `<div class="sr-item"><div class="sr-img">${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `${p.emoji}`}</div><div style="flex:1"><div class="sr-name">${p.name}${oos ? ` <span style="color:#e74c3c;font-size:11px">(Out of Stock)</span>` : ""}</div><div class="sr-unit">${p.unit}</div></div><div class="sr-price">₹${p.price}</div>${p.active !== false ? `<button class="sr-add" onclick="event.stopPropagation();addFromSearch(${p.id})">ADD</button>` : ""}</div>`;
+              const pclosed = window._productsClosed === true && !oos;
+              return `<div class="sr-item" style="${pclosed ? 'opacity:0.85;' : ''}"><div class="sr-img" style="position:relative;">${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `${p.emoji}`}</div><div style="flex:1"><div class="sr-name">${p.name}${oos ? ` <span style="color:#e74c3c;font-size:11px">(Out of Stock)</span>` : ""}${pclosed ? ` <span style="color:#e74c3c;font-size:11px;">(Closed)</span>` : ""}</div><div class="sr-unit">${p.unit}</div></div><div class="sr-price">₹${p.price}</div>${p.active !== false && !pclosed ? `<button class="sr-add" onclick="event.stopPropagation();addFromSearch(${p.id})">ADD</button>` : p.active !== false && pclosed ? `<button class="sr-add" style="background:#c0392b;cursor:not-allowed;" disabled></button>` : ""}</div>`;
             })
             .join("");
         }
@@ -3099,7 +3363,7 @@
               "prod-card" + (p.active === false ? " out-of-stock" : "");
             card.id = "pc-" + p.id;
             card.innerHTML = cardHTML(p);
-            if (p.active !== false)
+            if (p.active !== false && window._productsClosed !== true)
               card.addEventListener("click", function (e) {
                 if (!e.target.closest("button")) openDetailModal(p.cat, p.sub);
               });
@@ -3115,7 +3379,12 @@
       function cardHTML(p) {
         const qty = cart[p.id] ? cart[p.id].qty : 0;
         const oos = p.active === false;
-        return `${oos ? `<div class="oos-badge">Out of Stock</div>` : ""}<div class="pc-img-wrap">${p.img ? `<img src="${p.img}" onerror="this.style.display='none';this.nextSibling.style.display='block'" alt="${p.name}"><span style="display:none;font-size:34px">${p.emoji}</span>` : `<span style="font-size:34px">${p.emoji}</span>`}</div><div class="pc-time">🕐 20–30 mins</div><div class="pc-name">${p.name}</div><div class="pc-unit">${p.unit}</div><div class="pc-price">₹${p.price}</div><div id="act-${p.id}">${oos ? `<button class="oos-btn">Not Available</button>` : qty > 0 ? `<div class="qty-ctrl"><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},-1)">−</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},1)">+</button></div>` : `<div class="pc-btns"><button class="btn-add" onclick="event.stopPropagation();addToCart(${p.id})">+ Add</button><button class="btn-order" onclick="event.stopPropagation();quickOrder(${p.id})">⚡ Order</button></div>`}</div>`;
+        const pclosed = window._productsClosed === true && !oos;
+        const imgWrap = `<div class="pc-img-wrap">${p.img ? `<img src="${p.img}" onerror="this.style.display='none';this.nextSibling.style.display='block'" alt="${p.name}"><span style="display:none;font-size:34px">${p.emoji}</span>` : `<span style="font-size:34px">${p.emoji}</span>`}</div>`;
+        const closedOverlayInner = pclosed ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;border-radius:14px;"><span style="background:rgba(180,0,0,0.78);color:#fff;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:7px 18px;border-radius:50px;box-shadow:0 2px 12px rgba(0,0,0,0.18);">Closed</span></div>` : "";
+        const cardStyle = `style="position:relative;"`;
+        const actionHTML = oos ? `<button class="oos-btn">Not Available</button>` : pclosed ? `<div class="pc-btns" style="pointer-events:none;opacity:0.5;"><button class="btn-add">+ Add</button><button class="btn-order">⚡ Order</button></div>` : qty > 0 ? `<div class="qty-ctrl"><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},-1)">−</button><span class="qty-num">${qty}</span><button class="qty-btn" onclick="event.stopPropagation();chQty(${p.id},1)">+</button></div>` : `<div class="pc-btns"><button class="btn-add" onclick="event.stopPropagation();addToCart(${p.id})">+ Add</button><button class="btn-order" onclick="event.stopPropagation();quickOrder(${p.id})">⚡ Order</button></div>`;
+        return `<div ${cardStyle}>${oos ? `<div class="oos-badge">Out of Stock</div>` : ""}${closedOverlayInner}${imgWrap}<div class="pc-time">🕐 20–30 mins</div><div class="pc-name">${p.name}</div><div class="pc-unit">${p.unit}</div><div class="pc-price">₹${p.price}</div><div id="act-${p.id}">${actionHTML}</div></div>`;
       }
 
       function refreshCard(id) {
@@ -3126,7 +3395,7 @@
         el.className =
           "prod-card" + (p.active === false ? " out-of-stock" : "");
         el.innerHTML = cardHTML(p);
-        if (p.active !== false) {
+        if (p.active !== false && window._productsClosed !== true) {
           el.onclick = function (e) {
             if (!e.target.closest("button")) openDetailModal(p.cat, p.sub);
           };
@@ -3184,7 +3453,8 @@
             .map((p) => {
               const qty = cart[p.id] ? cart[p.id].qty : 0;
               const oos = p.active === false;
-              return `<div class="dm-prod-row" id="dmrow-${p.id}"><div class="dm-prod-img">${p.img ? `<img src="${p.img}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" alt="${p.name}"><span style="display:none;font-size:32px">${p.emoji}</span>` : `<span style="font-size:32px">${p.emoji}</span>`}</div><div class="dm-prod-info"><div class="dm-prod-name">${p.name}</div><div class="dm-prod-unit">${p.unit}</div><div class="dm-prod-price">₹${p.price}</div></div><div class="dm-prod-action" id="dmact-${p.id}">${oos ? `<button class="dm-oos-btn">N/A</button>` : qty > 0 ? `<div class="dm-qty-ctrl"><button class="dm-qty-btn" onclick="chQtyDM(${p.id},-1)">−</button><span class="dm-qty-num">${qty}</span><button class="dm-qty-btn" onclick="chQtyDM(${p.id},1)">+</button></div>` : `<button class="dm-add-btn" onclick="addToDM(${p.id})">ADD</button>`}</div></div>`;
+              const pclosed = window._productsClosed === true && !oos;
+              return `<div class="dm-prod-row" id="dmrow-${p.id}"><div class="dm-prod-img" style="position:relative;">${p.img ? `<img src="${p.img}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" alt="${p.name}"><span style="display:none;font-size:32px">${p.emoji}</span>` : `<span style="font-size:32px">${p.emoji}</span>`}${pclosed ? `<div style="position:absolute;inset:0;background:rgba(231,76,60,0.82);display:flex;align-items:center;justify-content:center;border-radius:8px;"><span style="color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;">Closed</span></div>` : ""}</div><div class="dm-prod-info"><div class="dm-prod-name">${p.name}</div><div class="dm-prod-unit">${p.unit}</div><div class="dm-prod-price">₹${p.price}</div></div><div class="dm-prod-action" id="dmact-${p.id}">${oos ? `<button class="dm-oos-btn">N/A</button>` : pclosed ? `` : qty > 0 ? `<div class="dm-qty-ctrl"><button class="dm-qty-btn" onclick="chQtyDM(${p.id},-1)">−</button><span class="dm-qty-num">${qty}</span><button class="dm-qty-btn" onclick="chQtyDM(${p.id},1)">+</button></div>` : `<button class="dm-add-btn" onclick="addToDM(${p.id})">ADD</button>`}</div></div>`;
             })
             .join("");
       }
@@ -3194,12 +3464,15 @@
         const p = window.products.find((x) => x.id === id);
         if (!p) return;
         const qty = cart[id] ? cart[id].qty : 0;
+        const pclosedR = window._productsClosed === true && p.active !== false;
         el.innerHTML =
           p.active === false
             ? `<button class="dm-oos-btn">N/A</button>`
-            : qty > 0
-              ? `<div class="dm-qty-ctrl"><button class="dm-qty-btn" onclick="chQtyDM(${id},-1)">−</button><span class="dm-qty-num">${qty}</span><button class="dm-qty-btn" onclick="chQtyDM(${id},1)">+</button></div>`
-              : `<button class="dm-add-btn" onclick="addToDM(${id})">ADD</button>`;
+            : pclosedR
+              ? ``
+              : qty > 0
+                ? `<div class="dm-qty-ctrl"><button class="dm-qty-btn" onclick="chQtyDM(${id},-1)">−</button><span class="dm-qty-num">${qty}</span><button class="dm-qty-btn" onclick="chQtyDM(${id},1)">+</button></div>`
+                : `<button class="dm-add-btn" onclick="addToDM(${id})">ADD</button>`;
       }
       function selectDMSub(cat, sub) {
         curDetailSub = sub;
@@ -3420,6 +3693,36 @@ function closeMyOrders() {
         }
       }
 
+      let selectedCheckoutArea = "";
+      function selectAreaChk(area) {
+        selectedCheckoutArea = area;
+        document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) {
+          b.classList.toggle("selected", b.dataset.area === area);
+        });
+        // Collapse picker, show badge
+        document.getElementById("chkAreaPicker").style.display = "none";
+        document.getElementById("chkAreaBadgeText").textContent = area;
+        document.getElementById("chkAreaBadgeWrap").style.display = "block";
+      }
+      function openChkAreaPicker() {
+        document.getElementById("chkAreaPicker").style.display = "block";
+        document.getElementById("chkAreaBadgeWrap").style.display = "none";
+      }
+      function filterAreaSearch(gridId, noResultId, query) {
+        const grid = document.getElementById(gridId);
+        const noRes = document.getElementById(noResultId);
+        if (!grid) return;
+        const q = query.trim().toLowerCase();
+        const btns = grid.querySelectorAll('.area-btn');
+        let visible = 0;
+        btns.forEach(function(btn) {
+          const name = btn.getAttribute('data-area') || '';
+          const match = q === '' || name.toLowerCase().includes(q);
+          btn.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        if (noRes) noRes.style.display = (visible === 0 && q.length > 0) ? 'block' : 'none';
+      }
       async function placeOrder() {
         if (!isOpen()) {
           showToast("❌ Store closed!");
@@ -3441,6 +3744,11 @@ function closeMyOrders() {
           showToast("❌ Please enter an address!");
           return;
         }
+        if (!selectedCheckoutArea) {
+          showToast("❌ Please select your area!");
+          return;
+        }
+        const fullAddr = selectedCheckoutArea + ", " + addr;
         if (pin !== "431401") {
           showToast("❌ Delivery available only in Parbhani (431401)!");
           return;
@@ -3453,7 +3761,7 @@ function closeMyOrders() {
         const orderData = {
           name,
           phone,
-          address: addr,
+          address: fullAddr,
           pincode: pin,
           items: items.map((i) => ({
             id: i.id,
@@ -3462,6 +3770,7 @@ function closeMyOrders() {
             price: i.price,
             qty: i.qty,
             emoji: i.emoji || "📦",
+            img: i.img || null,
           })),
           subtotal: sub,
           delivery: del,
@@ -3472,7 +3781,7 @@ function closeMyOrders() {
         const orderId = await window.saveOrderToFirebase(orderData);
         // Save user details for next time
         if (!currentUser.phone || !currentUser.name) {
-          currentUser = { phone, name, address: addr };
+          currentUser = { phone, name, address: fullAddr };
           localStorage.setItem("sqm_user", JSON.stringify(currentUser));
           updateProfileUI();
         }
@@ -3492,6 +3801,15 @@ function closeMyOrders() {
         });
         document.getElementById("pinHint").className = "pin-hint";
         document.getElementById("cPin").className = "fi";
+        // Reset area then re-apply saved user area
+        selectedCheckoutArea = "";
+        document.getElementById("chk-area-grid").querySelectorAll(".area-btn").forEach(function(b) { b.classList.remove("selected"); });
+        document.getElementById("chk-area-search").value = "";
+        filterAreaSearch("chk-area-grid", "chk-area-no-result", "");
+        document.getElementById("chkAreaBadgeWrap").style.display = "none";
+        document.getElementById("chkAreaPicker").style.display = "block";
+        // Re-fill from saved profile
+        autoFillCheckout();
       }
 
       let toastTmr = null;
@@ -3513,5 +3831,16 @@ function closeMyOrders() {
       setupTiming();
       loadUser();
     </script>
+
+    <!-- PRODUCTS CLOSED POPUP -->
+    <div id="productsClosedOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:800;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:20px;padding:36px 28px;max-width:320px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+        <div style="font-size:52px;margin-bottom:10px;">🔒</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:#c0392b;margin-bottom:8px;">Website Closed</div>
+        <div style="font-size:14px;color:#666;line-height:1.6;margin-bottom:20px;">We are temporarily closed right now.<br>Please check back soon! 🙏</div>
+        <button onclick="document.getElementById('productsClosedOverlay').style.display='none';" style="background:#c0392b;color:#fff;border:none;border-radius:12px;padding:12px 28px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:700;cursor:pointer;width:100%;">OK, Got It!</button>
+      </div>
+    </div>
+
   </body>
 </html>

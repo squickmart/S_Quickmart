@@ -1,0 +1,2278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuickMart — Delivery Panel</title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --pr: #ff6b00;
+        --pr-dark: #e05800;
+        --pr-glow: rgba(255, 107, 0, 0.25);
+        --green: #10b981;
+        --blue: #3b82f6;
+        --danger: #ef4444;
+        --yellow: #f59e0b;
+        --purple: #8b5cf6;
+        --dark: #0d0d14;
+        --card: #17171f;
+        --card2: #1e1e28;
+        --card3: #23232e;
+        --border: rgba(255, 255, 255, 0.07);
+        --border2: rgba(255, 255, 255, 0.12);
+        --text: #f0f0f5;
+        --muted: #8888aa;
+        --bg: #111118;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      a {
+        text-decoration: none;
+      }
+
+      /* ══ LOGIN ══════════════════════════════════════════ */
+      .login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(
+          ellipse at 50% 30%,
+          #1f0800 0%,
+          #0d0d14 65%
+        );
+        padding: 20px;
+      }
+      .login-box {
+        background: var(--card);
+        border: 1px solid var(--border2);
+        border-radius: 32px;
+        padding: 48px 36px 40px;
+        width: 100%;
+        max-width: 390px;
+        box-shadow:
+          0 40px 100px rgba(0, 0, 0, 0.7),
+          0 0 0 1px var(--border);
+      }
+      .login-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 36px;
+      }
+      .lb-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        flex-shrink: 0;
+        /* background: linear-gradient(135deg, var(--pr), var(--pr-dark)); */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        box-shadow: 0 8px 24px var(--pr-glow);
+        overflow: hidden;
+      }
+      .lb-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: #fff;
+      }
+      .lb-name {
+        font-family: "Baloo 2", cursive;
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.1;
+      }
+      .lb-name span {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        font-family: "DM Sans", sans-serif;
+        margin-top: 2px;
+      }
+      .login-sub {
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 30px;
+        line-height: 1.5;
+      }
+      .pin-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .pin-dots {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+      .pin-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        background: transparent;
+        transition: 0.2s;
+      }
+      .pin-dot.filled {
+        background: var(--pr);
+        border-color: var(--pr);
+        box-shadow: 0 0 10px var(--pr-glow);
+      }
+      .pin-dot.error {
+        background: var(--danger);
+        border-color: var(--danger);
+      }
+      .pin-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .pin-btn {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px 10px;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text);
+        cursor: pointer;
+        transition: 0.15s;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pin-btn:active {
+        transform: scale(0.91);
+        background: rgba(255, 107, 0, 0.18);
+        border-color: var(--pr);
+      }
+      .login-error {
+        color: var(--danger);
+        font-size: 13px;
+        text-align: center;
+        margin-top: 10px;
+        display: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      /* ══ TOP BAR ════════════════════════════════════════ */
+      .top-bar {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 13px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 300;
+        backdrop-filter: blur(10px);
+      }
+      .top-brand {
+        font-family: "Baloo 2", cursive;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--pr);
+        
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .top-brand .top-logo {
+        width: 36px;
+        height: 36px;
+        
+        border-radius: 12px;
+        object-fit: contain;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: #fff;
+      }
+      .top-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .live-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--green);
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: blink 1.4s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.2;
+        }
+      }
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .logout-btn:hover {
+        color: var(--danger);
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+
+      /* ══ TABS ═══════════════════════════════════════════ */
+      .tab-nav {
+        display: flex;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        padding: 0 10px;
+        gap: 2px;
+      }
+      .tab-btn {
+        padding: 13px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        transition: 0.2s;
+      }
+      .tab-btn.active {
+        color: var(--pr);
+        border-bottom-color: var(--pr);
+      }
+      .tab-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--pr);
+        color: #fff;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 1px 7px;
+        margin-left: 5px;
+        min-width: 19px;
+      }
+      .tab-badge.zero {
+        background: var(--card3);
+        color: var(--muted);
+      }
+
+      /* ══ CONTENT ════════════════════════════════════════ */
+      .content {
+        padding: 16px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* ══ STATS ══════════════════════════════════════════ */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px 12px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 2px 2px 0 0;
+      }
+      .stat-card.s-pending::before {
+        background: var(--yellow);
+      }
+      .stat-card.s-ofd::before {
+        background: var(--blue);
+      }
+      .stat-card.s-done::before {
+        background: var(--green);
+      }
+      .stat-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .stat-card.s-pending .stat-num {
+        color: var(--yellow);
+      }
+      .stat-card.s-ofd .stat-num {
+        color: var(--blue);
+      }
+      .stat-card.s-done .stat-num {
+        color: var(--green);
+      }
+      .stat-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+
+      /* ══ SECTION HEADER ════════════════════════════════ */
+      .sec-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .sec-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 17px;
+        font-weight: 800;
+        color: #fff;
+      }
+
+      /* ══ FILTERS ════════════════════════════════════════ */
+      .filter-wrap {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .chip {
+        padding: 7px 13px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1.5px solid var(--border);
+        background: var(--card2);
+        color: var(--muted);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: 0.18s;
+      }
+      .chip.active {
+        border-color: var(--pr);
+        color: var(--pr);
+        background: rgba(255, 107, 0, 0.1);
+      }
+      .search-box {
+        width: 100%;
+        padding: 11px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        font-size: 14px;
+        background: var(--card2);
+        color: var(--text);
+        outline: none;
+        margin-bottom: 12px;
+        transition: 0.2s;
+      }
+      .search-box:focus {
+        border-color: var(--pr);
+      }
+      .search-box::placeholder {
+        color: var(--muted);
+      }
+
+      /* ══ ORDER CARD ═════════════════════════════════════ */
+      .order-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 18px;
+        margin-bottom: 13px;
+        transition: 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .order-card.is-new {
+        border-color: rgba(255, 107, 0, 0.35);
+        background: rgba(255, 107, 0, 0.03);
+      }
+      .order-card.is-new::before {
+        content: "NEW";
+        position: absolute;
+        top: 0;
+        right: 20px;
+        background: var(--pr);
+        color: #fff;
+        font-size: 9px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 0 0 8px 8px;
+        letter-spacing: 0.5px;
+      }
+      .order-card.is-ofd {
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+      .oc-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .oc-id {
+        font-family: "Baloo 2", cursive;
+        font-size: 17px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .oc-time {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .status-badge {
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      .s-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+      }
+      .s-confirmed {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+      }
+      .s-out_for_delivery {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+      }
+      .s-delivered {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+      }
+      .s-cancelled {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+      }
+      .s-accepted {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+      }
+      .s-rejected {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+      }
+
+      .oc-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .oc-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--card2);
+        padding: 5px 10px;
+        border-radius: 8px;
+      }
+      .oc-meta-item a {
+        color: var(--pr);
+        font-weight: 700;
+      }
+      .oc-items {
+        padding: 12px;
+        border-radius: 12px;
+        background: var(--card2);
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.8;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+      }
+      /* ── Item image cards ── */
+      .oc-items-grid {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+      .oc-item-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .oc-item-row:last-child {
+        border-bottom: none;
+      }
+      .oc-item-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: var(--card3);
+        border: 1px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        font-size: 22px;
+      }
+      .oc-item-img img {
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+        border-radius: 10px;
+      }
+      .oc-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .oc-item-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .oc-item-unit {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .oc-item-price {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pr);
+        white-space: nowrap;
+      }
+      .oc-total {
+        font-weight: 700;
+        color: var(--pr);
+        margin-top: 6px;
+        font-size: 14px;
+      }
+
+      /* ══ ACTION BUTTONS ═════════════════════════════════ */
+      .oc-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .btn {
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+      }
+      .btn:active {
+        transform: scale(0.95);
+      }
+      .btn-call {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--green);
+        border: 1.5px solid rgba(16, 185, 129, 0.3);
+      }
+      .btn-call:hover {
+        background: rgba(16, 185, 129, 0.25);
+      }
+      .btn-wa-owner {
+        background: rgba(255, 107, 0, 0.15);
+        color: var(--pr);
+        border: 1.5px solid rgba(255, 107, 0, 0.3);
+      }
+      .btn-wa-owner:hover {
+        background: rgba(255, 107, 0, 0.25);
+      }
+      .btn-ofd {
+        background: var(--blue);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+      }
+      .btn-ofd:hover {
+        background: #2563eb;
+      }
+      .btn-deliver {
+        background: var(--green);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      }
+      .btn-deliver:hover {
+        background: #059669;
+      }
+      .btn-done {
+        background: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+        border: 1.5px solid rgba(16, 185, 129, 0.2);
+        cursor: default;
+      }
+      .btn-locked {
+        background: var(--card3);
+        color: var(--muted);
+        border: 1.5px solid var(--border);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      /* Step indicator */
+      .step-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      .step.done {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--green);
+      }
+      .step.active {
+        background: rgba(255, 107, 0, 0.15);
+        color: var(--pr);
+      }
+      .step.wait {
+        background: var(--card2);
+        color: var(--muted);
+      }
+      .step-arrow {
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      /* ══ EMPTY ══════════════════════════════════════════ */
+      .empty {
+        text-align: center;
+        padding: 50px 20px;
+        color: var(--muted);
+      }
+      .empty-icon {
+        font-size: 44px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+      }
+
+      /* ══ DIVIDER ════════════════════════════════════════ */
+      .note-box {
+        background: rgba(139, 92, 246, 0.08);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #a78bfa;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* ══ TOAST ══════════════════════════════════════════ */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: #fff;
+        color: #111;
+        padding: 12px 24px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        transition: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 9999;
+        white-space: nowrap;
+        opacity: 0;
+      }
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      /* ══ EARNINGS TAB ═══════════════════════════════════ */
+      .earn-period-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .earn-period-btn {
+        padding: 9px 20px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1.5px solid var(--border);
+        background: var(--card2);
+        color: var(--muted);
+        cursor: pointer;
+        transition: 0.18s;
+        white-space: nowrap;
+      }
+      .earn-period-btn.active {
+        border-color: var(--green);
+        color: var(--green);
+        background: rgba(16,185,129,0.1);
+      }
+      .earn-hero {
+        background: var(--card);
+        border: 1.5px solid rgba(16,185,129,0.3);
+        border-radius: 24px;
+        padding: 30px 20px;
+        text-align: center;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .earn-hero::before {
+        content: "";
+        position: absolute;
+        top:0; left:0; right:0;
+        height: 3px;
+        background: var(--green);
+        border-radius: 2px 2px 0 0;
+      }
+      .earn-hero-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .earn-hero-amount {
+        font-family: "Baloo 2", cursive;
+        font-size: 52px;
+        font-weight: 800;
+        color: var(--green);
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .earn-hero-sub {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .earn-hero-parcels {
+        display: inline-block;
+        margin-top: 12px;
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(16,185,129,0.25);
+        border-radius: 999px;
+        padding: 6px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--green);
+      }
+      .earn-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .earn-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px 14px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .earn-card::before {
+        content: "";
+        position: absolute;
+        top:0; left:0; right:0;
+        height: 3px;
+        border-radius: 2px 2px 0 0;
+      }
+      .earn-card.ec-today::before { background: var(--yellow); }
+      .earn-card.ec-week::before  { background: var(--blue); }
+      .earn-card.ec-month::before { background: var(--purple); }
+      .earn-card.ec-all::before   { background: var(--green); }
+      .earn-card-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .earn-card.ec-today .earn-card-num { color: var(--yellow); }
+      .earn-card.ec-week  .earn-card-num { color: var(--blue); }
+      .earn-card.ec-month .earn-card-num { color: var(--purple); }
+      .earn-card.ec-all   .earn-card-num { color: var(--green); }
+      .earn-card-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .earn-card-parcels {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .earn-section-title {
+        font-family: "Baloo 2", cursive;
+        font-size: 16px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+        margin-top: 6px;
+      }
+      .earn-day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .earn-day-row {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 13px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .earn-day-date {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .earn-day-right {
+        text-align: right;
+      }
+      .earn-day-amount {
+        font-family: "Baloo 2", cursive;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--green);
+      }
+      .earn-day-parcels {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .earn-rate-box {
+        background: rgba(255,107,0,0.06);
+        border: 1px solid rgba(255,107,0,0.2);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: var(--pr);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+      }
+
+      /* ══ YN HISTORY TAB ══════════════════════════════════ */
+      .ynh-hero {
+        background: var(--card);
+        border: 1.5px solid rgba(139,92,246,0.3);
+        border-radius: 24px;
+        padding: 24px 20px;
+        text-align: center;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .ynh-hero::before {
+        content: "";
+        position: absolute;
+        top:0; left:0; right:0;
+        height: 3px;
+        background: var(--purple);
+        border-radius: 2px 2px 0 0;
+      }
+      .ynh-hero-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 56px;
+        font-weight: 800;
+        color: var(--purple);
+        line-height: 1;
+      }
+      .ynh-hero-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 6px;
+      }
+      .ynh-stats-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .ynh-stat {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px 12px;
+        text-align: center;
+      }
+      .ynh-stat-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--blue);
+        line-height: 1;
+      }
+      .ynh-stat-num.purple { color: var(--purple); }
+      .ynh-stat-num.green  { color: var(--green); }
+      .ynh-stat-num.yellow { color: var(--yellow); }
+      .ynh-stat-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .ynh-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+      }
+      .ynh-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        gap: 8px;
+      }
+      .ynh-card-type {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--purple);
+        background: rgba(139,92,246,0.1);
+        border: 1px solid rgba(139,92,246,0.2);
+        border-radius: 999px;
+        padding: 3px 10px;
+      }
+      .ynh-card-time {
+        font-size: 11px;
+        color: var(--muted);
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .ynh-card-customer {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .ynh-card-detail {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .ynh-card-detail strong { color: var(--text); }
+      .ynh-route {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+      .ynh-route-point {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 4px 10px;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .ynh-route-arrow {
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ══ LOGIN ════════════════════════════════════════════ -->
+    <div class="login-screen" id="loginScreen">
+      <div class="login-box">
+        <div class="login-brand">
+          <div class="lb-icon">
+            <img src="SLOGO.png" alt="QuickMart Logo" onerror="this.style.display='none'" />
+          </div>
+          <div class="lb-name">QuickMart<span>Delivery Panel</span></div>
+        </div>
+        <div class="login-sub">
+          Enter your phone number to log in.
+        </div>
+        <div class="pin-label">📞 Phone Number</div>
+        <input
+          type="tel"
+          id="phoneInput"
+          maxlength="10"
+          placeholder="10-digit number"
+          style="
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            background: var(--card2);
+            color: var(--text);
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 16px;
+            outline: none;
+          "
+          oninput="this.value = this.value.replace(/\D/g, '')"
+          onkeydown="if (event.key === 'Enter') phoneLogin();"
+        />
+        <button
+          onclick="phoneLogin()"
+          style="
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, var(--pr), var(--pr-dark));
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+          "
+        >
+          🚀 Login
+        </button>
+        <div class="login-error" id="loginError" style="margin-top: 12px">
+          ❌ Number not registered. Please confirm with the owner.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAIN SCREEN ═══════════════════════════════════════ -->
+    <div id="adminScreen" style="display: none">
+      <div class="top-bar">
+        <div class="top-brand">
+          <img src="SLOGO.png" alt="QuickMart Logo" class="top-logo" />
+           <span id="boyNameDisplay">Delivery Admin</span>
+        </div>
+        <div class="top-right">
+          <div class="live-pill">
+            <div class="live-dot"></div>
+            Live
+          </div>
+          <button class="logout-btn" onclick="doLogout()">Logout</button>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('orders', this)">
+          📦 Orders <span class="tab-badge zero" id="ordersBadge">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('yourneed', this)">
+          🎯 YourNeed <span class="tab-badge zero" id="ynBadge">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('earnings', this)">
+          💰 My Earnings
+        </button>
+        <button class="tab-btn" onclick="switchTab('yn-history', this)">
+          🎯 YN Parcels
+        </button>
+      </div>
+
+      <div class="content">
+        <!-- ORDERS TAB -->
+        <div class="tab-panel active" id="tab-orders">
+          <div class="stats-row">
+            <div class="stat-card s-pending">
+              <div class="stat-num" id="statPending">0</div>
+              <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card s-ofd">
+              <div class="stat-num" id="statOFD">0</div>
+              <div class="stat-label">On the Way</div>
+            </div>
+            <div class="stat-card s-done">
+              <div class="stat-num" id="statDelivered">0</div>
+              <div class="stat-label">Delivered Today</div>
+            </div>
+            <div
+              class="stat-card"
+              style="
+                border: 1.5px solid rgba(139, 92, 246, 0.3);
+                background: rgba(139, 92, 246, 0.08);
+              "
+            >
+              <div class="stat-num" style="color: #a78bfa" id="statMyDelivered">
+                0
+              </div>
+              <div class="stat-label">Mere Deliveries</div>
+            </div>
+          </div>
+          <div class="note-box">
+            💡 Flow:
+            <strong
+              >WA to Owner → Call Customer → Out for Delivery →
+              Delivered</strong
+            >
+          </div>
+          <div class="sec-header">
+            <div class="sec-title">📦 Live Orders</div>
+          </div>
+          <input
+            type="text"
+            class="search-box"
+            id="orderSearch"
+            placeholder="🔍 Search name, ID, area..."
+            oninput="renderOrders()"
+          />
+          <div class="filter-wrap" id="areaFilterBar"></div>
+          <div id="ordersContainer">
+            <div class="empty">
+              <div class="empty-icon">⏳</div>
+              <p>Loading orders...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- YOURNEED TAB -->
+        <div class="tab-panel" id="tab-yourneed">
+          <div class="stats-row">
+            <div class="stat-card s-pending">
+              <div class="stat-num" id="ynStatPending">0</div>
+              <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card s-ofd">
+              <div class="stat-num" id="ynStatAccepted">0</div>
+              <div class="stat-label">Accepted</div>
+            </div>
+            <div class="stat-card s-done">
+              <div class="stat-num" id="ynStatDone">0</div>
+              <div class="stat-label">Done</div>
+            </div>
+          </div>
+          <div class="note-box">
+            💡 Flow: <strong>WA to Owner → Call Customer → Done</strong>
+          </div>
+          <div class="sec-header">
+            <div class="sec-title">🎯 YourNeed Requests</div>
+          </div>
+          <input
+            type="text"
+            class="search-box"
+            id="ynSearch"
+            placeholder="🔍 Search requests..."
+            oninput="renderYourNeed()"
+          />
+          <div class="filter-wrap" id="ynFilterBar"></div>
+          <div class="filter-wrap" id="ynAreaFilterBar"></div>
+          <div id="ynContainer">
+            <div class="empty">
+              <div class="empty-icon">⏳</div>
+              <p>Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- EARNINGS TAB -->
+        <div class="tab-panel" id="tab-earnings">
+          <div class="earn-rate-box">
+            💸 Rate: ₹14 per parcel delivered
+          </div>
+
+          <!-- Summary cards always visible -->
+          <div class="earn-grid">
+            <div class="earn-card ec-today">
+              <div class="earn-card-num" id="earnToday">₹0</div>
+              <div class="earn-card-label">Today</div>
+              <div class="earn-card-parcels" id="earnTodayP">0 parcels</div>
+            </div>
+            <div class="earn-card ec-week">
+              <div class="earn-card-num" id="earnWeek">₹0</div>
+              <div class="earn-card-label">This Week</div>
+              <div class="earn-card-parcels" id="earnWeekP">0 parcels</div>
+            </div>
+            <div class="earn-card ec-month">
+              <div class="earn-card-num" id="earnMonth">₹0</div>
+              <div class="earn-card-label">This Month</div>
+              <div class="earn-card-parcels" id="earnMonthP">0 parcels</div>
+            </div>
+            <div class="earn-card ec-all">
+              <div class="earn-card-num" id="earnAll">₹0</div>
+              <div class="earn-card-label">All Time</div>
+              <div class="earn-card-parcels" id="earnAllP">0 parcels</div>
+            </div>
+          </div>
+
+          <!-- Period selector for detailed view -->
+          <div class="earn-section-title">📋 Detailed Breakdown</div>
+          <div class="earn-period-row">
+            <button class="earn-period-btn active" onclick="setEarnPeriod('day',this)">📅 Day-wise</button>
+            <button class="earn-period-btn" onclick="setEarnPeriod('week',this)">📆 Week-wise</button>
+            <button class="earn-period-btn" onclick="setEarnPeriod('month',this)">🗓️ Month-wise</button>
+          </div>
+
+          <div id="earnBreakdown">
+            <div class="empty"><div class="empty-icon">📦</div><p>No deliveries found</p></div>
+          </div>
+        </div>
+
+        <!-- YN PARCELS TAB -->
+        <div class="tab-panel" id="tab-yn-history">
+          <!-- Total parcels hero -->
+          <div class="ynh-hero">
+            <div class="ynh-hero-num" id="ynhTotal">0</div>
+            <div class="ynh-hero-label">Total YourNeed Parcels</div>
+          </div>
+
+          <!-- Type breakdown -->
+          <div class="ynh-stats-row">
+            <div class="ynh-stat">
+              <div class="ynh-stat-num purple" id="ynhCustom">0</div>
+              <div class="ynh-stat-label">🛍️ Custom Items</div>
+            </div>
+            <div class="ynh-stat">
+              <div class="ynh-stat-num green" id="ynhPickup">0</div>
+              <div class="ynh-stat-label">🏍️ Pickup & Drop</div>
+            </div>
+            <div class="ynh-stat">
+              <div class="ynh-stat-num yellow" id="ynhPending">0</div>
+              <div class="ynh-stat-label">⏳ Pending</div>
+            </div>
+            <div class="ynh-stat">
+              <div class="ynh-stat-num" id="ynhAccepted">0</div>
+              <div class="ynh-stat-label">✅ Accepted</div>
+            </div>
+          </div>
+
+          <div class="earn-section-title">📋 All YourNeed Requests</div>
+          <input
+            type="text"
+            class="search-box"
+            id="ynhSearch"
+            placeholder="🔍 Search customer, area, item..."
+            oninput="renderYNHistory()"
+          />
+          <div id="ynhContainer">
+            <div class="empty"><div class="empty-icon">⏳</div><p>Loading...</p></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- ══ FIREBASE ══════════════════════════════════════════ -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        query,
+        orderBy,
+        onSnapshot,
+        updateDoc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+      const app = initializeApp({
+        apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+        authDomain: "quickmart-b117e.firebaseapp.com",
+        projectId: "quickmart-b117e",
+        storageBucket: "quickmart-b117e.firebasestorage.app",
+        messagingSenderId: "128330058901",
+        appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
+      });
+      const db = getFirestore(app);
+
+      window.fbOrders = (cb) => {
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+        return onSnapshot(q, (s) =>
+          cb(s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        );
+      };
+      window.fbYN = (cb) => {
+        const q = query(
+          collection(db, "yourneed_requests"),
+          orderBy("createdAt", "desc"),
+        );
+        return onSnapshot(q, (s) =>
+          cb(s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        );
+      };
+      window.fbUpdate = async (id, data) => {
+        try {
+          await updateDoc(doc(db, "orders", id), data);
+          return true;
+        } catch (e) {
+          console.error(e);
+          return false;
+        }
+      };
+      window.fbLoadBoys = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "delivery_boys"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      document.dispatchEvent(new CustomEvent("fbReady"));
+    </script>
+
+    <!-- ══ APP JS ════════════════════════════════════════════ -->
+    <script>
+      // ━━ CONFIG ━━
+      const OWNER_WA = "917058204462";
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+      let allOrders = [],
+        allYN = [];
+      let unsubO = null,
+        unsubYN = null;
+      let aFilter = "all",
+        ynFilter = "all";
+      let fbReady = false,
+        needLoad = false;
+      let currentBoy = null; // { name, phone }
+
+      // ━━ PHONE LOGIN ━━
+      async function phoneLogin() {
+        const phone = document.getElementById("phoneInput").value.trim();
+        const errEl = document.getElementById("loginError");
+        errEl.style.display = "none";
+        if (phone.length !== 10 || isNaN(phone)) {
+          errEl.textContent = "❌ Please enter a 10-digit number!";
+          errEl.style.display = "block";
+          return;
+        }
+        const boys = await window.fbLoadBoys();
+        const boy = boys.find((b) => b.phone === phone && b.active !== false);
+        if (!boy) {
+          errEl.textContent =
+            "❌ Number not registered. Please confirm with the owner.";
+          errEl.style.display = "block";
+          return;
+        }
+        currentBoy = { name: boy.name, phone: boy.phone };
+        localStorage.setItem("qm_boy", JSON.stringify(currentBoy));
+        document.getElementById("boyNameDisplay").textContent =
+          "🏍️ " + boy.name;
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("adminScreen").style.display = "block";
+        if (fbReady) loadData();
+        else needLoad = true;
+      }
+
+      function doLogout() {
+        if (unsubO) unsubO();
+        if (unsubYN) unsubYN();
+        unsubO = unsubYN = null;
+        allOrders = [];
+        allYN = [];
+        currentBoy = null;
+        localStorage.removeItem("qm_boy");
+        document.getElementById("phoneInput").value = "";
+        document.getElementById("adminScreen").style.display = "none";
+        document.getElementById("loginScreen").style.display = "flex";
+      }
+
+      // ━━ FIREBASE READY + SESSION RESTORE ━━
+      document.addEventListener("fbReady", async () => {
+        fbReady = true;
+        const saved = localStorage.getItem("qm_boy");
+        if (saved && !currentBoy) {
+          try {
+            const b = JSON.parse(saved);
+            const boys = await window.fbLoadBoys();
+            const boy = boys.find(
+              (x) => x.phone === b.phone && x.active !== false,
+            );
+            if (boy) {
+              currentBoy = { name: boy.name, phone: boy.phone };
+              document.getElementById("boyNameDisplay").textContent =
+                "🏍️ " + boy.name;
+              document.getElementById("loginScreen").style.display = "none";
+              document.getElementById("adminScreen").style.display = "block";
+              loadData();
+              return;
+            } else {
+              localStorage.removeItem("qm_boy");
+            }
+          } catch (e) {}
+        }
+        if (needLoad) loadData();
+      });
+
+      // ━━ LOAD DATA ━━
+      function loadData() {
+        if (unsubO) unsubO();
+        unsubO = window.fbOrders((orders) => {
+          allOrders = orders;
+          renderOrders();
+          renderAreaFilters();
+          updateStats();
+          updateBadges();
+        });
+        if (unsubYN) unsubYN();
+        unsubYN = window.fbYN((reqs) => {
+          allYN = reqs;
+          renderYourNeed();
+          renderYNFilters();
+          renderYNAreaFilters();
+          updateStats();
+          updateBadges();
+          renderYNHistory();
+        });
+      }
+
+      // ━━ TABS ━━
+      function switchTab(id, btn) {
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("tab-" + id).classList.add("active");
+        btn.classList.add("active");
+        if (id === 'earnings') renderEarnings();
+        if (id === 'yn-history') renderYNHistory();
+      }
+
+      // ━━ STATS & BADGES ━━
+      function updateStats() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+        document.getElementById("statPending").textContent = allOrders.filter(
+          (o) => (o.status || "pending") === "pending",
+        ).length;
+        document.getElementById("statOFD").textContent = allOrders.filter(
+          (o) => o.status === "out_for_delivery",
+        ).length;
+        document.getElementById("statDelivered").textContent = allOrders.filter(
+          (o) => {
+            if (o.status !== "delivered") return false;
+            const ts = o.deliveredAt || o.createdAt;
+            if (!ts) return false;
+            const d = new Date((ts.seconds || ts._seconds) * 1000);
+            return d >= today && d <= todayEnd;
+          },
+        ).length;
+        // YourNeed stats
+        document.getElementById("ynStatPending").textContent = allYN.filter(
+          (r) => (r.status || "pending") === "pending",
+        ).length;
+        document.getElementById("ynStatAccepted").textContent = allYN.filter(
+          (r) => r.status === "accepted",
+        ).length;
+        document.getElementById("ynStatDone").textContent = allYN.filter(
+          (r) => r.status === "done" || r.status === "rejected",
+        ).length;
+        // Boy's own deliveries today
+        const myEl = document.getElementById("statMyDelivered");
+        if (myEl && currentBoy) {
+          myEl.textContent = allOrders.filter((o) => {
+            if (o.status !== "delivered" || o.deliveredBy !== currentBoy.phone)
+              return false;
+            const ts = o.deliveredAt || o.createdAt;
+            if (!ts) return false;
+            const d = new Date((ts.seconds || ts._seconds) * 1000);
+            return d >= today && d <= todayEnd;
+          }).length;
+        }
+      }
+
+      function updateBadges() {
+        const pO = allOrders.filter(
+          (o) => !["delivered", "cancelled"].includes(o.status || "pending"),
+        ).length;
+        const pY = allYN.filter(
+          (r) => (r.status || "pending") === "pending",
+        ).length;
+        const ob = document.getElementById("ordersBadge");
+        const yb = document.getElementById("ynBadge");
+        ob.textContent = pO;
+        ob.classList.toggle("zero", pO === 0);
+        yb.textContent = pY;
+        yb.classList.toggle("zero", pY === 0);
+      }
+
+      // ━━ AREA FILTERS ━━
+      function renderAreaFilters() {
+        const activeOrders = allOrders.filter(
+          (o) => !["delivered", "cancelled"].includes(o.status || "pending"),
+        );
+        const areas = [
+          "all",
+          ...new Set(
+            activeOrders
+              .map(
+                (o) =>
+                  o.area || (o.address || "").split(",")[0].trim() || "Unknown",
+              )
+              .filter(Boolean),
+          ),
+        ];
+        if (aFilter !== "all" && !areas.includes(aFilter)) {
+          aFilter = "all";
+        }
+        document.getElementById("areaFilterBar").innerHTML = areas
+          .map(
+            (a) =>
+              `<div class="chip ${aFilter === a ? "active" : ""}" onclick="setAF('${a}')">${a === "all" ? "🗂️ All" : a}</div>`,
+          )
+          .join("");
+      }
+      function renderYNFilters() {
+        const fs = [
+          { k: "all", l: "🗂️ All" },
+          { k: "pending", l: "⏳ Pending" },
+          { k: "accepted", l: "✅ Accepted" },
+          { k: "custom_item", l: "🛍️ Custom" },
+          { k: "pickup_drop", l: "🏍️ Pickup" },
+        ];
+        document.getElementById("ynFilterBar").innerHTML = fs
+          .map(
+            (f) =>
+              `<div class="chip ${ynFilter === f.k ? "active" : ""}" onclick="setYNF('${f.k}')">${f.l}</div>`,
+          )
+          .join("");
+      }
+      let ynAreaFilter = "all";
+      function renderYNAreaFilters() {
+        const activeYN = allYN.filter(
+          (r) => !(ynSentWA.has(r.id) && ynSentCall.has(r.id)),
+        );
+        const parcelRequests = activeYN.filter((r) => r.type === "pickup_drop");
+        if (!parcelRequests.length) {
+          ynAreaFilter = "all";
+          document.getElementById("ynAreaFilterBar").innerHTML = "";
+          return;
+        }
+        const areas = [
+          "all",
+          ...new Set(
+            parcelRequests
+              .flatMap((r) => [r.pickupArea || "", r.dropArea || ""])
+              .filter(Boolean),
+          ),
+        ];
+        if (ynAreaFilter !== "all" && !areas.includes(ynAreaFilter))
+          ynAreaFilter = "all";
+        document.getElementById("ynAreaFilterBar").innerHTML = areas
+          .map(
+            (a) =>
+              `<div class="chip ${ynAreaFilter === a ? "active" : ""}" onclick="setYNAF('${a}')">${a === "all" ? "🗂️ All Areas" : a}</div>`,
+          )
+          .join("");
+      }
+      function setYNAF(a) {
+        ynAreaFilter = a;
+        renderYNAreaFilters();
+        renderYourNeed();
+      }
+      function setAF(a) {
+        aFilter = a;
+        renderAreaFilters();
+        renderOrders();
+      }
+      function setYNF(f) {
+        ynFilter = f;
+        renderYNFilters();
+        renderYourNeed();
+      }
+
+      // ━━ RENDER ORDERS ━━
+      // Steps: 1=WA to Owner  2=Call  3=Out for Delivery  4=Delivered
+      // sentCall, sentOwnerWA stored in localStorage per order
+      let sentCall = new Set(
+        JSON.parse(localStorage.getItem("qm_call") || "[]"),
+      );
+      let sentOwnerWA = new Set(
+        JSON.parse(localStorage.getItem("qm_owa") || "[]"),
+      );
+
+      function saveLocal() {
+        localStorage.setItem("qm_call", JSON.stringify([...sentCall]));
+        localStorage.setItem("qm_owa", JSON.stringify([...sentOwnerWA]));
+      }
+
+      function escapeHtml(text) {
+        return String(text)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function renderOrders() {
+        const con = document.getElementById("ordersContainer");
+        const q = document
+          .getElementById("orderSearch")
+          .value.trim()
+          .toLowerCase();
+        let orders = allOrders.filter(
+          (o) => o.status !== "delivered" && o.status !== "cancelled",
+        );
+        if (aFilter !== "all")
+          orders = orders.filter(
+            (o) =>
+              (o.area || (o.address || "").split(",")[0].trim()) === aFilter,
+          );
+        if (q)
+          orders = orders.filter((o) =>
+            `${o.id} ${o.name || ""} ${o.phone || ""} ${o.address || ""} ${o.area || ""}`
+              .toLowerCase()
+              .includes(q),
+          );
+        if (!orders.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No orders found</p></div>`;
+          return;
+        }
+
+        con.innerHTML = orders
+          .map((o) => {
+            const status = o.status || "pending";
+            const address = (o.address || "").trim();
+            const area = o.area || "";
+            const mapUrl = address
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Parbhani, Maharashtra")}`;
+            const displayAddress = address ? escapeHtml(address) : "Parbhani";
+            const items = (o.items || [])
+              .map((i) => `• ${i.name || "Item"} ×${i.qty || 1}`)
+              .join("<br>");
+            const itemsHtml = (o.items || []).length
+              ? `<div class="oc-items-grid">${(o.items || [])
+                  .map(
+                    (i) => `
+                <div class="oc-item-row">
+                  <div class="oc-item-img">
+                    ${
+                      i.img
+                        ? `<img src="${i.img}" alt="${escapeHtml(i.name || "")}" onerror="this.style.display='none';this.parentNode.innerHTML='${escapeHtml(i.emoji || "📦")}';">`
+                        : escapeHtml(i.emoji || "📦")
+                    }
+                  </div>
+                  <div class="oc-item-info">
+                    <div class="oc-item-name">${escapeHtml(i.name || "Item")}</div>
+                    <div class="oc-item-unit">${escapeHtml(i.unit || "")} × ${i.qty || 1}</div>
+                  </div>
+                  <div class="oc-item-price">₹${(i.price || 0) * (i.qty || 1)}</div>
+                </div>`,
+                  )
+                  .join("")}
+              </div>`
+              : `<div class="oc-items">No items</div>`;
+            const total = o.total != null ? `₹${o.total}` : "—";
+            const age = formatAge(o.createdAt);
+            const isOFD = status === "out_for_delivery";
+            const called = sentCall.has(o.id);
+            const ownerWASent = sentOwnerWA.has(o.id);
+            const canOFD = called && ownerWASent;
+
+            // Step indicators
+            const steps = `
+        <div class="step-row">
+          <div class="step ${ownerWASent ? "done" : "active"}">📲 ${ownerWASent ? "WA Sent" : "WA Owner"}</div>
+          <div class="step-arrow">→</div>
+          <div class="step ${called ? "done" : ownerWASent ? "active" : "wait"}">📞 ${called ? "Called" : "Call"}</div>
+          <div class="step-arrow">→</div>
+          <div class="step ${isOFD ? "done" : canOFD ? "active" : "wait"}">🏍️ ${isOFD ? "On Way" : "OFD"}</div>
+          <div class="step-arrow">→</div>
+          <div class="step wait">✅ Done</div>
+        </div>`;
+
+            // Buttons logic
+            let btns = "";
+            // Step 1 — WA to Owner (show first)
+            if (!ownerWASent) {
+              btns += `<button class="btn btn-wa-owner" onclick="doOwnerWA('${o.id}','${(o.name || "").replace(/'/g, "\\'")}','${area.replace(/'/g, "\\'")}','${items.replace(/</g, "&lt;").replace(/'/g, "\\'")}','${total}')">📲 WA to Owner</button>`;
+            } else {
+              btns += `<button class="btn btn-done" style="cursor:default;">✓ Owner Notified</button>`;
+              if (!called) {
+                btns += `<button class="btn btn-call" onclick="doCall('${o.id}','${o.phone || ""}')">📞 Call Customer</button>`;
+              } else {
+                btns += `<button class="btn btn-done" style="cursor:default;">✓ Called</button>`;
+              }
+            }
+            // Step 3 — OFD (only after call+WA)
+            if (canOFD && !isOFD) {
+              btns += `<button class="btn btn-ofd" onclick="markOFD('${o.id}')">🏍️ Out for Delivery</button>`;
+            }
+            // Step 4 — Delivered (only when OFD)
+            if (isOFD) {
+              btns += `<button class="btn btn-deliver" onclick="markDelivered('${o.id}','${o.phone || ""}','${(o.name || "").replace(/'/g, "\\'")}','${area.replace(/'/g, "\\'")}')">✅ Delivered</button>`;
+            }
+
+            return `<div class="order-card ${status === "pending" ? "is-new" : ""} ${isOFD ? "is-ofd" : ""}">
+        <div class="oc-top">
+          <div>
+            <div class="oc-id">#${o.id.slice(-6).toUpperCase()}</div>
+            <div class="oc-time">🕐 ${formatDate(o.createdAt)} · ${age}</div>
+          </div>
+          <span class="status-badge s-${status}">${statusLabel(status)}</span>
+        </div>
+        <div class="oc-meta">
+          <div class="oc-meta-item">👤 ${o.name || "—"}</div>
+          <div class="oc-meta-item">📞 <a href="tel:${o.phone}">${o.phone || "—"}</a></div>
+          <div class="oc-meta-item">📍 <a href="${mapUrl}" target="_blank">${displayAddress}</a></div>
+          <div class="oc-meta-item">💰 ${total}</div>
+        </div>
+        ${itemsHtml}
+        ${steps}
+        <div class="oc-actions">${btns}</div>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // ━━ YN localStorage for WA/Call tracking ━━
+      let ynSentCall = new Set(
+        JSON.parse(localStorage.getItem("qm_yn_call") || "[]"),
+      );
+      let ynSentWA = new Set(
+        JSON.parse(localStorage.getItem("qm_yn_wa") || "[]"),
+      );
+      function saveYNLocal() {
+        localStorage.setItem("qm_yn_call", JSON.stringify([...ynSentCall]));
+        localStorage.setItem("qm_yn_wa", JSON.stringify([...ynSentWA]));
+      }
+
+      // ━━ RENDER YOURNEED ━━
+      function renderYourNeed() {
+        const con = document.getElementById("ynContainer");
+        const q = document
+          .getElementById("ynSearch")
+          .value.trim()
+          .toLowerCase();
+        let reqs = allYN.filter((r) => {
+          const waDone = ynSentWA.has(r.id);
+          const callDone = ynSentCall.has(r.id);
+          return !(waDone && callDone);
+        });
+        if (["pending", "accepted", "rejected"].includes(ynFilter))
+          reqs = reqs.filter((r) => (r.status || "pending") === ynFilter);
+        else if (["custom_item", "pickup_drop"].includes(ynFilter))
+          reqs = reqs.filter((r) => r.type === ynFilter);
+        if (ynAreaFilter !== "all")
+          reqs = reqs.filter((r) =>
+            [r.area, r.pickupArea, r.dropArea]
+              .filter(Boolean)
+              .some((v) => v === ynAreaFilter),
+          );
+        if (q)
+          reqs = reqs.filter((r) => {
+            const haystack = [
+              r.id,
+              r.name,
+              r.phone,
+              r.area,
+              r.type,
+              r.category,
+              r.itemType,
+              r.itemDesc,
+              r.pickupArea,
+              r.dropArea,
+              r.pickupAddr,
+              r.dropAddr,
+              r.note,
+              ...(r.items || []).map((i) => i.name),
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            return haystack.includes(q);
+          });
+        if (!reqs.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No requests found</p></div>`;
+          return;
+        }
+
+        con.innerHTML = reqs
+          .map((r) => {
+            const status = r.status || "pending";
+            const isCustom = r.type === "custom_item";
+            const typeLabel = isCustom ? "🛍️ Custom Item" : "🏍️ Pickup & Drop";
+            const details = isCustom
+              ? `<strong>Category:</strong> ${r.category || "—"}<br>${(r.items || []).map((i) => `• ${i.name || "Item"} ×${i.qty || 1}${i.brand ? " (" + i.brand + ")" : ""}`).join("<br>")}`
+              : `<strong>Item:</strong> ${r.itemType || "—"} — ${r.itemDesc || "—"}<br><strong>Pickup:</strong> ${r.pickupArea || "—"}, ${r.pickupAddr || "—"}<br><strong>Drop:</strong> ${r.dropArea || "—"}, ${r.dropAddr || "—"}`;
+
+            const waSent = ynSentWA.has(r.id);
+            const called = ynSentCall.has(r.id);
+
+            // Step indicators
+            const steps = `
+        <div class="step-row">
+          <div class="step ${waSent ? "done" : "active"}">📲 ${waSent ? "WA Sent" : "WA Owner"}</div>
+          <div class="step-arrow">→</div>
+          <div class="step ${called ? "done" : waSent ? "active" : "wait"}">📞 ${called ? "Called" : "Call"}</div>
+          <div class="step-arrow">→</div>
+          <div class="step ${called && waSent ? "active" : "wait"}">✅ Done</div>
+        </div>`;
+
+            // Buttons
+            let btns = "";
+            if (!waSent) {
+              const ynMsg = `🎯 *YourNeed Request — QuickMart*\n\n👤 Customer: ${r.name || "—"}\n📞 Phone: ${r.phone || "—"}\n📍 Area: ${r.area || "—"}\n🕐 Slot: ${r.deliverySlot || "—"}\n\n📦 Type: ${typeLabel}\n${r.note ? "📝 Note: " + r.note : ""}\n\nRequest ID: #${r.id.slice(-6).toUpperCase()}`;
+              btns += `<button class="btn btn-wa-owner" onclick="doYNOwnerWA('${r.id}','${encodeURIComponent(ynMsg)}')">📲 WA to Owner</button>`;
+            } else {
+              btns += `<button class="btn btn-done" style="cursor:default;">✓ Owner Notified</button>`;
+              if (!called) {
+                btns += `<button class="btn btn-call" onclick="doYNCall('${r.id}','${r.phone || ""}')">📞 Call Customer</button>`;
+              } else {
+                btns += `<button class="btn btn-done" style="cursor:default;">✓ Called</button>`;
+              }
+            }
+
+            return `<div class="order-card ${status === "pending" ? "is-new" : ""}">
+        <div class="oc-top">
+          <div><div class="oc-id">${typeLabel}</div><div class="oc-time">🕐 ${formatDate(r.createdAt)}</div></div>
+          <span class="status-badge s-${status}">${statusLabel(status)}</span>
+        </div>
+        <div class="oc-meta">
+          <div class="oc-meta-item">👤 ${r.name || "—"}</div>
+          <div class="oc-meta-item">📞 <a href="tel:${r.phone}" style="color:var(--pr);font-weight:700;">${r.phone || "—"}</a></div>
+          ${r.area ? `<div class="oc-meta-item">📍 ${r.area}</div>` : ""}
+          <div class="oc-meta-item">⏰ ${r.deliverySlot || "—"}</div>
+        </div>
+        <div class="oc-items">${details}${r.note ? `<br>📝 ${r.note}` : ""}</div>
+        ${r.adminNote ? `<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fbbf24;font-size:12px;">📋 Admin Note: ${r.adminNote}</div>` : ""}
+        ${steps}
+        <div class="oc-actions" style="margin-top:10px;">${btns}</div>
+      </div>`;
+          })
+          .join("");
+      }
+
+      function doYNOwnerWA(id, encodedMsg) {
+        ynSentWA.add(id);
+        saveYNLocal();
+        renderYourNeed();
+        window.open(`https://wa.me/${OWNER_WA}?text=${encodedMsg}`, "_blank");
+        showToast("📲 Sent YourNeed to owner!");
+      }
+      function doYNCall(id, phone) {
+        if (!phone) {
+          showToast("❌ Phone number missing!");
+          return;
+        }
+        ynSentCall.add(id);
+        saveYNLocal();
+        renderYourNeed();
+        window.open("tel:" + phone);
+        showToast("📞 Call the customer!");
+      }
+
+      // ━━ YN HISTORY ━━
+      function renderYNHistory() {
+        // Update summary numbers
+        const total   = allYN.length;
+        const custom  = allYN.filter(r => r.type === 'custom_item').length;
+        const pickup  = allYN.filter(r => r.type === 'pickup_drop').length;
+        const pending = allYN.filter(r => (r.status || 'pending') === 'pending').length;
+        const accepted = allYN.filter(r => r.status === 'accepted').length;
+
+        document.getElementById('ynhTotal').textContent    = total;
+        document.getElementById('ynhCustom').textContent   = custom;
+        document.getElementById('ynhPickup').textContent   = pickup;
+        document.getElementById('ynhPending').textContent  = pending;
+        document.getElementById('ynhAccepted').textContent = accepted;
+
+        const con = document.getElementById('ynhContainer');
+        const q   = (document.getElementById('ynhSearch').value || '').trim().toLowerCase();
+
+        let reqs = [...allYN];
+        if (q) {
+          reqs = reqs.filter(r => {
+            const hay = [
+              r.name, r.phone, r.area, r.type, r.category,
+              r.itemType, r.itemDesc, r.pickupArea, r.dropArea,
+              r.pickupAddr, r.dropAddr, r.note,
+              ...(r.items || []).map(i => i.name)
+            ].filter(Boolean).join(' ').toLowerCase();
+            return hay.includes(q);
+          });
+        }
+
+        if (!reqs.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No requests found</p></div>`;
+          return;
+        }
+
+        con.innerHTML = reqs.map(r => {
+          const isPickup = r.type === 'pickup_drop';
+          const typeLabel = isPickup ? '🏍️ Pickup & Drop' : '🛍️ Custom Item';
+          const status = r.status || 'pending';
+
+          // Route for pickup/drop
+          let detailHtml = '';
+          if (isPickup) {
+            const from = [r.pickupArea, r.pickupAddr].filter(Boolean).join(', ') || '—';
+            const to   = [r.dropArea,   r.dropAddr  ].filter(Boolean).join(', ') || '—';
+            const item = [r.itemType, r.itemDesc].filter(Boolean).join(' — ') || '—';
+            detailHtml = `
+              <div class="ynh-card-detail" style="margin-bottom:6px;"><strong>Item:</strong> ${item}</div>
+              <div class="ynh-route">
+                <div class="ynh-route-point">📍 ${from}</div>
+                <div class="ynh-route-arrow">→</div>
+                <div class="ynh-route-point">🏠 ${to}</div>
+              </div>`;
+          } else {
+            const itemsList = (r.items || []).map(i =>
+              `${i.name || 'Item'} ×${i.qty || 1}${i.brand ? ' ('+i.brand+')' : ''}`
+            ).join(', ') || '—';
+            const area = r.area || '—';
+            detailHtml = `
+              <div class="ynh-card-detail"><strong>Category:</strong> ${r.category || '—'}</div>
+              <div class="ynh-card-detail"><strong>Items:</strong> ${itemsList}</div>
+              <div class="ynh-route" style="margin-top:6px;">
+                <div class="ynh-route-point">📍 ${area}</div>
+              </div>`;
+          }
+
+          const noteHtml = r.note
+            ? `<div class="ynh-card-detail" style="margin-top:6px;">📝 ${r.note}</div>` : '';
+
+          return `<div class="ynh-card">
+            <div class="ynh-card-top">
+              <span class="ynh-card-type">${typeLabel}</span>
+              <div class="ynh-card-time">${formatDate(r.createdAt)}<br><span class="status-badge s-${status}" style="font-size:10px;padding:2px 8px;">${statusLabel(status)}</span></div>
+            </div>
+            <div class="ynh-card-customer">👤 ${r.name || '—'} &nbsp;·&nbsp; 📞 ${r.phone || '—'}</div>
+            ${detailHtml}
+            ${noteHtml}
+          </div>`;
+        }).join('');
+      }
+      const PARCEL_RATE = 14;
+      let earnPeriod = 'day';
+
+      function setEarnPeriod(p, btn) {
+        earnPeriod = p;
+        document.querySelectorAll('.earn-period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderEarnings();
+      }
+
+      function getMyDeliveries() {
+        if (!currentBoy) return [];
+        return allOrders.filter(o =>
+          o.status === 'delivered' && o.deliveredBy === currentBoy.phone
+        );
+      }
+
+      function tsToDate(ts) {
+        if (!ts) return null;
+        return new Date((ts.seconds || ts._seconds) * 1000);
+      }
+
+      function updateEarningsSummary() {
+        const deliveries = getMyDeliveries();
+        const now = new Date();
+
+        const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
+        const todayEnd   = new Date(now); todayEnd.setHours(23,59,59,999);
+
+        const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
+        const weekStart = new Date(now); weekStart.setHours(0,0,0,0); weekStart.setDate(now.getDate() - dayOfWeek);
+        const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd   = new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59, 999);
+
+        function count(from, to) {
+          return deliveries.filter(o => {
+            const d = tsToDate(o.deliveredAt || o.createdAt);
+            return d && d >= from && d <= to;
+          }).length;
+        }
+
+        const todayC  = count(todayStart, todayEnd);
+        const weekC   = count(weekStart, weekEnd);
+        const monthC  = count(monthStart, monthEnd);
+        const allC    = deliveries.length;
+
+        document.getElementById('earnToday').textContent   = `₹${todayC * PARCEL_RATE}`;
+        document.getElementById('earnTodayP').textContent  = `${todayC} parcel${todayC !== 1 ? 's' : ''}`;
+        document.getElementById('earnWeek').textContent    = `₹${weekC * PARCEL_RATE}`;
+        document.getElementById('earnWeekP').textContent   = `${weekC} parcel${weekC !== 1 ? 's' : ''}`;
+        document.getElementById('earnMonth').textContent   = `₹${monthC * PARCEL_RATE}`;
+        document.getElementById('earnMonthP').textContent  = `${monthC} parcel${monthC !== 1 ? 's' : ''}`;
+        document.getElementById('earnAll').textContent     = `₹${allC * PARCEL_RATE}`;
+        document.getElementById('earnAllP').textContent    = `${allC} parcel${allC !== 1 ? 's' : ''}`;
+      }
+
+      function renderEarnings() {
+        updateEarningsSummary();
+        const deliveries = getMyDeliveries();
+        const con = document.getElementById('earnBreakdown');
+
+        if (!deliveries.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>No deliveries yet — start delivering!</p></div>`;
+          return;
+        }
+
+        const groups = {};
+        deliveries.forEach(o => {
+          const d = tsToDate(o.deliveredAt || o.createdAt);
+          if (!d) return;
+          let key = '';
+          if (earnPeriod === 'day') {
+            key = d.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+          } else if (earnPeriod === 'week') {
+            const tempDate = new Date(d);
+            const dayNum = (tempDate.getDay() + 6) % 7;
+            tempDate.setDate(tempDate.getDate() - dayNum + 3);
+            const firstThursday = tempDate.valueOf();
+            tempDate.setMonth(0, 1);
+            if (tempDate.getDay() !== 4) tempDate.setMonth(0, 1 + ((4 - tempDate.getDay()) + 7) % 7);
+            const weekNo = 1 + Math.ceil((firstThursday - tempDate) / 604800000);
+            key = `Week ${weekNo}, ${d.getFullYear()}`;
+          } else {
+            key = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+          }
+          if (!groups[key]) groups[key] = 0;
+          groups[key]++;
+        });
+
+        const keys = Object.keys(groups).reverse();
+        if (!keys.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>No deliveries in this period</p></div>`;
+          return;
+        }
+
+        con.innerHTML = `<div class="earn-day-list">${keys.map(k => {
+          const c = groups[k];
+          const amt = c * PARCEL_RATE;
+          return `<div class="earn-day-row">
+            <div class="earn-day-date">${k}</div>
+            <div class="earn-day-right">
+              <div class="earn-day-amount">₹${amt}</div>
+              <div class="earn-day-parcels">${c} parcel${c !== 1 ? 's' : ''}</div>
+            </div>
+          </div>`;
+        }).join('')}</div>`;
+      }
+
+      // ━━ ACTIONS ━━
+      function doCall(id, phone) {
+        if (!phone) {
+          showToast("❌ No phone number!");
+          return;
+        }
+        sentCall.add(id);
+        saveLocal();
+        renderOrders();
+        window.open("tel:" + phone);
+        showToast("📞 Call the customer!");
+      }
+
+      function doOwnerWA(id, name, area, items, total) {
+        const clean = items
+          .replace(/<br>/g, "\n• ")
+          .replace(/&lt;/g, "<")
+          .replace(/• /, "");
+        const msg =
+          `🛵 *Delivery Update — QuickMart*\n\n` +
+          `Driver is picking up the order ✅\n\n` +
+          `👤 Customer: ${name}\n` +
+          `📍 Area: ${area}\n` +
+          `💰 Total: ${total}\n\n` +
+          `📦 Items:\n• ${clean}\n\n` +
+          `Order ID: #${id.slice(-6).toUpperCase()}`;
+        sentOwnerWA.add(id);
+        saveLocal();
+        renderOrders();
+        window.open(
+          `https://wa.me/${OWNER_WA}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
+        showToast("📲 Owner notified!");
+      }
+
+      async function markOFD(id) {
+        const ok = await window.fbUpdate(id, { status: "out_for_delivery" });
+        showToast(
+          ok ? "🏍️ Marked Out for Delivery!" : "❌ Update failed",
+        );
+      }
+
+      async function markDelivered(id, phone, name, area) {
+        const ok = await window.fbUpdate(id, {
+          status: "delivered",
+          deliveredAt: { seconds: Math.floor(Date.now() / 1000) },
+          deliveredBy: currentBoy ? currentBoy.phone : "",
+          deliveredByName: currentBoy ? currentBoy.name : "",
+        });
+        if (ok) {
+          showToast("✅ Delivered! Thank you 🙏");
+          // Owner notified with delivery update
+          const msg = `✅ *Delivered — QuickMart*\n\nOrder #${id.slice(-6).toUpperCase()} has been delivered!\n👤 ${name}\n📍 ${area}`;
+          setTimeout(
+            () =>
+              window.open(
+                `https://wa.me/${OWNER_WA}?text=${encodeURIComponent(msg)}`,
+                "_blank",
+              ),
+            800,
+          );
+        } else {
+          showToast("❌ Update failed");
+        }
+      }
+
+      // ━━ HELPERS ━━
+      function statusLabel(s) {
+        return (
+          {
+            pending: "⏳ Pending",
+            confirmed: "✅ Confirmed",
+            out_for_delivery: "🏍️ On the Way",
+            delivered: "✅ Delivered",
+            cancelled: "❌ Cancelled",
+            accepted: "✅ Accepted",
+            rejected: "❌ Rejected",
+          }[s] || s
+        );
+      }
+      function formatDate(ts) {
+        if (!ts) return "—";
+        return new Date((ts.seconds || ts._seconds) * 1000).toLocaleString(
+          "en-IN",
+          {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          },
+        );
+      }
+      function formatAge(ts) {
+        if (!ts) return "";
+        const m = Math.max(
+          0,
+          Math.floor((Date.now() - (ts.seconds || ts._seconds) * 1000) / 60000),
+        );
+        if (m < 60) return `${m}m ago`;
+        return `${Math.floor(m / 60)}h ${m % 60}m ago`;
+      }
+      let tT = null;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        if (tT) {
+          clearTimeout(tT);
+          t.classList.remove("show");
+        }
+        t.textContent = msg;
+        void t.offsetWidth;
+        t.classList.add("show");
+        tT = setTimeout(() => {
+          t.classList.remove("show");
+          tT = null;
+        }, 2800);
+      }
+    </script>
+  </body>
+</html>
