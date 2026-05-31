@@ -46,6 +46,16 @@
             status: "pending",
             createdAt: serverTimestamp(),
           });
+          // Telegram Notification
+          fetch("/api/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: data.name,
+              total: "YourNeed Request",
+              items: data.items || []
+            })
+          });
           return ref.id;
         } catch (e) {
           console.error("YourNeed save error:", e);
