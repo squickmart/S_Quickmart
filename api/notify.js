@@ -4,18 +4,24 @@ export default async function handler(req, res) {
   const { name, total, items } = req.body;
 
   const BOT_TOKEN = "8700564200:AAF2KVaU8E-Cu80SA4ZqBAIR6Hvg9XvF8jk";
-  const CHAT_ID = "5153397698";
+  const CHAT_ID = "-5110398756";
 
-  const itemList = items
-    ? items.map((i) => i.name + " x" + i.qty).join(", ")
+  const isYourNeed = total === "YourNeed Request";
+
+  const itemList = items && items.length
+    ? items.map((i) => "• " + (i.name || i) + (i.qty ? " ×" + i.qty : "")).join("\n")
     : "N/A";
 
-  const message =
-    "🛒 New Order — S_Quick Mart\n\n" +
-    "👤 Customer: " + name + "\n" +
-    "💰 Total: ₹" + total + "\n" +
-    "📦 Items: " + itemList + "\n\n" +
-    "⚡ Open panel to assign delivery!";
+  const message = isYourNeed
+    ? "🎯 New YourNeed Request — S_Quick Mart\n\n" +
+      "👤 Customer: " + name + "\n" +
+      "📦 Items: " + itemList + "\n\n" +
+      "⚡ Open panel to confirm!"
+    : "🛒 New Order — S_Quick Mart\n\n" +
+      "👤 Customer: " + name + "\n" +
+      "💰 Total: ₹" + total + "\n" +
+      "📦 Items: " + itemList + "\n\n" +
+      "⚡ Open panel to assign delivery!";
 
   await fetch(
     "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage",
