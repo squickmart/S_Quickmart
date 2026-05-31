@@ -114,6 +114,16 @@
       window.saveOrderToFirebase = async function (orderData) {
         try {
           const ref = await addDoc(collection(db, "orders"), orderData);
+          // Telegram Notification
+          fetch("/api/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: orderData.name,
+              total: orderData.total,
+              items: orderData.items
+            })
+          });
           return ref.id;
         } catch (e) {
           console.error(e);
