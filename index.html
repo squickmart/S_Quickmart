@@ -4121,7 +4121,7 @@
         const items = Object.values(cart);
         const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
         const cnt = items.reduce((s, i) => s + i.qty, 0);
-        const del = sub > 0 ? (sub >= 189 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23)) : 24;
+        const del = sub > 0 ? (sub >= 189 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23)) : 23;
         const grand = sub + del;
         const badge = document.getElementById("cartBadge");
         badge.textContent = cnt;
