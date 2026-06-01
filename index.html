@@ -2610,14 +2610,14 @@
       <div class="c-items" id="cItems"></div>
       <div class="c-foot">
         <div class="del-info" id="delInfo">
-          🚚 Delivery: <strong>₹24</strong>
+          🚚 Delivery: <strong>₹23</strong>
         </div>
         <div class="c-bill">
           <div class="c-bill-row">
             <span>Items Total</span><span id="cSub">₹0</span>
           </div>
           <div class="c-bill-row">
-            <span>Delivery</span><span id="cDel">₹24</span>
+            <span>Delivery</span><span id="cDel">₹23</span>
           </div>
           <div class="c-bill-row total">
             <span>Grand Total</span><span id="cTotal">₹0</span>
@@ -3506,7 +3506,7 @@
                     )
                     .join("")}
                   <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:13px;color:#777">
-                    <span>Delivery</span><span>${o.delivery === 0 ? '<span style="color:#1a9e5c;font-weight:700">FREE</span>' : "₹" + (o.delivery || 24)}</span>
+                    <span>Delivery</span><span>${o.delivery === 0 ? '<span style="color:#1a9e5c;font-weight:700">FREE</span>' : "₹" + (o.delivery || 23)}</span>
                   </div>
                   <div style="display:flex;justify-content:space-between;padding-top:4px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:700;color:#1e1e1e">
                     <span>Total</span><span>₹${o.total}</span>
@@ -4138,12 +4138,12 @@
           del === 0 ? "FREE 🎉" : "₹" + del;
         document.getElementById("cTotal").textContent = "₹" + grand;
         const di = document.getElementById("delInfo");
-        if (sub === 0) di.innerHTML = "🚚 Delivery: <strong>₹24</strong>";
+        if (sub === 0) di.innerHTML = "🚚 Delivery: <strong>₹${getAreaDeliveryCharge ? getAreaDeliveryCharge() : 23}</strong>";
         else if (sub >= 189)
           di.innerHTML =
             '🎉 <strong style="color:#1a9e5c">Free Delivery!</strong>';
         else
-          di.innerHTML = `🚚 Delivery: <strong>₹24</strong> | ₹${189 - sub} more for free!`;
+          di.innerHTML = `🚚 Delivery: <strong>₹${getAreaDeliveryCharge ? getAreaDeliveryCharge() : 23}</strong> | ₹${189 - sub} more for free!`;
         renderCartItems();
       };
 
