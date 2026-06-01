@@ -2794,6 +2794,24 @@
     ></div>
     <div class="profile-sidebar" id="profileSidebar">
       <div class="profile-header">
+        <button id="logoutBtn" onclick="logoutUser()" style="
+             
+              position: absolute;
+              right: 65px;
+              top: 20px;
+              background: none;
+              border: 2px solid #246a73;
+              color: #fff;
+              border-radius: 8px;
+              padding: 7px 12px;
+              font-size: 12px;
+              font-weight: 700;
+              cursor: pointer;
+              font-family: &quot;Inter&quot;, sans-serif;
+            
+          " >
+            🚪 Logout
+          </button>
         <button
           class="profile-back"
           onclick="closeProfile()"
@@ -2859,7 +2877,7 @@
           <button class="save-profile-btn" onclick="saveProfile()">
             💾 Save
           </button>
-          <button id="logoutBtn" onclick="logoutUser()" style="
+          <!-- <button id="logoutBtn" onclick="logoutUser()" style="
             display:none;
             width:100%;
             margin-top:10px;
@@ -2875,7 +2893,7 @@
             transition:0.2s;
           " onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background='#fff'">
             🚪 Logout
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
