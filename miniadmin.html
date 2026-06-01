@@ -1272,7 +1272,7 @@
         <!-- EARNINGS TAB -->
         <div class="tab-panel" id="tab-earnings">
           <div class="earn-rate-box">
-            💸 Rate: ₹14 per parcel delivered
+            💸 Rate: ₹17 per parcel delivered
           </div>
 
           <!-- Summary cards always visible -->
@@ -2046,7 +2046,7 @@
           </div>`;
         }).join('');
       }
-      const PARCEL_RATE = 14;
+      const PARCEL_RATE = 17;
       let earnPeriod = 'day';
 
       function setEarnPeriod(p, btn) {
@@ -2314,8 +2314,8 @@
     }
 
     onMessage(messaging, function(payload) {
-      const title = payload.notification.title || "🛒 New Order — S_Quick Mart!";
-      const body  = payload.notification.body  || "A new order has been placed. Open app to assign delivery.!";
+      const title = payload.notification.title || "Naya Order!";
+      const body  = payload.notification.body  || "Ek naya order aaya hai!";
       if (Notification.permission === "granted") {
         new Notification(title, {
           body: body,

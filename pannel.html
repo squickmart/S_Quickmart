@@ -1839,7 +1839,9 @@
             >
               Add or remove areas here. Toggle off an area to mark
               <strong>Not Available</strong> — it will appear blurred on the
-              YourNeed page and cannot be selected.
+              YourNeed page and cannot be selected. Set a
+              <strong>delivery charge</strong> per area — this will
+              automatically apply on the YourNeed and checkout pages.
             </p>
 
             <!-- Add new area row -->
@@ -1857,6 +1859,15 @@
                 class="form-input"
                 placeholder="New area name (e.g. Sailu Road)"
                 style="flex: 1; min-width: 160px"
+                onkeydown="if (event.key === 'Enter') addArea();"
+              />
+              <input
+                type="number"
+                id="newAreaCharge"
+                class="form-input"
+                placeholder="Delivery ₹"
+                min="0"
+                style="width: 110px; flex-shrink: 0"
                 onkeydown="if (event.key === 'Enter') addArea();"
               />
               <button class="btn-primary" onclick="addArea()">
@@ -3357,15 +3368,33 @@ ${items}
         el.innerHTML = ynAreas
           .map(
             (a, i) => `
-          <div class="area-admin-card ${a.available ? "" : "unavailable"}">
-            <span class="area-admin-name">📍 ${a.name}</span>
-            <div class="area-admin-actions">
-              <span class="area-admin-badge ${a.available ? "avail" : "unavail"}">${a.available ? "✅ Available" : "🚫 Not Available"}</span>
-              <label class="toggle" title="Toggle availability">
-                <input type="checkbox" ${a.available ? "checked" : ""} onchange="toggleAreaAvail(${i}, this.checked)">
-                <span class="toggle-slider"></span>
-              </label>
-              <button class="btn-danger" onclick="deleteArea(${i})" style="padding:5px 10px;font-size:12px;">🗑️</button>
+          <div class="area-admin-card ${a.available ? "" : "unavailable"}" style="flex-direction:column;align-items:stretch;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <span class="area-admin-name">📍 ${a.name}</span>
+              <div class="area-admin-actions">
+                <span class="area-admin-badge ${a.available ? "avail" : "unavail"}">${a.available ? "✅ Available" : "🚫 N/A"}</span>
+                <label class="toggle" title="Toggle availability">
+                  <input type="checkbox" ${a.available ? "checked" : ""} onchange="toggleAreaAvail(${i}, this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+                <button class="btn-danger" onclick="deleteArea(${i})" style="padding:5px 10px;font-size:12px;">🗑️</button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:12px;color:var(--muted);white-space:nowrap;">🚚 Delivery Charge:</span>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="font-size:13px;font-weight:700;color:var(--muted);">₹</span>
+                <input
+                  type="number"
+                  min="0"
+                  value="${a.deliveryCharge !== undefined ? a.deliveryCharge : 20}"
+                  style="width:72px;padding:4px 8px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;font-weight:700;color:var(--dark);outline:none;"
+                  onfocus="this.style.borderColor='var(--primary)'"
+                  onblur="this.style.borderColor='#e0e0e0'"
+                  onchange="ynAreas[${i}].deliveryCharge = parseInt(this.value) || 0"
+                  title="Delivery charge for ${a.name}"
+                />
+              </div>
             </div>
           </div>`,
           )
@@ -3379,6 +3408,7 @@ ${items}
 
       function addArea() {
         const inp = document.getElementById("newAreaName");
+        const chargeInp = document.getElementById("newAreaCharge");
         const name = inp.value.trim();
         if (!name) {
           showToast("❌ Please enter an area name!");
@@ -3388,8 +3418,10 @@ ${items}
           showToast("❌ This area already exists!");
           return;
         }
-        ynAreas.push({ name, available: true });
+        const deliveryCharge = parseInt(chargeInp.value) || 20;
+        ynAreas.push({ name, available: true, deliveryCharge });
         inp.value = "";
+        chargeInp.value = "";
         renderAreasList();
         showToast(`✅ "${name}" added! Don't forget to save.`);
       }
@@ -3632,8 +3664,8 @@ ${items}
     }
 
     onMessage(messaging, function(payload) {
-      const title = payload.notification.title || "🛒 New Order — S_Quick Mart!";
-      const body  = payload.notification.body  || "A new order has been placed. Open app to assign delivery.!";
+      const title = payload.notification.title || "Naya Order!";
+      const body  = payload.notification.body  || "Ek naya order aaya hai!";
       if (Notification.permission === "granted") {
         new Notification(title, {
           body: body,

@@ -46,7 +46,7 @@
             status: "pending",
             createdAt: serverTimestamp(),
           });
-          // Telegram Notification
+           // Telegram Notification
           fetch("/api/notify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -464,11 +464,18 @@
         transform: rotate(180deg);
       }
       .step-body {
-        display: none;
-        padding: 0 16px 20px;
+        overflow: hidden;
+        max-height: 0;
+        padding: 0 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
       }
       .step.active .step-body {
-        display: block;
+        max-height: 2600px;
+        padding: 0 16px 20px;
+        opacity: 1;
+        pointer-events: auto;
       }
 
       /* ── CATEGORY GRID ── */
@@ -1710,11 +1717,11 @@
               </div>
               <div class="pr">
                 <span class="pl">Delivery Charge</span
-                ><span class="pv">₹20</span>
+                ><span class="pv" id="cr-delivery-charge">₹20</span>
               </div>
               <div class="pr total">
                 <span class="pl">Total</span
-                ><span class="pv">Item Cost + ₹20</span>
+                ><span class="pv" id="cr-total-text">Item Cost + ₹20</span>
               </div>
             </div>
             <div class="info-box green">
@@ -2401,12 +2408,13 @@
           .forEach((s) => s.classList.remove("active"));
         const el = document.getElementById("step-" + p + "-" + n);
         el.classList.add("active");
-        // smooth scroll — offset for sticky header+nav (~116px)
+        // Scroll only if the step header has gone above the visible area
         setTimeout(() => {
           const rect = el.getBoundingClientRect();
-          const offset = rect.top + window.pageYOffset - 120;
-          window.scrollTo({ top: Math.max(0, offset), behavior: "smooth" });
-        }, 60);
+          if (rect.top < 116) {
+            window.scrollTo({ top: Math.max(0, rect.top + window.pageYOffset - 124), behavior: "smooth" });
+          }
+        }, 100);
       }
 
       /* ─ CATEGORY ─ */
@@ -2434,6 +2442,17 @@
           .forEach((b) =>
             b.classList.toggle("selected", b.dataset.area === area),
           );
+        // Update delivery charge display for custom request
+        if (p === "cr") {
+          const areas = window._latestYnAreas || [];
+          const areaData = areas.find(a => a.name === area);
+          const charge = areaData && areaData.deliveryCharge !== undefined ? areaData.deliveryCharge : 20;
+          const delEl = document.getElementById("cr-delivery-charge");
+          const totalEl = document.getElementById("cr-total-text");
+          if (delEl) delEl.textContent = "₹" + charge;
+          if (totalEl) totalEl.textContent = "Item Cost + ₹" + charge;
+          S[p].deliveryCharge = charge;
+        }
       }
       function selectAreaPD(type, area) {
         if (type === "from") S.pd.fromArea = area;
