@@ -981,9 +981,9 @@
         white-space: nowrap;
       }
       /* Qty control */
-      .btn-order {
+      /* .btn-order {
         display: none;
-      }
+      } */
       .qty-ctrl {
         display: flex;
         align-items: center;
@@ -3326,6 +3326,8 @@
         // Auto close
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
+        document.body.style.overflow = "";
+        setOverlayFooterState(false);
       }
 
       function logoutUser() {
