@@ -3255,6 +3255,7 @@
       function skipPhoneLogin() {
         document.getElementById("phoneModal").classList.remove("open");
         setOverlayFooterState(false);
+        document.body.style.overflow = "";
       }
 
       let selectedProfileArea = "";
@@ -4510,6 +4511,19 @@
 
       setupTiming();
       loadUser();
+// -----------------------------------------------------------------------------------------------
+
+      // Safety: agar koi overlay close ho to overflow reset ho
+        document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+        document.body.style.overflow = "";
+        closeProfile && closeProfile();
+        closeCart && closeCart();
+        closeDetail && closeDetail();
+        closeCheckout && closeCheckout();
+      }
+    });
+
     </script>
 
     <!-- PRODUCTS CLOSED POPUP -->
