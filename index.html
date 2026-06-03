@@ -2495,7 +2495,7 @@
       </div>
     </header>
     <div class="banner">
-      🚚 Order above ₹189 — FREE Delivery! &nbsp;|&nbsp; Just ₹23 delivery
+      🚚 Order above ₹399 — FREE Delivery! &nbsp;|&nbsp; Just ₹23 delivery
       charge
     </div>
     <div class="announce-bar hidden" id="announceBar">
@@ -4142,7 +4142,7 @@
         const items = Object.values(cart);
         const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
         const cnt = items.reduce((s, i) => s + i.qty, 0);
-        const del = sub > 0 ? (sub >= 189 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23)) : 23;
+        const del = sub > 0 ? (sub >= 399 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23)) : 23;
         const grand = sub + del;
         const badge = document.getElementById("cartBadge");
         badge.textContent = cnt;
@@ -4160,11 +4160,11 @@
         document.getElementById("cTotal").textContent = "₹" + grand;
         const di = document.getElementById("delInfo");
         if (sub === 0) di.innerHTML = `🚚 Delivery: <strong>₹${getAreaDeliveryCharge ? getAreaDeliveryCharge() : 23}</strong>`;
-        else if (sub >= 189)
+        else if (sub >= 399)
           di.innerHTML =
             '🎉 <strong style="color:#1a9e5c">Free Delivery!</strong>';
         else
-          di.innerHTML = `🚚 Delivery: <strong>₹${getAreaDeliveryCharge ? getAreaDeliveryCharge() : 23}</strong> | ₹${189 - sub} more for free!`;
+          di.innerHTML = `🚚 Delivery: <strong>₹${getAreaDeliveryCharge ? getAreaDeliveryCharge() : 23}</strong> | ₹${399 - sub} more for free!`;
         renderCartItems();
       };
 
@@ -4239,7 +4239,7 @@
       function renderOrdSum() {
         const items = Object.values(cart);
         const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
-        const del = sub >= 189 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23);
+        const del = sub >= 399 ? 0 : (selectedCheckoutArea ? getAreaDeliveryCharge() : 23);
         const grand = sub + del;
         let html = `<div class="ord-sum-title">📦 Your Order</div>`;
         items.forEach((i) => {
@@ -4433,7 +4433,7 @@
         }
         const items = Object.values(cart);
         const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
-        const del = sub >= 189 ? 0 : getAreaDeliveryCharge();
+        const del = sub >= 399 ? 0 : getAreaDeliveryCharge();
         const grand = sub + del;
         // Save to Firebase
         const orderData = {
