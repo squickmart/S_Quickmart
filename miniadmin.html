@@ -756,7 +756,51 @@
         gap: 8px;
       }
 
-      /* ══ TOAST ══════════════════════════════════════════ */
+      /* ══ DELIVERY TIMER ════════════════════════════════════ */
+      .order-timer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        margin-bottom: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--yellow);
+        transition: 0.3s;
+      }
+      .order-timer.timer-red {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: var(--danger);
+        animation: pulse-red 1s infinite;
+      }
+      .order-timer.timer-expired {
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.45);
+        color: var(--danger);
+      }
+      @keyframes pulse-red {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.65; }
+      }
+      .timer-icon { font-size: 16px; }
+      .timer-label { flex: 1; }
+      .timer-time { font-family: "Baloo 2", cursive; font-size: 16px; }
+      .timer-late-rate {
+        font-size: 11px;
+        font-weight: 700;
+        background: rgba(239,68,68,0.15);
+        border: 1px solid rgba(239,68,68,0.3);
+        color: var(--danger);
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-left: 6px;
+      }
+
+
       .toast {
         position: fixed;
         bottom: 24px;
@@ -1272,7 +1316,7 @@
         <!-- EARNINGS TAB -->
         <div class="tab-panel" id="tab-earnings">
           <div class="earn-rate-box">
-            💸 Rate: ₹17 per parcel delivered
+            💸 Rate: ₹14 per parcel (₹10 if delivered after 30 mins)
           </div>
 
           <!-- Summary cards always visible -->
@@ -1421,6 +1465,8 @@
     <script>
       // ━━ CONFIG ━━
       const OWNER_WA = "917058204462";
+      const DELIVERY_RATE_NORMAL = 14;
+      const DELIVERY_RATE_LATE   = 10;
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
       let allOrders = [],
@@ -1736,9 +1782,10 @@
             const status = o.status || "pending";
             const address = (o.address || "").trim();
             const area = o.area || "";
-            const mapUrl = address
-              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Parbhani, Maharashtra")}`;
+            const mapQuery = address
+              ? `${address}, Parbhani, Maharashtra`
+              : `Parbhani, Maharashtra`;
+            const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
             const displayAddress = address ? escapeHtml(address) : "Parbhani";
             const items = (o.items || [])
               .map((i) => `• ${i.name || "Item"} ×${i.qty || 1}`)
@@ -1771,6 +1818,16 @@
             const called = sentCall.has(o.id);
             const ownerWASent = sentOwnerWA.has(o.id);
             const canOFD = called && ownerWASent;
+
+            // ── Delivery timer ──
+            const orderTs = o.createdAt ? (o.createdAt.seconds || o.createdAt._seconds) * 1000 : null;
+            const timerHtml = orderTs
+              ? `<div class="order-timer" id="timer-${o.id}" data-created="${orderTs}">
+                  <span class="timer-icon">⏱️</span>
+                  <span class="timer-label">Delivery Timer</span>
+                  <span class="timer-time" id="timerVal-${o.id}">--:--</span>
+                </div>`
+              : '';
 
             // Step indicators
             const steps = `
@@ -1821,6 +1878,7 @@
           <div class="oc-meta-item">💰 ${total}</div>
         </div>
         ${itemsHtml}
+        ${timerHtml}
         ${steps}
         <div class="oc-actions">${btns}</div>
       </div>`;
@@ -2046,7 +2104,7 @@
           </div>`;
         }).join('');
       }
-      const PARCEL_RATE = 17;
+      const PARCEL_RATE = 14;
       let earnPeriod = 'day';
 
       function setEarnPeriod(p, btn) {
@@ -2068,6 +2126,19 @@
         return new Date((ts.seconds || ts._seconds) * 1000);
       }
 
+      // Returns ₹14 if delivered within 30 min of order, else ₹10
+      function rateForOrder(o) {
+        const created   = o.createdAt   ? (o.createdAt.seconds   || o.createdAt._seconds)   * 1000 : null;
+        const delivered = o.deliveredAt ? (o.deliveredAt.seconds || o.deliveredAt._seconds) * 1000 : null;
+        if (!created || !delivered) return DELIVERY_RATE_NORMAL;
+        const diffMin = (delivered - created) / 60000;
+        return diffMin <= 30 ? DELIVERY_RATE_NORMAL : DELIVERY_RATE_LATE;
+      }
+
+      function sumEarnings(list) {
+        return list.reduce((acc, o) => acc + rateForOrder(o), 0);
+      }
+
       function updateEarningsSummary() {
         const deliveries = getMyDeliveries();
         const now = new Date();
@@ -2082,26 +2153,25 @@
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const monthEnd   = new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59, 999);
 
-        function count(from, to) {
+        function filterPeriod(from, to) {
           return deliveries.filter(o => {
             const d = tsToDate(o.deliveredAt || o.createdAt);
             return d && d >= from && d <= to;
-          }).length;
+          });
         }
 
-        const todayC  = count(todayStart, todayEnd);
-        const weekC   = count(weekStart, weekEnd);
-        const monthC  = count(monthStart, monthEnd);
-        const allC    = deliveries.length;
+        const todayList  = filterPeriod(todayStart, todayEnd);
+        const weekList   = filterPeriod(weekStart, weekEnd);
+        const monthList  = filterPeriod(monthStart, monthEnd);
 
-        document.getElementById('earnToday').textContent   = `₹${todayC * PARCEL_RATE}`;
-        document.getElementById('earnTodayP').textContent  = `${todayC} parcel${todayC !== 1 ? 's' : ''}`;
-        document.getElementById('earnWeek').textContent    = `₹${weekC * PARCEL_RATE}`;
-        document.getElementById('earnWeekP').textContent   = `${weekC} parcel${weekC !== 1 ? 's' : ''}`;
-        document.getElementById('earnMonth').textContent   = `₹${monthC * PARCEL_RATE}`;
-        document.getElementById('earnMonthP').textContent  = `${monthC} parcel${monthC !== 1 ? 's' : ''}`;
-        document.getElementById('earnAll').textContent     = `₹${allC * PARCEL_RATE}`;
-        document.getElementById('earnAllP').textContent    = `${allC} parcel${allC !== 1 ? 's' : ''}`;
+        document.getElementById('earnToday').textContent   = `₹${sumEarnings(todayList)}`;
+        document.getElementById('earnTodayP').textContent  = `${todayList.length} parcel${todayList.length !== 1 ? 's' : ''}`;
+        document.getElementById('earnWeek').textContent    = `₹${sumEarnings(weekList)}`;
+        document.getElementById('earnWeekP').textContent   = `${weekList.length} parcel${weekList.length !== 1 ? 's' : ''}`;
+        document.getElementById('earnMonth').textContent   = `₹${sumEarnings(monthList)}`;
+        document.getElementById('earnMonthP').textContent  = `${monthList.length} parcel${monthList.length !== 1 ? 's' : ''}`;
+        document.getElementById('earnAll').textContent     = `₹${sumEarnings(deliveries)}`;
+        document.getElementById('earnAllP').textContent    = `${deliveries.length} parcel${deliveries.length !== 1 ? 's' : ''}`;
       }
 
       function renderEarnings() {
@@ -2133,8 +2203,9 @@
           } else {
             key = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
           }
-          if (!groups[key]) groups[key] = 0;
-          groups[key]++;
+          if (!groups[key]) groups[key] = { orders: [], count: 0 };
+          groups[key].orders.push(o);
+          groups[key].count++;
         });
 
         const keys = Object.keys(groups).reverse();
@@ -2144,10 +2215,12 @@
         }
 
         con.innerHTML = `<div class="earn-day-list">${keys.map(k => {
-          const c = groups[k];
-          const amt = c * PARCEL_RATE;
+          const { orders, count: c } = groups[k];
+          const amt = sumEarnings(orders);
+          const lateCount = orders.filter(o => rateForOrder(o) === DELIVERY_RATE_LATE).length;
+          const lateNote = lateCount > 0 ? `<span style="font-size:10px;color:var(--danger);margin-left:4px;">(${lateCount} late @₹10)</span>` : '';
           return `<div class="earn-day-row">
-            <div class="earn-day-date">${k}</div>
+            <div class="earn-day-date">${k}${lateNote}</div>
             <div class="earn-day-right">
               <div class="earn-day-amount">₹${amt}</div>
               <div class="earn-day-parcels">${c} parcel${c !== 1 ? 's' : ''}</div>
@@ -2258,6 +2331,56 @@
         if (m < 60) return `${m}m ago`;
         return `${Math.floor(m / 60)}h ${m % 60}m ago`;
       }
+      // ━━ DELIVERY TIMER TICK ━━
+      function tickTimers() {
+        const now = Date.now();
+        document.querySelectorAll('.order-timer[data-created]').forEach(el => {
+          const created = parseInt(el.dataset.created, 10);
+          const elapsedMs = now - created;
+          const elapsedSec = Math.floor(elapsedMs / 1000);
+          const limitSec = 30 * 60; // 30 minutes
+          const warnSec  = 20 * 60; // 20 minutes
+
+          const valEl = el.querySelector('[id^="timerVal-"]');
+          if (!valEl) return;
+
+          if (elapsedSec >= limitSec) {
+            // Expired — show over-time
+            const over = elapsedSec - limitSec;
+            const om = String(Math.floor(over / 60)).padStart(2,'0');
+            const os = String(over % 60).padStart(2,'0');
+            el.classList.remove('timer-red');
+            el.classList.add('timer-expired');
+            el.querySelector('.timer-icon').textContent = '🚨';
+            el.querySelector('.timer-label').textContent = 'Time Over! +';
+            valEl.textContent = `${om}:${os}`;
+            // Show late rate badge if not already added
+            if (!el.querySelector('.timer-late-rate')) {
+              const badge = document.createElement('span');
+              badge.className = 'timer-late-rate';
+              badge.textContent = '₹10 rate';
+              el.appendChild(badge);
+            }
+          } else {
+            const remaining = limitSec - elapsedSec;
+            const rm = String(Math.floor(remaining / 60)).padStart(2,'0');
+            const rs = String(remaining % 60).padStart(2,'0');
+            valEl.textContent = `${rm}:${rs}`;
+            if (elapsedSec >= warnSec) {
+              el.classList.add('timer-red');
+              el.querySelector('.timer-icon').textContent = '🔴';
+              el.querySelector('.timer-label').textContent = 'Hurry! Deliver now';
+            } else {
+              el.classList.remove('timer-red');
+              el.querySelector('.timer-icon').textContent = '⏱️';
+              el.querySelector('.timer-label').textContent = 'Delivery Timer';
+            }
+          }
+        });
+      }
+      // Start global timer tick every second
+      setInterval(tickTimers, 1000);
+
       let tT = null;
       function showToast(msg) {
         const t = document.getElementById("toast");
