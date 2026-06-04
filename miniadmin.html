@@ -1217,6 +1217,9 @@
         <button class="tab-btn" onclick="switchTab('yn-history', this)">
           🎯 YN Parcels
         </button>
+        <button class="tab-btn" onclick="switchTab('deliveryarea', this)">
+          📍 Delivery Area
+        </button>
       </div>
 
       <div class="content">
@@ -1316,7 +1319,7 @@
         <!-- EARNINGS TAB -->
         <div class="tab-panel" id="tab-earnings">
           <div class="earn-rate-box">
-            💸 Rate: ₹14 per parcel (₹10 if delivered after 30 mins)
+            💸 Rate: ₹15 per parcel (₹10 if delivered after 30 mins)
           </div>
 
           <!-- Summary cards always visible -->
@@ -1397,6 +1400,55 @@
           </div>
         </div>
 
+        <!-- DELIVERY AREA TAB -->
+        <div class="tab-panel" id="tab-deliveryarea">
+
+          <!-- Areas list -->
+          <div style="margin-bottom:10px;">
+            <div class="sec-title" style="margin-bottom:4px;">📍 Areas & Shops</div>
+            <div style="font-size:12px;color:var(--muted);">Click an area to see shops inside it.</div>
+          </div>
+          <div id="daAreasList">
+            <div class="empty"><div class="empty-icon">⏳</div><p>Loading areas...</p></div>
+          </div>
+          <!-- Shop list (shown after clicking an area) -->
+          <div id="daShopsSection" style="display:none;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+              <button onclick="daGoBack()" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;">← Back</button>
+              <div class="sec-title" id="daSelectedAreaTitle" style="margin-bottom:0;"></div>
+            </div>
+            <div id="daShopsList"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AREA & SHOP PICKUP MODAL -->
+    <div id="pickupModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:8000;align-items:flex-end;justify-content:center;">
+      <div style="background:var(--card);border-radius:28px 28px 0 0;padding:28px 20px 40px;width:100%;max-width:520px;box-shadow:0 -20px 60px rgba(0,0,0,0.5);border-top:1px solid var(--border2);">
+        <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:4px;margin:0 auto 22px;"></div>
+        <div style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:#fff;margin-bottom:6px;">Order Pickup Details</div>
+        <div id="pickupModalOrderInfo" style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;"></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Area Select karo</div>
+            <select id="pmArea" style="width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-size:15px;font-weight:600;outline:none;" onchange="pmLoadShops()">
+              <option value="">-- Area chunein --</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Shop Select karo</div>
+            <select id="pmShop" style="width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-size:15px;font-weight:600;outline:none;" disabled>
+              <option value="">-- Pehle area chunein --</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="closePM()" style="flex:1;background:var(--card2);color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;">Cancel</button>
+            <button onclick="submitPM()" id="pmSubmitBtn" style="flex:2;background:linear-gradient(135deg,var(--pr),var(--pr-dark));color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;">Out for Delivery</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1414,6 +1466,9 @@
         onSnapshot,
         updateDoc,
         getDoc,
+        setDoc,
+        addDoc,
+        serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
       const app = initializeApp({
@@ -1458,6 +1513,38 @@
           return [];
         }
       };
+      window.fbLoadDeliveryAreas = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "delivery_areas"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbSaveDeliveryAreas = async (areas) => {
+        try {
+          await setDoc(doc(db, "store", "delivery_areas"), { list: areas });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbWatchDeliveryAreas = (cb) => {
+        return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
+          cb(snap.exists() ? snap.data().list || [] : []);
+        });
+      };
+      window.fbSavePickup = async (pickup) => {
+        try {
+          console.log("Saving pickup to Firestore:", pickup);
+          const ref = await addDoc(collection(db, "shop_pickups"), { ...pickup, createdAt: serverTimestamp() });
+          console.log("Pickup saved with ID:", ref.id);
+          return true;
+        } catch(e) {
+          console.error("fbSavePickup FAILED:", e);
+          return false;
+        }
+      };
       document.dispatchEvent(new CustomEvent("fbReady"));
     </script>
 
@@ -1465,19 +1552,22 @@
     <script>
       // ━━ CONFIG ━━
       const OWNER_WA = "917058204462";
-      const DELIVERY_RATE_NORMAL = 14;
+      const DELIVERY_RATE_NORMAL = 15;
       const DELIVERY_RATE_LATE   = 10;
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
       let allOrders = [],
         allYN = [];
       let unsubO = null,
-        unsubYN = null;
+        unsubYN = null,
+        unsubDA = null;
       let aFilter = "all",
         ynFilter = "all";
       let fbReady = false,
         needLoad = false;
       let currentBoy = null; // { name, phone }
+      let deliveryAreas = [];
+      let daSelectedArea = null;
 
       // ━━ PHONE LOGIN ━━
       async function phoneLogin() {
@@ -1567,20 +1657,233 @@
           updateBadges();
           renderYNHistory();
         });
+        // Watch delivery areas live (real-time updates)
+        if (unsubDA) unsubDA();
+        unsubDA = window.fbWatchDeliveryAreas((areas) => {
+          deliveryAreas = areas || [];
+          renderDAAreasList();
+        });
       }
 
       // ━━ TABS ━━
       function switchTab(id, btn) {
-        document
-          .querySelectorAll(".tab-panel")
-          .forEach((p) => p.classList.remove("active"));
-        document
-          .querySelectorAll(".tab-btn")
-          .forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
         document.getElementById("tab-" + id).classList.add("active");
         btn.classList.add("active");
         if (id === 'earnings') renderEarnings();
         if (id === 'yn-history') renderYNHistory();
+        if (id === 'deliveryarea') {
+          daSelectedArea = null;
+          renderDAAreasList();
+          if (toggleBtn) toggleBtn.innerHTML = "📦 Log New Pickup";
+        }
+      }
+
+      // ━━ DELIVERY AREA (VIEW ONLY) ━━
+      function renderDAAreasList() {
+        const aEl = document.getElementById("daAreasList");
+        const sEl = document.getElementById("daShopsSection");
+        if (!aEl) return;
+        // Show areas list, hide shops
+        aEl.style.display = "block";
+        if (sEl) sEl.style.display = "none";
+        if (!deliveryAreas.length) {
+          aEl.innerHTML = `<div class="empty"><div class="empty-icon">📍</div><p>No delivery areas set up yet.<br><span style="font-size:12px;">Ask admin to add areas.</span></p></div>`;
+          return;
+        }
+        aEl.innerHTML = deliveryAreas.map((area, ai) => `
+          <div onclick="daSelectArea(${ai})" style="
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:16px 18px;
+            margin-bottom:12px;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            gap:14px;
+            transition:0.18s;
+          " onmouseover="this.style.borderColor='rgba(255,107,0,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,rgba(255,107,0,0.2),rgba(255,107,0,0.08));border:1.5px solid rgba(255,107,0,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📍</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;color:var(--text);">${area.name}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">${(area.shops||[]).length} shop${(area.shops||[]).length!==1?'s':''}</div>
+            </div>
+            <div style="font-size:20px;color:var(--muted);">›</div>
+          </div>
+        `).join('');
+      }
+
+      function daSelectArea(ai) {
+        daSelectedArea = ai;
+        const area = deliveryAreas[ai];
+        const aEl = document.getElementById("daAreasList");
+        const sEl = document.getElementById("daShopsSection");
+        const titleEl = document.getElementById("daSelectedAreaTitle");
+        const shopsEl = document.getElementById("daShopsList");
+        if (!aEl || !sEl) return;
+        aEl.style.display = "none";
+        sEl.style.display = "block";
+        if (titleEl) titleEl.textContent = `📍 ${area.name}`;
+        if (!shopsEl) return;
+        const shops = area.shops || [];
+        if (!shops.length) {
+          shopsEl.innerHTML = `<div class="empty"><div class="empty-icon">🏪</div><p>No shops in this area yet.</p></div>`;
+          return;
+        }
+        shopsEl.innerHTML = shops.map((shop, si) => `
+          <div style="
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:14px 16px;
+            margin-bottom:10px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+          ">
+            <div style="width:42px;height:42px;border-radius:12px;background:rgba(16,185,129,0.12);border:1.5px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏪</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);flex:1;">${shop}</div>
+            <div style="font-size:11px;color:var(--muted);background:var(--card2);border-radius:8px;padding:3px 9px;">#${si+1}</div>
+          </div>
+        `).join('');
+      }
+
+      // ━━ DELIVERY AREA (VIEW + PICKUP LOG) ━━
+      function toggleNewPickupForm() {
+        const form = document.getElementById("newPickupForm");
+        const btn  = document.getElementById("newPickupToggleBtn");
+        if (!form) return;
+        const open = form.style.display === "none";
+        form.style.display = open ? "block" : "none";
+        if (btn) btn.innerHTML = open ? "✕ Cancel Pickup" : "📦 Log New Pickup";
+        if (open) npPopulateAreaSelect();
+      }
+
+      function npPopulateAreaSelect() {
+        const sel = document.getElementById("npArea");
+        if (!sel) return;
+        sel.innerHTML = `<option value="">Select Area</option>` +
+          deliveryAreas.map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+        const shopSel = document.getElementById("npShop");
+        if (shopSel) { shopSel.innerHTML = `<option value="">Select area first</option>`; shopSel.disabled = true; }
+      }
+
+      function npPopulateShops() {
+        const areaSel = document.getElementById("npArea");
+        const shopSel = document.getElementById("npShop");
+        if (!areaSel || !shopSel) return;
+        const area = deliveryAreas.find(a => a.name === areaSel.value);
+        if (!area || !(area.shops || []).length) {
+          shopSel.innerHTML = `<option value="">No shops in this area</option>`;
+          shopSel.disabled = true;
+          return;
+        }
+        shopSel.innerHTML = `<option value="">🏪 Select Shop</option>` +
+          area.shops.map(s => {
+            const name  = typeof s === 'object' ? s.name  : s;
+            const phone = typeof s === 'object' ? (s.phone || '') : '';
+            return `<option value="${name}|${phone}">${name}${phone ? ' · ' + phone : ''}</option>`;
+          }).join('');
+        shopSel.disabled = false;
+      }
+
+      async function submitNewPickup() {
+        const orderId  = (document.getElementById("npOrderId")  || {}).value?.trim() || '';
+        const areaName = (document.getElementById("npArea")     || {}).value || '';
+        const shopRaw  = (document.getElementById("npShop")     || {}).value || '';
+        const amount   = parseInt((document.getElementById("npAmount") || {}).value) || 0;
+        const itemNote = (document.getElementById("npNote")     || {}).value?.trim() || '';
+
+        if (!areaName) { showToast("❌ Select an area!"); return; }
+        if (!shopRaw)  { showToast("❌ Select a shop!"); return; }
+        if (!amount)   { showToast("❌ Enter the amount!"); return; }
+
+        const [shopName, shopPhone] = shopRaw.split('|');
+        const pickup = {
+          orderId:   orderId || '—',
+          boyName:   currentBoy ? currentBoy.name  : 'Unknown',
+          boyPhone:  currentBoy ? currentBoy.phone  : '',
+          areaName,
+          shopName,
+          shopPhone: shopPhone || '',
+          amount,
+          itemNote,
+        };
+
+        const ok = await window.fbSavePickup(pickup);
+        if (ok) {
+          showToast(`✅ Pickup logged — ₹${amount} from ${shopName}`);
+          // Reset form
+          ['npOrderId','npAmount','npNote'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+          const npShop = document.getElementById("npShop");
+          if (npShop) { npShop.innerHTML = `<option value="">Select area first</option>`; npShop.disabled = true; }
+          const npArea = document.getElementById("npArea");
+          if (npArea) npArea.value = '';
+          toggleNewPickupForm();
+        } else {
+          showToast("❌ Failed to log pickup!");
+        }
+      }
+
+      function renderDAAreasList() {
+        const aEl = document.getElementById("daAreasList");
+        const sEl = document.getElementById("daShopsSection");
+        if (!aEl) return;
+        aEl.style.display = "block";
+        if (sEl) sEl.style.display = "none";
+        if (!deliveryAreas.length) {
+          aEl.innerHTML = `<div class="empty"><div class="empty-icon">📍</div><p>No delivery areas set up yet.<br><span style="font-size:12px;">Ask admin to add areas in the main panel.</span></p></div>`;
+          return;
+        }
+        aEl.innerHTML = deliveryAreas.map((area, ai) => `
+          <div onclick="daSelectArea(${ai})" style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:0.18s;" onmouseover="this.style.borderColor='rgba(255,107,0,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,rgba(255,107,0,0.2),rgba(255,107,0,0.08));border:1.5px solid rgba(255,107,0,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📍</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;color:var(--text);">${area.name}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">${(area.shops||[]).length} shop${(area.shops||[]).length!==1?'s':''}</div>
+            </div>
+            <div style="font-size:20px;color:var(--muted);">›</div>
+          </div>
+        `).join('');
+      }
+
+      function daSelectArea(ai) {
+        daSelectedArea = ai;
+        const area = deliveryAreas[ai];
+        const aEl  = document.getElementById("daAreasList");
+        const sEl  = document.getElementById("daShopsSection");
+        const titleEl = document.getElementById("daSelectedAreaTitle");
+        const shopsEl = document.getElementById("daShopsList");
+        if (!aEl || !sEl) return;
+        aEl.style.display = "none";
+        sEl.style.display = "block";
+        if (titleEl) titleEl.textContent = `📍 ${area.name}`;
+        if (!shopsEl) return;
+        const shops = area.shops || [];
+        if (!shops.length) {
+          shopsEl.innerHTML = `<div class="empty"><div class="empty-icon">🏪</div><p>No shops in this area yet.</p></div>`;
+          return;
+        }
+        shopsEl.innerHTML = shops.map((shop, si) => {
+          const name  = typeof shop === 'object' ? shop.name  : shop;
+          const phone = typeof shop === 'object' ? (shop.phone || '') : '';
+          return `
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:rgba(16,185,129,0.12);border:1.5px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏪</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:var(--text);">${name}</div>
+                ${phone ? `<a href="tel:${phone}" style="font-size:12px;color:var(--pr);font-weight:600;text-decoration:none;">📞 ${phone}</a>` : '<div style="font-size:12px;color:var(--muted);">No phone</div>'}
+              </div>
+              <div style="font-size:11px;color:var(--muted);background:var(--card2);border-radius:8px;padding:3px 9px;">#${si+1}</div>
+            </div>`;
+        }).join('');
+      }
+
+      function daGoBack() {
+        daSelectedArea = null;
+        renderDAAreasList();
       }
 
       // ━━ STATS & BADGES ━━
@@ -1793,7 +2096,7 @@
             const itemsHtml = (o.items || []).length
               ? `<div class="oc-items-grid">${(o.items || [])
                   .map(
-                    (i) => `
+                    (i, idx) => `
                 <div class="oc-item-row">
                   <div class="oc-item-img">
                     ${
@@ -1806,7 +2109,7 @@
                     <div class="oc-item-name">${escapeHtml(i.name || "Item")}</div>
                     <div class="oc-item-unit">${escapeHtml(i.unit || "")} × ${i.qty || 1}</div>
                   </div>
-                  <div class="oc-item-price">₹${(i.price || 0) * (i.qty || 1)}</div>
+                  ${idx === (o.items||[]).length - 1 ? `<div style="margin-left:auto;font-family:'Baloo 2',cursive;font-size:15px;font-weight:800;color:var(--pr);white-space:nowrap;">₹${o.total ?? ""}</div>` : ""}
                 </div>`,
                   )
                   .join("")}
@@ -1875,7 +2178,6 @@
           <div class="oc-meta-item">👤 ${o.name || "—"}</div>
           <div class="oc-meta-item">📞 <a href="tel:${o.phone}">${o.phone || "—"}</a></div>
           <div class="oc-meta-item">📍 <a href="${mapUrl}" target="_blank">${displayAddress}</a></div>
-          <div class="oc-meta-item">💰 ${total}</div>
         </div>
         ${itemsHtml}
         ${timerHtml}
@@ -2104,7 +2406,7 @@
           </div>`;
         }).join('');
       }
-      const PARCEL_RATE = 14;
+      const PARCEL_RATE = 15;
       let earnPeriod = 'day';
 
       function setEarnPeriod(p, btn) {
@@ -2266,10 +2568,89 @@
       }
 
       async function markOFD(id) {
-        const ok = await window.fbUpdate(id, { status: "out_for_delivery" });
-        showToast(
-          ok ? "🏍️ Marked Out for Delivery!" : "❌ Update failed",
-        );
+        var order = allOrders.find(function(o){ return o.id === id; });
+        if (!order) return;
+        window._pmOrderId = id;
+        window._pmOrder   = order;
+        var pmArea = document.getElementById('pmArea');
+        pmArea.innerHTML = '<option value="">-- Area chunein --</option>' +
+          (deliveryAreas || []).map(function(a){ return '<option value="' + a.name + '">' + a.name + '</option>'; }).join('');
+        var pmShop = document.getElementById('pmShop');
+        pmShop.innerHTML = '<option value="">-- Pehle area chunein --</option>';
+        pmShop.disabled = true;
+        var info = document.getElementById('pickupModalOrderInfo');
+        var items = (order.items || []).map(function(i){ return (i.name||'Item') + ' x' + (i.qty||1); }).join(', ') || '-';
+        info.innerHTML = '<span style="color:#fff;font-weight:700;">#' + id.slice(-6).toUpperCase() + '</span> &middot; ' + (order.name||'-') + ' &middot; <span style="color:var(--green);font-weight:700;">Rs.' + (order.total||0) + '</span><br><span style="font-size:12px;">' + items + '</span>';
+        document.getElementById('pickupModal').style.display = 'flex';
+      }
+
+      function pmLoadShops() {
+        var area = document.getElementById('pmArea').value;
+        var pmShop = document.getElementById('pmShop');
+        var areaObj = (deliveryAreas || []).find(function(a){ return a.name === area; });
+        if (!areaObj || !(areaObj.shops||[]).length) {
+          pmShop.innerHTML = '<option value="">Is area mein koi shop nahi</option>';
+          pmShop.disabled = true;
+          return;
+        }
+        pmShop.innerHTML = '<option value="">-- Shop chunein --</option>' +
+          (areaObj.shops || []).map(function(s) {
+            var name  = typeof s === 'object' ? s.name  : s;
+            var phone = typeof s === 'object' ? (s.phone||'') : '';
+            return '<option value="' + name + '|' + phone + '">' + name + (phone ? ' - ' + phone : '') + '</option>';
+          }).join('');
+        pmShop.disabled = false;
+      }
+
+      function closePM() {
+        document.getElementById('pickupModal').style.display = 'none';
+        window._pmOrderId = null;
+        window._pmOrder   = null;
+      }
+
+      async function submitPM() {
+        var areaName = document.getElementById('pmArea').value;
+        var shopRaw  = document.getElementById('pmShop').value;
+        if (!areaName) { showToast('Area select karo!'); return; }
+        if (!shopRaw)  { showToast('Shop select karo!'); return; }
+        var btn = document.getElementById('pmSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        var id    = window._pmOrderId;
+        var order = window._pmOrder;
+        var parts = shopRaw.split('|');
+        var shopName  = parts[0];
+        var shopPhone = parts[1] || '';
+        var ok = await window.fbUpdate(id, { status: 'out_for_delivery' });
+        if (!ok) {
+          showToast('Update failed!');
+          btn.disabled = false;
+          btn.textContent = 'Out for Delivery';
+          return;
+        }
+        var items = (order.items || []).map(function(i){ return (i.name||'Item') + ' x' + (i.qty||1); }).join(', ') || '-';
+        var pickup = {
+          orderId:   id,
+          boyName:   currentBoy ? currentBoy.name  : 'Unknown',
+          boyPhone:  currentBoy ? currentBoy.phone  : '',
+          areaName:  areaName,
+          shopName:  shopName,
+          shopPhone: shopPhone,
+          amount:    order.total || 0,
+          itemNote:  items,
+        };
+        await window.fbSavePickup(pickup).then(function(result) {
+          console.log("fbSavePickup result:", result);
+          if (!result) {
+            showToast('⚠️ Pickup save failed! Check console.');
+          }
+        }).catch(function(e) {
+          console.error("fbSavePickup error:", e);
+        });
+        closePM();
+        showToast('Out for Delivery! Pickup logged.');
+        btn.disabled = false;
+        btn.textContent = 'Out for Delivery';
       }
 
       async function markDelivered(id, phone, name, area) {
@@ -2397,58 +2778,5 @@
         }, 2800);
       }
     </script>
-
-  <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-messaging.js";
-
-    const fcmConfig = {
-      apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
-      authDomain: "quickmart-b117e.firebaseapp.com",
-      projectId: "quickmart-b117e",
-      storageBucket: "quickmart-b117e.firebasestorage.app",
-      messagingSenderId: "128330058901",
-      appId: "1:128330058901:web:2bbd1eae9231308ef79f9c"
-    };
-
-    const fcmApp = getApps().length ? getApps()[0] : initializeApp(fcmConfig, "fcm-app");
-    const messaging = getMessaging(fcmApp);
-
-    async function setupNotifications() {
-      try {
-        const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") { console.log("Notification permission denied"); return; }
-        const token = await getToken(messaging, {
-          vapidKey: "BGtCoyevUrRPsnoJgIu-uvzJGsvvQPsUveVWq_eoYUOpfk_hFKJAOHlRVb2_t2WmaRZJbBBHezf8485wN8zxqD8",
-          serviceWorkerRegistration: reg
-        });
-        if (token) {
-          console.log("FCM Token:", token);
-          localStorage.setItem("fcm_token", token);
-        }
-      } catch (err) {
-        console.error("FCM setup error:", err);
-      }
-    }
-
-    if ("Notification" in window && "serviceWorker" in navigator) {
-      setupNotifications();
-    }
-
-    onMessage(messaging, function(payload) {
-      const title = payload.notification.title || "Naya Order!";
-      const body  = payload.notification.body  || "Ek naya order aaya hai!";
-      if (Notification.permission === "granted") {
-        new Notification(title, {
-          body: body,
-          icon: "/icon.png",
-          tag: "new-order",
-          renotify: true,
-          vibrate: [200, 100, 200]
-        });
-      }
-    });
-  </script>
   </body>
 </html>

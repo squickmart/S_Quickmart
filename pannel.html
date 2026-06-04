@@ -22,6 +22,8 @@
         updateDoc,
         query,
         orderBy,
+        addDoc,
+        serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
       import {
         getStorage,
@@ -194,6 +196,53 @@
         } catch (e) {
           return [];
         }
+      };
+
+      // ── DELIVERY AREAS (with shops) ───────────────────────────
+      window.fbSaveDeliveryAreas = async (areas) => {
+        try {
+          await setDoc(doc(db, "store", "delivery_areas"), { list: areas });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbLoadDeliveryAreas = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "delivery_areas"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbWatchDeliveryAreas = (cb) => {
+        return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
+          cb(snap.exists() ? snap.data().list || [] : []);
+        });
+      };
+
+      // ── SHOP PICKUPS ──────────────────────────────────────────
+      window.fbSavePickup = async (pickup) => {
+        try {
+          await addDoc(collection(db, "shop_pickups"), { ...pickup, createdAt: serverTimestamp() });
+          return true;
+        } catch(e) {
+          console.error(e);
+          return false;
+        }
+      };
+      window.fbWatchPickups = (cb) => {
+        return onSnapshot(collection(db, "shop_pickups"), (snap) => {
+          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => {
+            const at = a.createdAt ? (a.createdAt.seconds || a.createdAt._seconds || 0) : 0;
+            const bt = b.createdAt ? (b.createdAt.seconds || b.createdAt._seconds || 0) : 0;
+            return bt - at;
+          });
+          cb(docs);
+        }, (err) => {
+          console.error("shop_pickups error:", err);
+        });
       };
 
       // ── DELIVERY BOYS ─────────────────────────────────────────
@@ -1240,6 +1289,9 @@
           🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
         </div>
         <div class="admin-tab" onclick="switchTab('areas', this)">🗺️ Areas</div>
+        <div class="admin-tab" onclick="switchTab('deliveryarea', this)">
+          📍 Delivery Area
+        </div>
         <div class="admin-tab" onclick="switchTab('boys', this)">
           🏍️ Delivery Boys
         </div>
@@ -1901,6 +1953,66 @@
           </div>
         </div>
 
+        <!-- ── DELIVERY AREA TAB ── -->
+        <div class="tab-panel" id="tab-deliveryarea">
+          <div class="admin-card">
+            <div class="admin-card-title">📍 Delivery Area Management</div>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px">
+              Add delivery areas and shops (with phone numbers). Delivery boys can log pickups per order from miniadmin.
+            </p>
+
+            <!-- Add new area row -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+              <input
+                type="text"
+                id="newDelivAreaName"
+                class="form-input"
+                placeholder="New area name (e.g. Sailu Road)"
+                style="flex:1;min-width:160px"
+                onkeydown="if(event.key==='Enter') addDelivArea();"
+              />
+              <button class="btn-primary" onclick="addDelivArea()">＋ Add Area</button>
+            </div>
+
+            <!-- Areas list with shops -->
+            <div id="delivAreasList" style="display:flex;flex-direction:column;gap:14px;">
+              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading...</div>
+            </div>
+
+            <button
+              class="btn-primary"
+              style="margin-top:16px;width:100%"
+              onclick="saveDelivAreas()"
+            >
+              💾 Save All Areas & Shops
+            </button>
+          </div>
+
+          <!-- ── SHOP PICKUP LOG ── -->
+          <div class="admin-card" style="margin-top:14px;">
+            <div class="admin-card-title">
+              🧾 Shop Pickup Log
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <select id="pickupFilterArea" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
+                  <option value="all">All Areas</option>
+                </select>
+                <select id="pickupFilterBoy" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
+                  <option value="all">All Boys</option>
+                </select>
+              </div>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+              Jab bhi delivery boy "Out for Delivery" mark karta hai, woh order ka area aur shop select karta hai — woh record yahan dikhega.
+            </p>
+            <!-- Summary cards -->
+            <div id="pickupSummaryCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;"></div>
+            <!-- Log table -->
+            <div id="pickupLogContainer">
+              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading pickup log...</div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── DELIVERY BOYS TAB ── -->
         <div class="tab-panel" id="tab-boys">
           <div class="admin-card">
@@ -2214,6 +2326,21 @@
         deliveryBoys = savedBoys;
         renderBoysAdmin();
         renderBoysStats();
+
+        // Watch delivery areas live (real-time updates)
+        if (window._unsubDelivAreas) window._unsubDelivAreas();
+        window._unsubDelivAreas = window.fbWatchDeliveryAreas((areas) => {
+          deliveryAreas = areas || [];
+          renderDelivAreasList();
+        });
+
+        // Watch shop pickup log live
+        if (window._unsubPickups) window._unsubPickups();
+        window._unsubPickups = window.fbWatchPickups((pickups) => {
+          allPickups = pickups;
+          renderPickupLog();
+          populatePickupFilters();
+        });
       }
       const defaultCategories = [
         {
@@ -2286,6 +2413,8 @@
         unsubYN = null;
       let ynAreas = [];
       let deliveryBoys = [];
+      let deliveryAreas = [];
+      let allPickups = [];
       let storeIsOpen = true;
 
       function switchTab(id, btn) {
@@ -2297,6 +2426,7 @@
           .forEach((t) => t.classList.remove("active"));
         document.getElementById("tab-" + id).classList.add("active");
         btn.classList.add("active");
+        if (id === "deliveryarea") { populatePickupFilters(); renderPickupLog(); }
       }
 
       // ── CATEGORIES ───────────────────────────────────────────────
@@ -3576,6 +3706,220 @@ ${items}
         );
       }
 
+      // ── DELIVERY AREAS (WITH SHOPS) ───────────────────────────────
+      function renderDelivAreasList() {
+        const el = document.getElementById("delivAreasList");
+        if (!el) return;
+        if (!deliveryAreas.length) {
+          el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;">No areas added yet. Add your first area above.</div>`;
+          return;
+        }
+        el.innerHTML = deliveryAreas.map((area, ai) => `
+          <div style="border:1.5px solid #eee;border-radius:14px;padding:14px;background:#fff;">
+            <!-- Area Header -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+              <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📍</div>
+              <input
+                type="text"
+                value="${area.name}"
+                class="form-input"
+                style="flex:1;min-width:140px;font-weight:700;"
+                onchange="deliveryAreas[${ai}].name=this.value"
+                placeholder="Area name"
+              />
+              <button class="btn-danger" onclick="deleteDelivArea(${ai})" style="flex-shrink:0;">🗑️ Delete</button>
+            </div>
+
+            <!-- Shops in this area -->
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🏪 Shops in this area:</div>
+            <div id="delivShopsList-${ai}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+              ${(area.shops || []).map((shop, si) => `
+                <div style="background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:18px;">🏪</span>
+                  <input
+                    type="text"
+                    value="${typeof shop === 'object' ? shop.name : shop}"
+                    class="form-input"
+                    style="flex:1;min-width:120px;font-size:13px;padding:7px 10px;"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], name:this.value} : {name:this.value, phone:''};"
+                    placeholder="Shop name"
+                  />
+                  <input
+                    type="tel"
+                    value="${typeof shop === 'object' ? (shop.phone || '') : ''}"
+                    class="form-input"
+                    style="width:140px;font-size:13px;padding:7px 10px;"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], phone:this.value} : {name:'', phone:this.value};"
+                    placeholder="📞 Shop number"
+                    maxlength="10"
+                  />
+                  <button class="btn-danger" onclick="deleteDelivShop(${ai},${si})" style="padding:6px 11px;font-size:12px;">🗑️</button>
+                </div>
+              `).join('')}
+              ${!(area.shops || []).length ? `<div style="font-size:12px;color:var(--muted);padding:4px 2px;">No shops added yet.</div>` : ''}
+            </div>
+
+            <!-- Add shop row -->
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input
+                type="text"
+                id="newShopInput-${ai}"
+                class="form-input"
+                placeholder="Shop name..."
+                style="flex:1;min-width:120px;font-size:13px;"
+                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
+              />
+              <input
+                type="tel"
+                id="newShopPhone-${ai}"
+                class="form-input"
+                placeholder="📞 Phone (optional)"
+                style="width:170px;font-size:13px;"
+                maxlength="10"
+                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
+              />
+              <button class="btn-primary" style="padding:8px 14px;font-size:13px;" onclick="addDelivShop(${ai})">＋ Shop</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function addDelivArea() {
+        const inp = document.getElementById("newDelivAreaName");
+        const name = inp.value.trim();
+        if (!name) { showToast("❌ Please enter an area name!"); return; }
+        if (deliveryAreas.find(a => a.name.toLowerCase() === name.toLowerCase())) {
+          showToast("❌ This area already exists!"); return;
+        }
+        deliveryAreas.push({ name, shops: [] });
+        inp.value = "";
+        renderDelivAreasList();
+        showToast(`✅ Area "${name}" added! Don't forget to save.`);
+      }
+
+      function deleteDelivArea(ai) {
+        if (!confirm(`Delete area "${deliveryAreas[ai].name}" and all its shops?`)) return;
+        deliveryAreas.splice(ai, 1);
+        renderDelivAreasList();
+      }
+
+      function addDelivShop(ai) {
+        const inp = document.getElementById(`newShopInput-${ai}`);
+        const phoneInp = document.getElementById(`newShopPhone-${ai}`);
+        const name = inp.value.trim();
+        const phone = phoneInp ? phoneInp.value.trim() : '';
+        if (!name) { showToast("❌ Please enter a shop name!"); return; }
+        if (!deliveryAreas[ai].shops) deliveryAreas[ai].shops = [];
+        deliveryAreas[ai].shops.push({ name, phone });
+        inp.value = "";
+        if (phoneInp) phoneInp.value = "";
+        renderDelivAreasList();
+        showToast(`✅ "${name}" added!`);
+      }
+
+      function deleteDelivShop(ai, si) {
+        deliveryAreas[ai].shops.splice(si, 1);
+        renderDelivAreasList();
+      }
+
+      async function saveDelivAreas() {
+        const ok = await window.fbSaveDeliveryAreas(deliveryAreas);
+        showToast(ok ? "✅ Delivery areas & shops saved!" : "❌ Save failed!");
+      }
+
+      // ── SHOP PICKUP LOG ───────────────────────────────────────────
+      function populatePickupFilters() {
+        const areaSel = document.getElementById("pickupFilterArea");
+        const boySel  = document.getElementById("pickupFilterBoy");
+        if (!areaSel || !boySel) return;
+        const curArea = areaSel.value;
+        const curBoy  = boySel.value;
+        const areas = ["all", ...new Set(allPickups.map(p => p.areaName).filter(Boolean))];
+        const boys  = ["all", ...new Set(allPickups.map(p => p.boyName).filter(Boolean))];
+        areaSel.innerHTML = areas.map(a => `<option value="${a}" ${curArea===a?'selected':''}>${a==='all'?'All Areas':a}</option>`).join('');
+        boySel.innerHTML  = boys.map(b => `<option value="${b}" ${curBoy===b?'selected':''}>${b==='all'?'All Boys':b}</option>`).join('');
+      }
+
+      function renderPickupLog() {
+        const con = document.getElementById("pickupLogContainer");
+        const summaryEl = document.getElementById("pickupSummaryCards");
+        if (!con) return;
+
+        const areaF = (document.getElementById("pickupFilterArea") || {}).value || "all";
+        const boyF  = (document.getElementById("pickupFilterBoy") || {}).value  || "all";
+
+        let filtered = allPickups;
+        if (areaF !== "all") filtered = filtered.filter(p => p.areaName === areaF);
+        if (boyF  !== "all") filtered = filtered.filter(p => p.boyName  === boyF);
+
+        // Summary cards
+        const totalAmt    = filtered.reduce((s,p) => s + (p.amount||0), 0);
+        const totalTx     = filtered.length;
+        const uniqueShops = new Set(filtered.map(p => p.shopName)).size;
+        if (summaryEl) {
+          summaryEl.innerHTML = `
+            <div style="background:#fff3ec;border:1.5px solid #ffd5b0;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:var(--pr);">₹${totalAmt.toLocaleString('en-IN')}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Amount</div>
+            </div>
+            <div style="background:#e8f7f0;border:1.5px solid #a5d6c2;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;">${totalTx}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Pickups</div>
+            </div>
+            <div style="background:#f0f4ff;border:1.5px solid #c3cff5;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#3b5bdb;">${uniqueShops}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Shops</div>
+            </div>`;
+        }
+
+        if (!filtered.length) {
+          con.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No pickup logs found.</div>`;
+          return;
+        }
+
+        var cardsHtml = '';
+        filtered.forEach(function(p, i) {
+          var ts = p.createdAt ? new Date((p.createdAt.seconds||p.createdAt._seconds||0)*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+          var orderId = p.orderId && p.orderId !== '—' ? '#' + p.orderId.slice(-6).toUpperCase() : '—';
+          var shopPhoneHtml = p.shopPhone ? '<a href="tel:' + p.shopPhone + '" style="font-size:11px;color:var(--pr);font-weight:600;text-decoration:none;">📞 ' + p.shopPhone + '</a>' : '';
+          cardsHtml += '<div style="background:#fff;border:1.5px solid #f0f0f0;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">'
+              + '<div style="display:flex;align-items:center;gap:8px;">'
+                + '<span style="font-family:\'Baloo 2\',cursive;font-size:15px;font-weight:800;color:var(--pr);">📦 ' + orderId + '</span>'
+                + '<span style="background:#fff3ec;color:var(--pr);font-size:10px;font-weight:700;border-radius:50px;padding:2px 9px;border:1px solid #ffd5b0;">#' + (i+1) + '</span>'
+              + '</div>'
+              + '<span style="font-size:11px;color:var(--muted);font-weight:500;">🕐 ' + ts + '</span>'
+            + '</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px;">'
+              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏍️ Delivery Boy</div>'
+                + '<div style="font-size:14px;font-weight:700;color:var(--dark);">' + (p.boyName||'—') + '</div>'
+              + '</div>'
+              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📍 Area</div>'
+                + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.areaName||'—') + '</div>'
+              + '</div>'
+              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏪 Shop</div>'
+                + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.shopName||'—') + '</div>'
+                + shopPhoneHtml
+              + '</div>'
+            + '</div>'
+            + '<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;border-top:1.5px solid #f0f0f0;padding-top:10px;">'
+              + '<div style="flex:1;min-width:160px;">'
+                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📝 Items</div>'
+                + '<div style="font-size:13px;color:#555;line-height:1.5;">' + (p.itemNote||'—') + '</div>'
+              + '</div>'
+              + '<div style="text-align:right;flex-shrink:0;">'
+                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">💰 Total Amount</div>'
+                + '<div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹' + (p.amount||0).toLocaleString('en-IN') + '</div>'
+              + '</div>'
+            + '</div>'
+          + '</div>';
+        });
+        con.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' + cardsHtml + '</div>';
+      }
+
       // ── PRODUCTS CLOSED MODE ──────────────────────────────────────────────
       async function toggleProductsClosed(checked) {
         applyProductsClosedUI({ ...(window._storeStatus || {}), productsClosed: checked });
@@ -3624,58 +3968,5 @@ ${items}
         }, 3000);
       }
     </script>
-
-  <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-messaging.js";
-
-    const fcmConfig = {
-      apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
-      authDomain: "quickmart-b117e.firebaseapp.com",
-      projectId: "quickmart-b117e",
-      storageBucket: "quickmart-b117e.firebasestorage.app",
-      messagingSenderId: "128330058901",
-      appId: "1:128330058901:web:2bbd1eae9231308ef79f9c"
-    };
-
-    const fcmApp = getApps().length ? getApps()[0] : initializeApp(fcmConfig, "fcm-app");
-    const messaging = getMessaging(fcmApp);
-
-    async function setupNotifications() {
-      try {
-        const reg = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") { console.log("Notification permission denied"); return; }
-        const token = await getToken(messaging, {
-          vapidKey: "BGtCoyevUrRPsnoJgIu-uvzJGsvvQPsUveVWq_eoYUOpfk_hFKJAOHlRVb2_t2WmaRZJbBBHezf8485wN8zxqD8",
-          serviceWorkerRegistration: reg
-        });
-        if (token) {
-          console.log("FCM Token:", token);
-          localStorage.setItem("fcm_token", token);
-        }
-      } catch (err) {
-        console.error("FCM setup error:", err);
-      }
-    }
-
-    if ("Notification" in window && "serviceWorker" in navigator) {
-      setupNotifications();
-    }
-
-    onMessage(messaging, function(payload) {
-      const title = payload.notification.title || "Naya Order!";
-      const body  = payload.notification.body  || "Ek naya order aaya hai!";
-      if (Notification.permission === "granted") {
-        new Notification(title, {
-          body: body,
-          icon: "/icon.png",
-          tag: "new-order",
-          renotify: true,
-          vibrate: [200, 100, 200]
-        });
-      }
-    });
-  </script>
   </body>
 </html>
