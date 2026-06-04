@@ -1433,13 +1433,13 @@
         <div id="pickupModalOrderInfo" style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;"></div>
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Area Select karo</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Select Area </div>
             <select id="pmArea" style="width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-size:15px;font-weight:600;outline:none;" onchange="pmLoadShops()">
               <option value="">-- Select Area --</option>
             </select>
           </div>
           <div>
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Shop Select karo</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Select Shop </div>
             <select id="pmShop" style="width:100%;padding:13px 16px;border-radius:14px;border:1.5px solid var(--border2);background:var(--card2);color:var(--text);font-size:15px;font-weight:600;outline:none;" disabled>
               <option value="">-- First Select Area --</option>
             </select>
@@ -2593,7 +2593,7 @@
           pmShop.disabled = true;
           return;
         }
-        pmShop.innerHTML = '<option value="">-- Shop chunein --</option>' +
+        pmShop.innerHTML = '<option value="">-- Select Shop --</option>' +
           (areaObj.shops || []).map(function(s) {
             var name  = typeof s === 'object' ? s.name  : s;
             var phone = typeof s === 'object' ? (s.phone||'') : '';
@@ -2611,8 +2611,8 @@
       async function submitPM() {
         var areaName = document.getElementById('pmArea').value;
         var shopRaw  = document.getElementById('pmShop').value;
-        if (!areaName) { showToast('Area select karo!'); return; }
-        if (!shopRaw)  { showToast('Shop select karo!'); return; }
+        if (!areaName) { showToast(' Plz Area select!'); return; }
+        if (!shopRaw)  { showToast(' Plz Shop select!'); return; }
         var btn = document.getElementById('pmSubmitBtn');
         btn.disabled = true;
         btn.textContent = 'Saving...';
