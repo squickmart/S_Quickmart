@@ -2871,8 +2871,19 @@
               </button>
             </div>
             <div class="profile-area-picker open" id="pAreaPicker">
-              <div class="profile-area-grid" id="pAreaGrid"></div>
-            </div>
+            <div class="area-search-wrap">
+              <span class="search-icon">🔍</span>
+              <input
+              type="text"
+              class="area-search-input"
+              id="p-area-search"
+              placeholder="Search area..."
+              oninput="filterAreaSearch('pAreaGrid','p-area-no-result',this.value)"
+              autocomplete="off"
+        />
+  </div>
+  <div class="area-no-result" id="p-area-no-result">😕 No area found</div>
+  <div class="profile-area-grid" id="pAreaGrid"></div>
           </div>
           <button class="save-profile-btn" onclick="saveProfile()">
             💾 Save
@@ -3273,8 +3284,10 @@
         document.getElementById("pAreaBadgeWrap").style.display = "block";
       }
       function openProfileAreaPicker() {
-        document.getElementById("pAreaPicker").classList.add("open");
-        document.getElementById("pAreaBadgeWrap").style.display = "none";
+      document.getElementById("pAreaPicker").classList.add("open");
+      document.getElementById("pAreaBadgeWrap").style.display = "none";
+      var ps = document.getElementById("p-area-search");
+      if (ps) { ps.value = ""; filterAreaSearch("pAreaGrid","p-area-no-result",""); }
       }
       function loadProfileAreaUI(area) {
         if (!area) return;
@@ -4376,7 +4389,7 @@
         const noRes = document.getElementById(noResultId);
         if (!grid) return;
         const q = query.trim().toLowerCase();
-        const btns = grid.querySelectorAll(".area-btn");
+        const btns = grid.querySelectorAll(".area-btn, .profile-area-btn");
         let visible = 0;
         btns.forEach(function (btn) {
           const name = btn.getAttribute("data-area") || "";
