@@ -3597,6 +3597,8 @@
         // Auto close
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
+        document.body.style.overflow = "";   // ✅ YE ADD KARO
+        setOverlayFooterState(false);        // ✅ YE ADD KARO
       }
 
       function logoutUser() {
