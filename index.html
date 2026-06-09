@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>S_Quick Mart — Fast Grocery Delivery in Parbhani | 20-30 Min</title>
+  <title>S_Quick Mart — Grocery Delivery in Parbhani | 20-30 Min</title>
   <link rel="icon" type="image/png" href="S2.PNG" />
   <!-- Primary SEO -->
-  <meta name="description" content="S Quick Mart — Parbhani's fastest grocery delivery service. Get groceries and daily essentials delivered in 20-30 minutes. Cash on Delivery available. Order now!" />
+  <meta name="description"
+    content="S_Quick Mart — Parbhani ka sabse fast grocery delivery service. Groceries, daily essentials 20-30 minutes mein ghar pe. Cash on Delivery available. Order karo abhi!" />
   <meta name="keywords"
     content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart,Quick Mart,QuickMart, fast delivery Parbhani, ghar pe grocery Parbhani, 431401 grocery" />
   <meta name="author" content="S_Quick Mart, Parbhani" />
@@ -22,16 +23,6 @@
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="en_IN" />
 
-
-  <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B6LRT1B4VM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-B6LRT1B4VM');
-</script>
-
   <!-- Local Business Schema -->
   <script type="application/ld+json">
       {
@@ -40,7 +31,7 @@
         "name": "S_Quick Mart",
         "description": "Parbhani's fastest grocery delivery service",
         "url": "https://squickmart.store",
-        "telephone": "+917249148205",
+        "telephone": "+917058204462",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Parbhani",
@@ -65,7 +56,7 @@
         "name": "S_Quick Mart",
         "description": "Parbhani's fastest grocery delivery service",
         "url": "https://squickmart.store",
-        "telephone": "+917249148205",
+        "telephone": "+917058204462",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Parbhani",
@@ -180,6 +171,8 @@
     window._onSnapshot = onSnapshot;
     window._getDocs = getDocs;
     window._db = db;
+    window._setDoc = setDoc;
+    window._doc = doc;
 
     // load categories first so product rendering has category info
     loadCategories().then(() => loadProducts());
@@ -3048,7 +3041,6 @@
               <a href="help.html#policy" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
                 onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Privacy
                 Policy</a>
-              
             </div>
           </div>
 
@@ -3340,7 +3332,7 @@
           within 20–30 minutes.
         </div>
         <div class="suc-time">⏱️ Expected: 20–30 Minutes</div>
-        <div class="suc-msg">📞 Support: <strong>7249148205</strong></div>
+        <div class="suc-msg">📞 Support: <strong>9545148205</strong></div>
         <button class="suc-close" onclick="closeSuc()">
           OK, Thank You! 😊
         </button>
@@ -3595,10 +3587,22 @@
         autoFillCheckout();
         showToast("✅ Details saved!");
         // Auto close
+        // Save to Firebase customers collection (silent)
+        try {
+          if (window._db && window._setDoc && window._doc) {
+            window._setDoc(window._doc(window._db, "customers", currentUser.phone), {
+              phone: currentUser.phone,
+              name: currentUser.name,
+              address: currentUser.address,
+              area: currentUser.area,
+              lastSeen: new Date().toISOString(),
+            }, { merge: true });
+          }
+        } catch(e) {}
         document.getElementById("profileOverlay").classList.remove("open");
         document.getElementById("profileSidebar").classList.remove("open");
-        document.body.style.overflow = "";   // ✅ YE ADD KARO
-        setOverlayFooterState(false);        // ✅ YE ADD KARO
+        document.body.style.overflow = "";   // ✅ YE ADD KARE
+        setOverlayFooterState(false);        // ✅ YE ADD KARE
       }
 
       function logoutUser() {

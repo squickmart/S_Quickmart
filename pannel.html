@@ -22,8 +22,8 @@
         updateDoc,
         query,
         orderBy,
-        addDoc,
-        serverTimestamp,
+        getDocs,
+        where,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
       import {
         getStorage,
@@ -198,53 +198,6 @@
         }
       };
 
-      // ── DELIVERY AREAS (with shops) ───────────────────────────
-      window.fbSaveDeliveryAreas = async (areas) => {
-        try {
-          await setDoc(doc(db, "store", "delivery_areas"), { list: areas });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbLoadDeliveryAreas = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "delivery_areas"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbWatchDeliveryAreas = (cb) => {
-        return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
-          cb(snap.exists() ? snap.data().list || [] : []);
-        });
-      };
-
-      // ── SHOP PICKUPS ──────────────────────────────────────────
-      window.fbSavePickup = async (pickup) => {
-        try {
-          await addDoc(collection(db, "shop_pickups"), { ...pickup, createdAt: serverTimestamp() });
-          return true;
-        } catch(e) {
-          console.error(e);
-          return false;
-        }
-      };
-      window.fbWatchPickups = (cb) => {
-        return onSnapshot(collection(db, "shop_pickups"), (snap) => {
-          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          docs.sort((a, b) => {
-            const at = a.createdAt ? (a.createdAt.seconds || a.createdAt._seconds || 0) : 0;
-            const bt = b.createdAt ? (b.createdAt.seconds || b.createdAt._seconds || 0) : 0;
-            return bt - at;
-          });
-          cb(docs);
-        }, (err) => {
-          console.error("shop_pickups error:", err);
-        });
-      };
-
       // ── DELIVERY BOYS ─────────────────────────────────────────
       window.fbSaveBoys = async (boys) => {
         try {
@@ -265,6 +218,12 @@
       window.fbWatchBoys = (cb) => {
         return onSnapshot(doc(db, "store", "delivery_boys"), (snap) => {
           cb(snap.exists() ? snap.data().list || [] : []);
+        });
+      };
+
+      window.fbWatchCustomers = (cb) => {
+        return onSnapshot(collection(db, "customers"), (snap) => {
+          cb(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         });
       };
 
@@ -1233,6 +1192,56 @@
       .rev-date-input input::-webkit-calendar-picker-indicator {
         filter: invert(1);
       }
+
+      /* Customer order detail smooth expand */
+      .cod-det {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.28s ease,
+                    padding 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        overflow: hidden;
+        padding: 0 14px;
+        border-top: 0px solid #f0f0f0;
+      }
+      .cod-det-inner {
+        min-height: 0;
+        overflow: hidden;
+      }
+      .cod-det.open {
+        grid-template-rows: 1fr;
+        opacity: 1;
+        padding: 12px 14px;
+        border-top-width: 1px;
+      }
+      .cod-card {
+        background: #fff;
+        border: 1.5px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .cod-card:hover {
+        border-color: #ffd6b3;
+        box-shadow: 0 2px 12px rgba(255,107,0,0.08);
+      }
+      .cod-card.expanded {
+        border-color: var(--pr);
+        box-shadow: 0 4px 18px rgba(255,107,0,0.13);
+      }
+      .cod-chevron {
+        font-size: 16px;
+        color: #bbb;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
+        display: inline-block;
+        line-height: 1;
+      }
+      .cod-card.expanded .cod-chevron {
+        transform: rotate(90deg);
+        color: var(--pr);
+      }
     </style>
   </head>
   <body>
@@ -1289,12 +1298,10 @@
           🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
         </div>
         <div class="admin-tab" onclick="switchTab('areas', this)">🗺️ Areas</div>
-        <div class="admin-tab" onclick="switchTab('deliveryarea', this)">
-          📍 Delivery Area
-        </div>
         <div class="admin-tab" onclick="switchTab('boys', this)">
           🏍️ Delivery Boys
         </div>
+        <div class="admin-tab" onclick="switchTab('customers', this)">👥 Customers</div>
       </div>
       <div class="admin-content">
         <!-- ── ORDERS TAB ── -->
@@ -1953,66 +1960,6 @@
           </div>
         </div>
 
-        <!-- ── DELIVERY AREA TAB ── -->
-        <div class="tab-panel" id="tab-deliveryarea">
-          <div class="admin-card">
-            <div class="admin-card-title">📍 Delivery Area Management</div>
-            <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px">
-              Add delivery areas and shops (with phone numbers). Delivery boys can log pickups per order from miniadmin.
-            </p>
-
-            <!-- Add new area row -->
-            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-              <input
-                type="text"
-                id="newDelivAreaName"
-                class="form-input"
-                placeholder="New area name (e.g. Sailu Road)"
-                style="flex:1;min-width:160px"
-                onkeydown="if(event.key==='Enter') addDelivArea();"
-              />
-              <button class="btn-primary" onclick="addDelivArea()">＋ Add Area</button>
-            </div>
-
-            <!-- Areas list with shops -->
-            <div id="delivAreasList" style="display:flex;flex-direction:column;gap:14px;">
-              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading...</div>
-            </div>
-
-            <button
-              class="btn-primary"
-              style="margin-top:16px;width:100%"
-              onclick="saveDelivAreas()"
-            >
-              💾 Save All Areas & Shops
-            </button>
-          </div>
-
-          <!-- ── SHOP PICKUP LOG ── -->
-          <div class="admin-card" style="margin-top:14px;">
-            <div class="admin-card-title">
-              🧾 Shop Pickup Log
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                <select id="pickupFilterArea" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
-                  <option value="all">All Areas</option>
-                </select>
-                <select id="pickupFilterBoy" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
-                  <option value="all">All Boys</option>
-                </select>
-              </div>
-            </div>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
-              Show all delevery rocoed 
-            </p>
-            <!-- Summary cards -->
-            <div id="pickupSummaryCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;"></div>
-            <!-- Log table -->
-            <div id="pickupLogContainer">
-              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading pickup log...</div>
-            </div>
-          </div>
-        </div>
-
         <!-- ── DELIVERY BOYS TAB ── -->
         <div class="tab-panel" id="tab-boys">
           <div class="admin-card">
@@ -2078,6 +2025,14 @@
               <p style="text-align: center; color: var(--muted); padding: 20px">
                 ⏳ Loading stats...
               </p>
+            </div>
+          </div>
+        </div>
+        <!-- CUSTOMERS TAB -->
+        <div class="tab-panel" id="tab-customers">
+          <div class="admin-card" style="padding:0;overflow:hidden;border-radius:var(--r);">
+            <div id="custView" style="padding:18px;">
+              <p style="text-align:center;color:var(--muted);padding:30px;">⏳ Loading...</p>
             </div>
           </div>
         </div>
@@ -2327,19 +2282,12 @@
         renderBoysAdmin();
         renderBoysStats();
 
-        // Watch delivery areas live (real-time updates)
-        if (window._unsubDelivAreas) window._unsubDelivAreas();
-        window._unsubDelivAreas = window.fbWatchDeliveryAreas((areas) => {
-          deliveryAreas = areas || [];
-          renderDelivAreasList();
-        });
-
-        // Watch shop pickup log live
-        if (window._unsubPickups) window._unsubPickups();
-        window._unsubPickups = window.fbWatchPickups((pickups) => {
-          allPickups = pickups;
-          renderPickupLog();
-          populatePickupFilters();
+        // Live customers listener
+        if (unsubCustomers) unsubCustomers();
+        unsubCustomers = window.fbWatchCustomers((customers) => {
+          allCustomers = customers;
+          renderCustomers();
+          updateCustomersBadge();
         });
       }
       const defaultCategories = [
@@ -2413,9 +2361,198 @@
         unsubYN = null;
       let ynAreas = [];
       let deliveryBoys = [];
-      let deliveryAreas = [];
-      let allPickups = [];
+      let allCustomers = [];
+      let unsubCustomers = null;
       let storeIsOpen = true;
+      let _custState = { view: 'areas', area: null, custIdx: -1 };
+
+      function updateCustomersBadge() {
+        // badge removed — no-op
+      }
+
+      function custGoHome() {
+        _custState = { view: 'areas', area: null, custIdx: -1 };
+        renderCustomers();
+      }
+      function custGoArea() {
+        _custState.view = 'names';
+        _custState.custIdx = -1;
+        renderCustomers();
+      }
+
+      function renderCustomers() {
+        const con = document.getElementById("custView");
+        if (!con) return;
+
+        if (_custState.view === 'areas') {
+          const grouped = {};
+          allCustomers.forEach(c => {
+            const area = (c.area || 'Unknown').trim();
+            if (!grouped[area]) grouped[area] = [];
+            grouped[area].push(c);
+          });
+          const areas = Object.keys(grouped).sort();
+          if (!areas.length) {
+            con.innerHTML = `<div style="text-align:center;padding:50px 20px;">
+              <div style="font-size:44px;margin-bottom:12px;">👥</div>
+              <div style="font-weight:700;font-size:16px;color:var(--dark);margin-bottom:6px;">No Customers Yet</div>
+              <div style="font-size:13px;color:var(--muted);">Customers appear here once they sign up.</div>
+            </div>`;
+            return;
+          }
+          con.innerHTML = `
+            <div style="margin-bottom:16px;">
+              <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--dark);">All Areas</div>
+              <div style="font-size:13px;color:var(--muted);">${allCustomers.length} customer${allCustomers.length!==1?'s':''} · ${areas.length} area${areas.length!==1?'s':''}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              ${areas.map(area => {
+                const count = grouped[area].length;
+                return '<div onclick="custSelectArea(\'' + area.replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:14px;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchstart="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" ontouchend="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'" onmouseover="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" onmouseout="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'">'
+                + '<div style="display:flex;align-items:center;gap:12px;">'
+                + '<div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--pr),#ff9a00);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📍</div>'
+                + '<div><div style="font-weight:700;font-size:15px;color:var(--dark);">' + area + '</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">' + count + ' customer' + (count!==1?'s':'') + '</div></div>'
+                + '</div>'
+                + '<div style="display:flex;align-items:center;gap:10px;">'
+                + '<div style="background:#fff3ec;border-radius:10px;padding:7px 14px;text-align:center;min-width:48px;"><div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:var(--pr);line-height:1;">' + count + '</div></div>'
+                + '<div style="color:#bbb;font-size:22px;line-height:1;padding-right:2px;">›</div>'
+                + '</div></div>';
+              }).join('')}
+            </div>`;
+          return;
+        }
+
+        if (_custState.view === 'names') {
+          const area = _custState.area;
+          const list = allCustomers.map((c,i)=>({c,i})).filter(({c}) => (c.area||'Unknown').trim()===area);
+          con.innerHTML = `
+            <div onclick="custGoHome()" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+              <div style="width:34px;height:34px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--dark);flex-shrink:0;">‹</div>
+              <div>
+                <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:var(--dark);">${area}</div>
+                <div style="font-size:12px;color:var(--muted);">${list.length} customer${list.length!==1?'s':''}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${list.map(({c,i}) => {
+                const avatar = (c.name||'?')[0].toUpperCase();
+                const oc = (allOrders||[]).filter(o=>o.phone===c.phone).length;
+                return '<div onclick="custSelectUser(' + i + ');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchstart="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" ontouchend="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'" onmouseover="this.style.borderColor=\'var(--pr)\'" onmouseout="this.style.borderColor=\'#eee\'">'
+                  + '<div style="display:flex;align-items:center;gap:12px;">'
+                  + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--pr),#ff9a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:\'Baloo 2\',cursive;font-size:17px;font-weight:800;flex-shrink:0;">' + avatar + '</div>'
+                  + '<div><div style="font-weight:700;font-size:14px;color:var(--dark);">' + (c.name||'—') + '</div>'
+                  + '<div style="font-size:12px;color:var(--muted);">📱 ' + (c.phone||'—') + ' &nbsp;·&nbsp; ' + oc + ' order' + (oc!==1?'s':'') + '</div></div>'
+                  + '</div><div style="color:#bbb;font-size:22px;line-height:1;padding-right:2px;">›</div></div>';
+              }).join('')}
+            </div>`;
+          return;
+        }
+
+        if (_custState.view === 'detail') {
+          const c = allCustomers[_custState.custIdx];
+          if (!c) { custGoHome(); return; }
+          const orders = (allOrders||[]).filter(o=>o.phone===c.phone);
+          const deliveredOrders = orders.filter(o=>o.status==='delivered');
+          const totalSpend = deliveredOrders.reduce((s,o)=>s+(o.total||0),0);
+          const fmt = (ts,time) => {
+            if (!ts) return '—';
+            const ms = (ts.seconds||ts._seconds) ? (ts.seconds||ts._seconds)*1000 : ts;
+            return new Date(ms).toLocaleString("en-IN", time
+              ? {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}
+              : {day:"2-digit",month:"short",year:"numeric"});
+          };
+          const lastSeen = fmt(c.lastSeen, true);
+          const avatar = (c.name||'?')[0].toUpperCase();
+          con.innerHTML = `
+            <div onclick="custGoArea()" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+              <div style="width:34px;height:34px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--dark);flex-shrink:0;">‹</div>
+              <div style="font-size:13px;color:var(--muted);">Back to <strong style="color:var(--dark);">${_custState.area}</strong></div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--pr),#ff9a00);border-radius:16px;padding:18px 16px;margin-bottom:16px;">
+              <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;flex-shrink:0;">${avatar}</div>
+              <div style="min-width:0;">
+                <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name||'—'}</div>
+                <div style="font-size:13px;color:rgba(255,255,255,0.85);">📱 ${c.phone||'—'}</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">📍 ${c.area||'—'}</div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+              <div style="background:#fff3ec;border-radius:12px;padding:14px;text-align:center;">
+                <div style="font-family:'Baloo 2',cursive;font-size:28px;font-weight:800;color:var(--pr);line-height:1;">${orders.length}</div>
+                <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">Total Orders</div>
+              </div>
+              <div style="background:#e8f7f0;border-radius:12px;padding:14px;text-align:center;">
+                <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;line-height:1;">₹${totalSpend.toLocaleString("en-IN")}</div>
+                <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">Delivered Spend</div>
+              </div>
+            </div>
+
+            <div style="background:#f7f8fc;border-radius:14px;overflow:hidden;margin-bottom:16px;">
+              ${[['📍','Area',c.area||'—'],['🏠','Address',c.address||'—'],['🕐','Last Seen',lastSeen]]
+                .map(([icon,label,val],i,arr)=>`
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;${i<arr.length-1?'border-bottom:1px solid #eee;':''}gap:10px;">
+                  <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">
+                    <span>${icon}</span>
+                    <span style="font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;">${label}</span>
+                  </div>
+                  <span style="font-size:13px;font-weight:700;color:var(--dark);text-align:right;word-break:break-word;max-width:60%;">${val}</span>
+                </div>`).join('')}
+            </div>
+
+            ${orders.length ? `
+            <div style="font-weight:700;font-size:14px;color:var(--dark);margin-bottom:10px;">🛒 Order History</div>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="custOrderList">
+              ${orders.slice(0,15).map((o,oi)=>{
+                const d=o.createdAt?new Date((o.createdAt.seconds||o.createdAt._seconds)*1000).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):'—';
+                const sc={delivered:'#1a9e5c',cancelled:'#e74c3c',confirmed:'var(--pr)',out_for_delivery:'#2980b9',pending:'#e8a000'}[o.status]||'#888';
+                const statusLabel={delivered:'✅ Delivered',cancelled:'❌ Cancelled',confirmed:'✔ Confirmed',out_for_delivery:'🛵 Out for Delivery',pending:'⏳ Pending'}[o.status]||(o.status||'—');
+                const deliveryBoyName = o.deliveredBy
+                  ? ((deliveryBoys||[]).find(b=>b.phone===o.deliveredBy)||{}).name || o.deliveredBy
+                  : null;
+                const itemsList = (o.items||[]).map(it=>`${it.name||it.n||'Item'} × ${it.qty||it.q||1}`).join(', ');
+                const detailId = 'cust-ord-det-'+oi;
+                return `<div class="cod-card" onclick="(function(el){var d=el.querySelector('.cod-det');var open=d.classList.toggle('open');el.classList.toggle('expanded',open);})(this)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:8px;flex-wrap:wrap;">
+                    <div>
+                      <div style="font-size:13px;font-weight:700;color:var(--dark);">#${(o.id||'').slice(-6).toUpperCase()}</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${d}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <span style="font-size:11px;font-weight:700;color:${sc};background:${sc}18;border-radius:6px;padding:3px 8px;">${statusLabel}</span>
+                      <span style="font-weight:800;color:#1a9e5c;font-size:14px;">₹${(o.total||0).toLocaleString("en-IN")}</span>
+                      <span class="cod-chevron">›</span>
+                    </div>
+                  </div>
+                  <div class="cod-det" style="background:#fafafa;">
+                    <div class="cod-det-inner">
+                      ${itemsList ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><span style="font-weight:700;color:var(--dark);">🛍️ Items:</span> ${itemsList}</div>` : ''}
+                      ${deliveryBoyName ? `<div style="font-size:12px;color:var(--muted);"><span style="font-weight:700;color:var(--dark);">🏍️ Delivery Boy:</span> ${deliveryBoyName}</div>` : (o.status==='delivered'?`<div style="font-size:12px;color:var(--muted);">🏍️ Delivery by: —</div>`:'')}
+                      ${o.address ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;"><span style="font-weight:700;color:var(--dark);">📍 Address:</span> ${o.address}</div>` : ''}
+                    </div>
+                  </div>
+                </div>`;
+              }).join('')}
+              ${orders.length>15?`<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px;">+${orders.length-15} more orders</div>`:''}
+            </div>` : `
+            <div style="text-align:center;background:#f7f8fc;border-radius:12px;padding:24px 16px;">
+              <div style="font-size:32px;margin-bottom:8px;">🛒</div>
+              <div style="font-size:13px;color:var(--muted);">No orders yet from this customer.</div>
+            </div>`}
+          `;
+        }
+      }
+
+            function custSelectArea(area) {
+        _custState = { view: 'names', area: area, custIdx: -1 };
+        renderCustomers();
+      }
+      function custSelectUser(idx) {
+        _custState.view = 'detail';
+        _custState.custIdx = parseInt(idx);
+        renderCustomers();
+      }
 
       function switchTab(id, btn) {
         document
@@ -2426,7 +2563,7 @@
           .forEach((t) => t.classList.remove("active"));
         document.getElementById("tab-" + id).classList.add("active");
         btn.classList.add("active");
-        if (id === "deliveryarea") { populatePickupFilters(); renderPickupLog(); }
+        if (id === "customers") { _custState = { view: 'areas', area: null, custIdx: -1 }; renderCustomers(); }
       }
 
       // ── CATEGORIES ───────────────────────────────────────────────
@@ -2775,8 +2912,8 @@ ${items}
         const msgs = {
           confirmed: `Hello ${name}! 🎉 Your order has been confirmed! We will deliver it soon. — S_Quick Mart`,
           out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart${locationNote}`,
-          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart${locationNote}`,
-          cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 7058204462 — S_Quick Mart${locationNote}`,
+          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart`,
+          cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 9545148205 — S_Quick Mart`,
         };
         const msg =
           msgs[status] ||
@@ -3472,9 +3609,9 @@ ${items}
       function ynWA(phone, name, status) {
         const msgs = {
           confirmed: `Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart \n\n📍 Please share your live location on WhatsApp`,
-          out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart \n\n📍 Please share your live location on WhatsApp`,
+          out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
           delivered: `Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
-          rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 7058204462 — S_Quick Mart \n\n📍 Please share your live location on WhatsApp if you need assistance.`,
+          rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 9545148205 — S_Quick Mart`,
           pending: `Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart\n\n📍 Please share your live location on WhatsApp`,
         };
         const msg =
@@ -3704,220 +3841,6 @@ ${items}
             ? "✅ Boys saved! They can now log in via miniadmin."
             : "❌ Save failed!",
         );
-      }
-
-      // ── DELIVERY AREAS (WITH SHOPS) ───────────────────────────────
-      function renderDelivAreasList() {
-        const el = document.getElementById("delivAreasList");
-        if (!el) return;
-        if (!deliveryAreas.length) {
-          el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;">No areas added yet. Add your first area above.</div>`;
-          return;
-        }
-        el.innerHTML = deliveryAreas.map((area, ai) => `
-          <div style="border:1.5px solid #eee;border-radius:14px;padding:14px;background:#fff;">
-            <!-- Area Header -->
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-              <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📍</div>
-              <input
-                type="text"
-                value="${area.name}"
-                class="form-input"
-                style="flex:1;min-width:140px;font-weight:700;"
-                onchange="deliveryAreas[${ai}].name=this.value"
-                placeholder="Area name"
-              />
-              <button class="btn-danger" onclick="deleteDelivArea(${ai})" style="flex-shrink:0;">🗑️ Delete</button>
-            </div>
-
-            <!-- Shops in this area -->
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🏪 Shops in this area:</div>
-            <div id="delivShopsList-${ai}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
-              ${(area.shops || []).map((shop, si) => `
-                <div style="background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-size:18px;">🏪</span>
-                  <input
-                    type="text"
-                    value="${typeof shop === 'object' ? shop.name : shop}"
-                    class="form-input"
-                    style="flex:1;min-width:120px;font-size:13px;padding:7px 10px;"
-                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], name:this.value} : {name:this.value, phone:''};"
-                    placeholder="Shop name"
-                  />
-                  <input
-                    type="tel"
-                    value="${typeof shop === 'object' ? (shop.phone || '') : ''}"
-                    class="form-input"
-                    style="width:140px;font-size:13px;padding:7px 10px;"
-                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], phone:this.value} : {name:'', phone:this.value};"
-                    placeholder="📞 Shop number"
-                    maxlength="10"
-                  />
-                  <button class="btn-danger" onclick="deleteDelivShop(${ai},${si})" style="padding:6px 11px;font-size:12px;">🗑️</button>
-                </div>
-              `).join('')}
-              ${!(area.shops || []).length ? `<div style="font-size:12px;color:var(--muted);padding:4px 2px;">No shops added yet.</div>` : ''}
-            </div>
-
-            <!-- Add shop row -->
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <input
-                type="text"
-                id="newShopInput-${ai}"
-                class="form-input"
-                placeholder="Shop name..."
-                style="flex:1;min-width:120px;font-size:13px;"
-                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
-              />
-              <input
-                type="tel"
-                id="newShopPhone-${ai}"
-                class="form-input"
-                placeholder="📞 Phone (optional)"
-                style="width:170px;font-size:13px;"
-                maxlength="10"
-                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
-              />
-              <button class="btn-primary" style="padding:8px 14px;font-size:13px;" onclick="addDelivShop(${ai})">＋ Shop</button>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      function addDelivArea() {
-        const inp = document.getElementById("newDelivAreaName");
-        const name = inp.value.trim();
-        if (!name) { showToast("❌ Please enter an area name!"); return; }
-        if (deliveryAreas.find(a => a.name.toLowerCase() === name.toLowerCase())) {
-          showToast("❌ This area already exists!"); return;
-        }
-        deliveryAreas.push({ name, shops: [] });
-        inp.value = "";
-        renderDelivAreasList();
-        showToast(`✅ Area "${name}" added! Don't forget to save.`);
-      }
-
-      function deleteDelivArea(ai) {
-        if (!confirm(`Delete area "${deliveryAreas[ai].name}" and all its shops?`)) return;
-        deliveryAreas.splice(ai, 1);
-        renderDelivAreasList();
-      }
-
-      function addDelivShop(ai) {
-        const inp = document.getElementById(`newShopInput-${ai}`);
-        const phoneInp = document.getElementById(`newShopPhone-${ai}`);
-        const name = inp.value.trim();
-        const phone = phoneInp ? phoneInp.value.trim() : '';
-        if (!name) { showToast("❌ Please enter a shop name!"); return; }
-        if (!deliveryAreas[ai].shops) deliveryAreas[ai].shops = [];
-        deliveryAreas[ai].shops.push({ name, phone });
-        inp.value = "";
-        if (phoneInp) phoneInp.value = "";
-        renderDelivAreasList();
-        showToast(`✅ "${name}" added!`);
-      }
-
-      function deleteDelivShop(ai, si) {
-        deliveryAreas[ai].shops.splice(si, 1);
-        renderDelivAreasList();
-      }
-
-      async function saveDelivAreas() {
-        const ok = await window.fbSaveDeliveryAreas(deliveryAreas);
-        showToast(ok ? "✅ Delivery areas & shops saved!" : "❌ Save failed!");
-      }
-
-      // ── SHOP PICKUP LOG ───────────────────────────────────────────
-      function populatePickupFilters() {
-        const areaSel = document.getElementById("pickupFilterArea");
-        const boySel  = document.getElementById("pickupFilterBoy");
-        if (!areaSel || !boySel) return;
-        const curArea = areaSel.value;
-        const curBoy  = boySel.value;
-        const areas = ["all", ...new Set(allPickups.map(p => p.areaName).filter(Boolean))];
-        const boys  = ["all", ...new Set(allPickups.map(p => p.boyName).filter(Boolean))];
-        areaSel.innerHTML = areas.map(a => `<option value="${a}" ${curArea===a?'selected':''}>${a==='all'?'All Areas':a}</option>`).join('');
-        boySel.innerHTML  = boys.map(b => `<option value="${b}" ${curBoy===b?'selected':''}>${b==='all'?'All Boys':b}</option>`).join('');
-      }
-
-      function renderPickupLog() {
-        const con = document.getElementById("pickupLogContainer");
-        const summaryEl = document.getElementById("pickupSummaryCards");
-        if (!con) return;
-
-        const areaF = (document.getElementById("pickupFilterArea") || {}).value || "all";
-        const boyF  = (document.getElementById("pickupFilterBoy") || {}).value  || "all";
-
-        let filtered = allPickups;
-        if (areaF !== "all") filtered = filtered.filter(p => p.areaName === areaF);
-        if (boyF  !== "all") filtered = filtered.filter(p => p.boyName  === boyF);
-
-        // Summary cards
-        const totalAmt    = filtered.reduce((s,p) => s + (p.amount||0), 0);
-        const totalTx     = filtered.length;
-        const uniqueShops = new Set(filtered.map(p => p.shopName)).size;
-        if (summaryEl) {
-          summaryEl.innerHTML = `
-            <div style="background:#fff3ec;border:1.5px solid #ffd5b0;border-radius:12px;padding:14px;text-align:center;">
-              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:var(--pr);">₹${totalAmt.toLocaleString('en-IN')}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Amount</div>
-            </div>
-            <div style="background:#e8f7f0;border:1.5px solid #a5d6c2;border-radius:12px;padding:14px;text-align:center;">
-              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;">${totalTx}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Pickups</div>
-            </div>
-            <div style="background:#f0f4ff;border:1.5px solid #c3cff5;border-radius:12px;padding:14px;text-align:center;">
-              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#3b5bdb;">${uniqueShops}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Shops</div>
-            </div>`;
-        }
-
-        if (!filtered.length) {
-          con.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No pickup logs found.</div>`;
-          return;
-        }
-
-        var cardsHtml = '';
-        filtered.forEach(function(p, i) {
-          var ts = p.createdAt ? new Date((p.createdAt.seconds||p.createdAt._seconds||0)*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
-          var orderId = p.orderId && p.orderId !== '—' ? '#' + p.orderId.slice(-6).toUpperCase() : '—';
-          var shopPhoneHtml = p.shopPhone ? '<a href="tel:' + p.shopPhone + '" style="font-size:11px;color:var(--pr);font-weight:600;text-decoration:none;">📞 ' + p.shopPhone + '</a>' : '';
-          cardsHtml += '<div style="background:#fff;border:1.5px solid #f0f0f0;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">'
-            + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">'
-              + '<div style="display:flex;align-items:center;gap:8px;">'
-                + '<span style="font-family:\'Baloo 2\',cursive;font-size:15px;font-weight:800;color:var(--pr);">📦 ' + orderId + '</span>'
-                + '<span style="background:#fff3ec;color:var(--pr);font-size:10px;font-weight:700;border-radius:50px;padding:2px 9px;border:1px solid #ffd5b0;">#' + (i+1) + '</span>'
-              + '</div>'
-              + '<span style="font-size:11px;color:var(--muted);font-weight:500;">🕐 ' + ts + '</span>'
-            + '</div>'
-            + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px;">'
-              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
-                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏍️ Delivery Boy</div>'
-                + '<div style="font-size:14px;font-weight:700;color:var(--dark);">' + (p.boyName||'—') + '</div>'
-              + '</div>'
-              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
-                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📍 Area</div>'
-                + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.areaName||'—') + '</div>'
-              + '</div>'
-              + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
-                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏪 Shop</div>'
-                + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.shopName||'—') + '</div>'
-                + shopPhoneHtml
-              + '</div>'
-            + '</div>'
-            + '<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;border-top:1.5px solid #f0f0f0;padding-top:10px;">'
-              + '<div style="flex:1;min-width:160px;">'
-                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📝 Items</div>'
-                + '<div style="font-size:13px;color:#555;line-height:1.5;">' + (p.itemNote||'—') + '</div>'
-              + '</div>'
-              + '<div style="text-align:right;flex-shrink:0;">'
-                + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">💰 Total Amount</div>'
-                + '<div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹' + (p.amount||0).toLocaleString('en-IN') + '</div>'
-              + '</div>'
-            + '</div>'
-          + '</div>';
-        });
-        con.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;">' + cardsHtml + '</div>';
       }
 
       // ── PRODUCTS CLOSED MODE ──────────────────────────────────────────────
