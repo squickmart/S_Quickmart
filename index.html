@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="S2.PNG" />
   <!-- Primary SEO -->
   <meta name="description"
-    content="S_Quick Mart — Parbhani ka sabse fast grocery delivery service. Groceries, daily essentials 20-30 minutes mein ghar pe. Cash on Delivery available. Order karo abhi!" />
+    content="S_Quick Mart — Fast grocery delivery in Parbhani. Groceries and daily essentials delivered to your doorstep in 20–30 minutes. Cash on Delivery available. Order now!" />
   <meta name="keywords"
-    content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart,Quick Mart,QuickMart, fast delivery Parbhani, ghar pe grocery Parbhani, 431401 grocery" />
+    content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart, Quick Mart, fast delivery Parbhani, home grocery delivery Parbhani, 431401 grocery" />
   <meta name="author" content="S_Quick Mart, Parbhani" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://squickmart.store/" />
@@ -18,7 +18,7 @@
   <!-- Open Graph (WhatsApp, Facebook preview) -->
   <meta property="og:title" content="S_Quick Mart — Grocery Delivery in Parbhani" />
   <meta property="og:description"
-    content="Parbhani ka sabse fast grocery delivery. 20-30 minutes mein doorstep pe. Cash on Delivery." />
+    content="Fast grocery delivery in Parbhani. Doorstep delivery in 20–30 minutes. Cash on Delivery." />
   <meta property="og:url" content="https://squickmart.store/" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="en_IN" />
@@ -108,6 +108,7 @@
       }
       window.renderProducts();
       window.updateCartUI();
+      window.renderSubcatStrip && window.renderSubcatStrip();
     }
 
     onSnapshot(doc(db, "store", "products"), (snap) => {
@@ -115,6 +116,7 @@
         window.products = snap.data().list || [];
         window.renderProducts();
         window.renderDetailIfOpen();
+        window.renderSubcatStrip && window.renderSubcatStrip();
       }
     });
     onSnapshot(doc(db, "store", "announcements"), (snap) => {
@@ -2824,6 +2826,49 @@
     .order-card.yn-card {
       border-left: 4px solid #7c3aed !important;
     }
+
+    /* ── SUBCATEGORY STRIP ── */
+    .scs-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+      cursor: pointer;
+      width: 76px;
+    }
+    .scs-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: #f4f6f5;
+      border: 1.5px solid #ebebeb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+    }
+    .scs-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .scs-card:hover .scs-img {
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(36,106,115,0.13);
+      transform: translateY(-2px);
+    }
+    .scs-name {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #2a2a2a;
+      text-align: center;
+      line-height: 1.3;
+      width: 76px;
+      word-break: break-word;
+    }
   </style>
 </head>
 
@@ -2926,6 +2971,10 @@
         <div class="cat-emoji">📝</div>
         <div class="cat-lbl">Stationery</div>
       </div>
+        <div class="cat-card" onclick="selCatScroll('health', this)">
+        <div class="cat-emoji">💊</div>
+        <div class="cat-lbl">Health & Safety</div>
+      </div>
     </div>
   </section>
   <section class="prod-sec" id="prodSec">
@@ -2934,6 +2983,11 @@
         Loading... ⏳
       </p>
     </div>
+    <!-- SUBCATEGORY STRIP -->
+    <div id="subcatStrip" style="display:none; margin:20px -16px 0; background:#fff; border-top:1px solid #efefef; border-bottom:1px solid #efefef; padding:18px 0;">
+      <div id="subcatStripInner" style="display:flex; flex-wrap:wrap; gap:10px 10px; padding:0 16px;"></div>
+    </div>
+
     <!-- FOOTER -->
     <footer
       style="background:#1a1a2e; color:#fff; font-family:'Inter',sans-serif; margin-top:0; padding:0; margin-left:-16px; margin-right:-16px;">
@@ -3001,7 +3055,11 @@
                 Needs</a>
                  <a href="#" onclick="selCat('stationery',null);return false;"
                 style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">📝 Stationer's
+                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">📝 Stationery's
+                </a>
+                 <a href="#" onclick="selCat('Health',null);return false;"
+                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
+                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">💊 Health & Safety
                 </a>
             </div>
           </div>
@@ -3447,11 +3505,63 @@
         renderCategoryGrid();
       }
 
+      window.buildCatInfo = buildCatInfo;
+      window.renderCategoryGrid = renderCategoryGrid;
       function buildCatInfo() {
         catInfo = {};
         (window.categories || []).forEach((c) => {
           catInfo[c.id] = { label: c.label, emoji: c.emoji, subs: c.subs || [] };
         });
+        renderSubcatStrip();
+      }
+
+      window.renderSubcatStrip = renderSubcatStrip;
+      function renderSubcatStrip() {
+        var inner = document.getElementById("subcatStripInner");
+        var wrap  = document.getElementById("subcatStrip");
+        if (!inner || !wrap) return;
+
+        var subImgMap = {};
+        (window.products || []).forEach(function(p) {
+          var key = (p.cat || "") + "|||" + (p.sub || "");
+          if (!subImgMap[key] && p.img) subImgMap[key] = p.img;
+        });
+
+        var seen = {};
+        var cards = [];
+        (window.categories || []).forEach(function(cat) {
+          (cat.subs || []).forEach(function(sub) {
+            var key = cat.id + "|||" + sub;
+            var hasProduct = (window.products || []).some(function(p) {
+              return p.cat === cat.id && (p.sub || "").trim() === sub.trim() && p.visible !== false;
+            });
+            if (!hasProduct) return;
+            if (seen[sub]) return;
+            seen[sub] = true;
+            var emoji = (typeof getSubEmoji === 'function') ? getSubEmoji(sub) : '📦';
+            cards.push({ cat: cat.id, sub: sub, img: subImgMap[key] || null, emoji: emoji });
+          });
+        });
+
+        if (!cards.length) { wrap.style.display = "none"; return; }
+
+        var html = "";
+        cards.forEach(function(c) {
+          var imgTag = c.img
+            ? "<img src='" + c.img + "' style='width:100%;height:100%;object-fit:contain;' onerror=\"this.parentNode.innerHTML='" + c.emoji + "'\">"
+            : c.emoji;
+          html += "<div class='scs-card' onclick=\"scsNav('" + c.cat + "','" + c.sub.replace(/'/g, "\\'") + "')\">"
+            + "<div class='scs-img'>" + imgTag + "</div>"
+            + "<div class='scs-name'>" + c.sub + "</div>"
+            + "</div>";
+        });
+
+        inner.innerHTML = html;
+        wrap.style.display = "block";
+      }
+
+      function scsNav(catId, subName) {
+        openDetailModal(catId, subName);
       }
 
       function renderCategoryGrid() {
@@ -4268,10 +4378,16 @@
       };
       function renderDMLeft(cat, subs) {
         document.getElementById("dmLeft").innerHTML = subs
-          .map(
-            (s) =>
-              `<div class="dm-sub-item ${s === curDetailSub ? "active" : ""}" onclick="selectDMSub('${cat}','${s}')"><span class="dm-sub-emoji">${getSubEmoji(s)}</span><div class="dm-sub-lbl">${s}</div></div>`,
-          )
+          .map(function(s) {
+            // First product image in this subcategory
+            var prod = (window.products || []).find(function(p) {
+              return p.cat === cat && p.sub === s && p.img;
+            });
+            var icon = prod
+              ? `<img src="${prod.img}" style="width:38px;height:38px;border-radius:8px;object-fit:contain;display:block;margin:0 auto 4px;background:#f5f5f5;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="dm-sub-emoji" style="display:none">${getSubEmoji(s)}</span>`
+              : `<span class="dm-sub-emoji">${getSubEmoji(s)}</span>`;
+            return `<div class="dm-sub-item ${s === curDetailSub ? "active" : ""}" onclick="selectDMSub('${cat}','${s}')">${icon}<div class="dm-sub-lbl">${s}</div></div>`;
+          })
           .join("");
       }
       function renderDMRight(cat, sub) {
@@ -4575,7 +4691,7 @@
               );
             })
             .join("");
-          // Agar selected area ab available nahi, toh reset karo aur turant batao
+          // If the selected area is no longer available, reset it and notify the user immediately
           if (prevSel) {
             const btn = chkGrid.querySelector(
               '.area-btn[data-area="' + prevSel + '"]:not(.area-na)',
@@ -4586,7 +4702,7 @@
               const picker = document.getElementById("chkAreaPicker");
               if (badgeWrap) badgeWrap.style.display = "none";
               if (picker) picker.style.display = "block";
-              // Checkout open hai to turant warn karo
+              // If checkout is open, warn the user immediately
               const ckOverlay = document.getElementById("ckOverlay");
               if (ckOverlay && ckOverlay.classList.contains("open")) {
                 showToast("⚠️ " + prevSel + " is now Not Available. Please select another area.");

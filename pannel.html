@@ -19,11 +19,13 @@
         setDoc,
         onSnapshot,
         collection,
+        addDoc,
         updateDoc,
         query,
         orderBy,
         getDocs,
         where,
+        serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
       import {
         getStorage,
@@ -198,6 +200,53 @@
         }
       };
 
+      // ── DELIVERY AREAS (with shops) ───────────────────────────
+      window.fbSaveDeliveryAreas = async (areas) => {
+        try {
+          await setDoc(doc(db, "store", "delivery_areas"), { list: areas });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      window.fbLoadDeliveryAreas = async () => {
+        try {
+          const s = await getDoc(doc(db, "store", "delivery_areas"));
+          return s.exists() ? s.data().list || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
+      window.fbWatchDeliveryAreas = (cb) => {
+        return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
+          cb(snap.exists() ? snap.data().list || [] : []);
+        });
+      };
+
+      // ── SHOP PICKUPS ──────────────────────────────────────────
+      window.fbSavePickup = async (pickup) => {
+        try {
+          await addDoc(collection(db, "shop_pickups"), { ...pickup, createdAt: serverTimestamp() });
+          return true;
+        } catch (e) {
+          console.error(e);
+          return false;
+        }
+      };
+      window.fbWatchPickups = (cb) => {
+        return onSnapshot(collection(db, "shop_pickups"), (snap) => {
+          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          docs.sort((a, b) => {
+            const at = a.createdAt ? (a.createdAt.seconds || a.createdAt._seconds || 0) : 0;
+            const bt = b.createdAt ? (b.createdAt.seconds || b.createdAt._seconds || 0) : 0;
+            return bt - at;
+          });
+          cb(docs);
+        }, (err) => {
+          console.error("shop_pickups error:", err);
+        });
+      };
+
       // ── DELIVERY BOYS ─────────────────────────────────────────
       window.fbSaveBoys = async (boys) => {
         try {
@@ -225,6 +274,38 @@
         return onSnapshot(collection(db, "customers"), (snap) => {
           cb(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         });
+      };
+
+      // ── SALARY CLEAR ─────────────────────────────────────────────
+      window.fbSaveSalaryClear = async (phone, weekKey, amount, boyName) => {
+        try {
+          const docId = phone + "_" + weekKey;
+          await setDoc(doc(db, "salary_cleared", docId), {
+            phone, weekKey, amount, boyName,
+            clearedAt: serverTimestamp()
+          });
+          return true;
+        } catch (e) {
+          console.error("❌ Salary clear Firestore error:", e.code, e.message);
+          // Common fix: Add this to Firestore Rules:
+          // match /salary_cleared/{docId} { allow read, write: if request.auth != null; }
+          return { error: e.code || e.message };
+        }
+      };
+      window.fbWatchSalaryCleared = (cb) => {
+        return onSnapshot(collection(db, "salary_cleared"), (snap) => {
+          const data = {};
+          snap.docs.forEach(d => { data[d.id] = d.data(); });
+          cb(data);
+        });
+      };
+      window.fbLoadSalaryCleared = async () => {
+        try {
+          const snap = await getDocs(collection(db, "salary_cleared"));
+          const data = {};
+          snap.docs.forEach(d => { data[d.id] = d.data(); });
+          return data;
+        } catch(e) { return {}; }
       };
 
       onSnapshot(doc(db, "store", "status"), (snap) => {
@@ -1242,6 +1323,139 @@
         transform: rotate(90deg);
         color: var(--pr);
       }
+
+      /* ── DELIVERY PERFORMANCE SMOOTH ANIMATIONS ── */
+      .boy-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border: 1.5px solid #eee;
+        border-radius: 12px;
+        background: #fff;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      .boy-row:hover {
+        border-color: var(--pr);
+        box-shadow: 0 2px 12px rgba(255,107,0,0.13);
+      }
+      .boy-row:active {
+        transform: scale(0.98);
+      }
+      .boy-row.selected {
+        border-color: var(--pr);
+        background: #fff8f3;
+        box-shadow: 0 2px 12px rgba(255,107,0,0.15);
+      }
+      .boy-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b00, #e05800);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+      .boy-parcel-badge {
+        text-align: center;
+        border-radius: 10px;
+        padding: 6px 14px;
+        min-width: 58px;
+        flex-shrink: 0;
+        transition: background 0.2s;
+      }
+      .boy-parcel-num {
+        font-size: 20px;
+        font-weight: 800;
+        font-family: 'Baloo 2', cursive;
+        line-height: 1;
+      }
+      .boy-parcel-lbl {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      /* Detail panel — smooth slide in */
+      #boysStatsContainer {
+        overflow: hidden;
+      }
+      .boy-detail-panel {
+        border: 2px solid var(--pr);
+        border-radius: 14px;
+        overflow: hidden;
+        animation: boySlideIn 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
+        transform-origin: top;
+      }
+      @keyframes boySlideIn {
+        from { opacity: 0; transform: translateY(-10px) scaleY(0.95); }
+        to   { opacity: 1; transform: translateY(0) scaleY(1); }
+      }
+      .boy-detail-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, #fff3ec, #ffe5d0);
+      }
+      .boy-detail-body { padding: 14px 16px; }
+      .boy-order-row {
+        font-size: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .boy-amount-card {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        color: #fff;
+      }
+      .boy-clear-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-family: 'Baloo 2', cursive;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(46,204,113,0.3);
+        transition: transform 0.15s, box-shadow 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      .boy-clear-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,204,113,0.4); }
+      .boy-clear-btn:active { transform: scale(0.98); }
+      /* Mobile tweaks */
+      @media (max-width: 480px) {
+        .boy-row { padding: 10px 12px; gap: 10px; }
+        .boy-avatar { width: 36px; height: 36px; font-size: 15px; }
+        .boy-parcel-badge { padding: 5px 10px; min-width: 50px; }
+        .boy-parcel-num { font-size: 18px; }
+        .boy-detail-header { padding: 12px 14px; gap: 10px; }
+        .boy-detail-body { padding: 12px 14px; }
+        .boy-amount-card { padding: 12px 14px; }
+        .boy-clear-btn { font-size: 15px; padding: 13px; }
+      }
     </style>
   </head>
   <body>
@@ -1298,6 +1512,9 @@
           🎯 YourNeed <span class="tab-badge" id="yourNeedBadge">0</span>
         </div>
         <div class="admin-tab" onclick="switchTab('areas', this)">🗺️ Areas</div>
+        <div class="admin-tab" onclick="switchTab('deliveryarea', this)">
+          📍 Delivery Area
+        </div>
         <div class="admin-tab" onclick="switchTab('boys', this)">
           🏍️ Delivery Boys
         </div>
@@ -1960,6 +2177,66 @@
           </div>
         </div>
 
+        <!-- ── DELIVERY AREA TAB ── -->
+        <div class="tab-panel" id="tab-deliveryarea">
+          <div class="admin-card">
+            <div class="admin-card-title">📍 Delivery Area Management</div>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px">
+              Add delivery areas and shops (with phone numbers). Delivery boys can log pickups per order from miniadmin.
+            </p>
+
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+              <input
+                type="text"
+                id="newDelivAreaName"
+                class="form-input"
+                placeholder="New area name (e.g. Sailu Road)"
+                style="flex:1;min-width:160px"
+                onkeydown="if(event.key==='Enter') addDelivArea();"
+              />
+              <button class="btn-primary" onclick="addDelivArea()">＋ Add Area</button>
+            </div>
+
+            <div id="delivAreasList" style="display:flex;flex-direction:column;gap:14px;">
+              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading...</div>
+            </div>
+
+            <button
+              class="btn-primary"
+              style="margin-top:16px;width:100%"
+              onclick="saveDelivAreas()"
+            >
+              💾 Save All Areas & Shops
+            </button>
+          </div>
+
+          <div class="admin-card" style="margin-top:14px;">
+            <div class="admin-card-title">
+              🧾 Shop Pickup Log
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <select id="pickupFilterArea" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
+                  <option value="all">All Areas</option>
+                </select>
+                <select id="pickupFilterBoy" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
+                  <option value="all">All Boys</option>
+                </select>
+              </div>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+              Every time a delivery boy marks an order as Out for Delivery, the selected area and shop are recorded here for quick review.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+              <button id="pickupViewToday" type="button" onclick="setPickupView('today')" style="border:1px solid #ffd5b0;background:#fff7f2;color:var(--pr);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(255,107,0,0.12);">Today</button>
+              <button id="pickupViewYesterday" type="button" onclick="setPickupView('yesterday')" style="border:1px solid #e7ebf5;background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Yesterday</button>
+              <button id="pickupViewAll" type="button" onclick="setPickupView('all')" style="border:1px solid #e7ebf5;background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">All Days</button>
+            </div>
+            <div id="pickupSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
+            <div id="pickupLogContainer">
+              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading pickup log...</div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── DELIVERY BOYS TAB ── -->
         <div class="tab-panel" id="tab-boys">
           <div class="admin-card">
@@ -2016,16 +2293,25 @@
 
           <div class="admin-card" style="margin-top: 14px">
             <div class="admin-card-title">📊 Delivery Performance</div>
-            <div
-              style="font-size: 12px; color: var(--muted); margin-bottom: 12px"
-            >
-              Today's and total delivered orders — by each delivery boy
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 14px">
+              Search by name or click a delivery boy below to view today's parcel count &amp; pending amount.
             </div>
-            <div id="boysStatsContainer">
-              <p style="text-align: center; color: var(--muted); padding: 20px">
-                ⏳ Loading stats...
-              </p>
+            <!-- Search Box -->
+            <div style="position:relative;margin-bottom:16px;">
+              <input
+                type="text"
+                id="boySearchInput"
+                class="form-input"
+                placeholder="🔍 Search delivery boy name..."
+                oninput="onBoySearch(this.value)"
+                autocomplete="off"
+              />
+              <div id="boySearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid #ff6b00;border-top:none;border-radius:0 0 12px 12px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:200px;overflow-y:auto;"></div>
             </div>
+            <!-- All Boys List (always visible) -->
+            <div id="boysQuickList" style="margin-bottom:16px;"></div>
+            <!-- Selected Boy Detail -->
+            <div id="boysStatsContainer"></div>
           </div>
         </div>
         <!-- CUSTOMERS TAB -->
@@ -2201,6 +2487,14 @@
           unsubYN();
           unsubYN = null;
         }
+        if (unsubDelivAreas) {
+          unsubDelivAreas();
+          unsubDelivAreas = null;
+        }
+        if (unsubPickups) {
+          unsubPickups();
+          unsubPickups = null;
+        }
         await window.fbSignOut();
         // UI update handled by onAuthStateChanged
       }
@@ -2275,6 +2569,24 @@
           ].map((n) => ({ name: n, available: true }));
         }
         renderAreasList();
+
+        // Load delivery areas + shops
+        const savedDelivAreas = await window.fbLoadDeliveryAreas();
+        deliveryAreas = savedDelivAreas || [];
+        renderDelivAreasList();
+        if (unsubDelivAreas) unsubDelivAreas();
+        unsubDelivAreas = window.fbWatchDeliveryAreas((areas) => {
+          deliveryAreas = areas || [];
+          renderDelivAreasList();
+        });
+
+        // Load pickup log
+        if (unsubPickups) unsubPickups();
+        unsubPickups = window.fbWatchPickups((pickups) => {
+          allPickups = pickups || [];
+          populatePickupFilters();
+          renderPickupLog();
+        });
 
         // Load delivery boys
         const savedBoys = await window.fbLoadBoys();
@@ -2360,8 +2672,12 @@
         ynFilter = "all",
         unsubYN = null;
       let ynAreas = [];
+      let deliveryAreas = [];
+      let allPickups = [];
       let deliveryBoys = [];
       let allCustomers = [];
+      let unsubDelivAreas = null;
+      let unsubPickups = null;
       let unsubCustomers = null;
       let storeIsOpen = true;
       let _custState = { view: 'areas', area: null, custIdx: -1 };
@@ -2919,7 +3235,7 @@ ${items}
           msgs[status] ||
           `Hello ${name}! Your order update: ${status}. — S_Quick Mart${locationNote}`;
         window.open(
-          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/919545148205?text=${encodeURIComponent(msg)}`,
           "_blank",
         );
       }
@@ -3618,7 +3934,7 @@ ${items}
           msgs[status] ||
           `Hello ${name}! Update on your request: ${status}. — S_Quick Mart`;
         window.open(
-          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/919545148205?text=${encodeURIComponent(msg)}`,
           "_blank",
         );
       }
@@ -3708,6 +4024,301 @@ ${items}
         );
       }
 
+      // ── DELIVERY AREAS (WITH SHOPS) ───────────────────────────────
+      function renderDelivAreasList() {
+        const el = document.getElementById("delivAreasList");
+        if (!el) return;
+        if (!deliveryAreas.length) {
+          el.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;">No areas added yet. Add your first area above.</div>`;
+          return;
+        }
+        el.innerHTML = deliveryAreas.map((area, ai) => `
+          <div style="border:1.5px solid #eee;border-radius:14px;padding:14px;background:#fff;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+              <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">📍</div>
+              <input
+                type="text"
+                value="${area.name}"
+                class="form-input"
+                style="flex:1;min-width:140px;font-weight:700;"
+                onchange="deliveryAreas[${ai}].name=this.value"
+                placeholder="Area name"
+              />
+              <button class="btn-danger" onclick="deleteDelivArea(${ai})" style="flex-shrink:0;">🗑️ Delete</button>
+            </div>
+
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🏪 Shops in this area:</div>
+            <div id="delivShopsList-${ai}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+              ${(area.shops || []).map((shop, si) => `
+                <div style="background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:18px;">🏪</span>
+                  <input
+                    type="text"
+                    value="${typeof shop === 'object' ? shop.name : shop}"
+                    class="form-input"
+                    style="flex:1;min-width:120px;font-size:13px;padding:7px 10px;"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], name:this.value} : {name:this.value, phone:''};"
+                    placeholder="Shop name"
+                  />
+                  <input
+                    type="tel"
+                    value="${typeof shop === 'object' ? (shop.phone || '') : ''}"
+                    class="form-input"
+                    style="width:140px;font-size:13px;padding:7px 10px;"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], phone:this.value} : {name:'', phone:this.value};"
+                    placeholder="📞 Shop number"
+                    maxlength="10"
+                  />
+                  <button class="btn-danger" onclick="deleteDelivShop(${ai},${si})" style="padding:6px 11px;font-size:12px;">🗑️</button>
+                </div>
+              `).join('')}
+              ${!(area.shops || []).length ? `<div style="font-size:12px;color:var(--muted);padding:4px 2px;">No shops added yet.</div>` : ''}
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input
+                type="text"
+                id="newShopInput-${ai}"
+                class="form-input"
+                placeholder="Shop name..."
+                style="flex:1;min-width:120px;font-size:13px;"
+                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
+              />
+              <input
+                type="tel"
+                id="newShopPhone-${ai}"
+                class="form-input"
+                placeholder="📞 Phone (optional)"
+                style="width:170px;font-size:13px;"
+                maxlength="10"
+                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
+              />
+              <button class="btn-primary" style="padding:8px 14px;font-size:13px;" onclick="addDelivShop(${ai})">＋ Shop</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function addDelivArea() {
+        const inp = document.getElementById("newDelivAreaName");
+        const name = inp.value.trim();
+        if (!name) { showToast("❌ Please enter an area name!"); return; }
+        if (deliveryAreas.find((a) => a.name.toLowerCase() === name.toLowerCase())) {
+          showToast("❌ This area already exists!"); return;
+        }
+        deliveryAreas.push({ name, shops: [] });
+        inp.value = "";
+        renderDelivAreasList();
+        showToast(`✅ Area "${name}" added! Don't forget to save.`);
+      }
+
+      function deleteDelivArea(ai) {
+        if (!confirm(`Delete area "${deliveryAreas[ai].name}" and all its shops?`)) return;
+        deliveryAreas.splice(ai, 1);
+        renderDelivAreasList();
+      }
+
+      function addDelivShop(ai) {
+        const inp = document.getElementById(`newShopInput-${ai}`);
+        const phoneInp = document.getElementById(`newShopPhone-${ai}`);
+        const name = inp.value.trim();
+        const phone = phoneInp ? phoneInp.value.trim() : '';
+        if (!name) { showToast("❌ Please enter a shop name!"); return; }
+        if (!deliveryAreas[ai].shops) deliveryAreas[ai].shops = [];
+        deliveryAreas[ai].shops.push({ name, phone });
+        inp.value = "";
+        if (phoneInp) phoneInp.value = "";
+        renderDelivAreasList();
+        showToast(`✅ "${name}" added!`);
+      }
+
+      function deleteDelivShop(ai, si) {
+        deliveryAreas[ai].shops.splice(si, 1);
+        renderDelivAreasList();
+      }
+
+      async function saveDelivAreas() {
+        const ok = await window.fbSaveDeliveryAreas(deliveryAreas);
+        showToast(ok ? "✅ Delivery areas & shops saved!" : "❌ Save failed!");
+      }
+
+      function populatePickupFilters() {
+        const areaSel = document.getElementById("pickupFilterArea");
+        const boySel = document.getElementById("pickupFilterBoy");
+        if (!areaSel || !boySel) return;
+        const curArea = areaSel.value;
+        const curBoy = boySel.value;
+        const areas = ["all", ...new Set(allPickups.map((p) => p.areaName).filter(Boolean))];
+        const boys = ["all", ...new Set(allPickups.map((p) => p.boyName).filter(Boolean))];
+        areaSel.innerHTML = areas.map((a) => `<option value="${a}" ${curArea === a ? 'selected' : ''}>${a === 'all' ? 'All Areas' : a}</option>`).join('');
+        boySel.innerHTML = boys.map((b) => `<option value="${b}" ${curBoy === b ? 'selected' : ''}>${b === 'all' ? 'All Boys' : b}</option>`).join('');
+      }
+
+      function getDateKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function getPickupDayKey(p) {
+        const createdAt = p.createdAt ? new Date((p.createdAt.seconds || p.createdAt._seconds || 0) * 1000) : null;
+        return createdAt && !Number.isNaN(createdAt.getTime()) ? getDateKey(createdAt) : "unknown";
+      }
+
+      function getPickupDayLabel(dayKey) {
+        const today = getDateKey(new Date());
+        const yesterday = getDateKey(new Date(Date.now() - 86400000));
+        if (dayKey === today) return "Today";
+        if (dayKey === yesterday) return "Yesterday";
+        const date = new Date(`${dayKey}T00:00:00`);
+        return date.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+      }
+
+      function setPickupView(mode) {
+        window.pickupViewMode = mode;
+        updatePickupViewButtons(mode);
+        renderPickupLog();
+      }
+
+      function updatePickupViewButtons(mode) {
+        const activeStyle = {
+          background: "linear-gradient(135deg, #ff6b00, #e05e00)",
+          color: "#fff",
+          borderColor: "#ffb07b",
+          boxShadow: "0 6px 18px rgba(255,107,0,0.22)",
+        };
+        const inactiveStyle = {
+          background: "#fff",
+          color: "var(--text)",
+          borderColor: "#e7ebf5",
+          boxShadow: "none",
+        };
+        const buttons = {
+          today: document.getElementById("pickupViewToday"),
+          yesterday: document.getElementById("pickupViewYesterday"),
+          all: document.getElementById("pickupViewAll"),
+        };
+        Object.entries(buttons).forEach(([key, btn]) => {
+          if (!btn) return;
+          const style = key === mode ? activeStyle : inactiveStyle;
+          btn.style.background = style.background;
+          btn.style.color = style.color;
+          btn.style.borderColor = style.borderColor;
+          btn.style.boxShadow = style.boxShadow;
+        });
+      }
+
+      function buildPickupCard(p, index) {
+        const ts = p.createdAt ? new Date((p.createdAt.seconds || p.createdAt._seconds || 0) * 1000).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+        const orderId = p.orderId && p.orderId !== '—' ? '#' + p.orderId.slice(-6).toUpperCase() : '—';
+        const shopPhoneHtml = p.shopPhone ? '<a href="tel:' + p.shopPhone + '" style="font-size:11px;color:var(--pr);font-weight:600;text-decoration:none;">📞 ' + p.shopPhone + '</a>' : '';
+        return '<div style="background:#fff;border:1.5px solid #edf0f5;border-radius:14px;padding:14px;box-shadow:0 3px 10px rgba(0,0,0,0.04);">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">'
+          + '<div style="display:flex;align-items:center;gap:8px;">'
+          + '<span style="font-family:\'Baloo 2\',cursive;font-size:15px;font-weight:800;color:var(--pr);">📦 ' + orderId + '</span>'
+          + '<span style="background:#fff3ec;color:var(--pr);font-size:10px;font-weight:700;border-radius:50px;padding:2px 9px;border:1px solid #ffd5b0;">#' + (index + 1) + '</span>'
+          + '</div>'
+          + '<span style="font-size:11px;color:var(--muted);font-weight:600;">🕐 ' + ts + '</span>'
+          + '</div>'
+          + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px;">'
+          + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏍️ Delivery Boy</div>'
+          + '<div style="font-size:14px;font-weight:700;color:var(--dark);">' + (p.boyName || '—') + '</div>'
+          + '</div>'
+          + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📍 Area</div>'
+          + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.areaName || '—') + '</div>'
+          + '</div>'
+          + '<div style="background:#f7f8fc;border-radius:10px;padding:10px 12px;">'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">🏪 Shop</div>'
+          + '<div style="font-size:14px;font-weight:600;color:var(--dark);">' + (p.shopName || '—') + '</div>'
+          + shopPhoneHtml
+          + '</div>'
+          + '</div>'
+          + '<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;border-top:1.5px solid #f0f0f0;padding-top:10px;">'
+          + '<div style="flex:1;min-width:140px;">'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">📝 Items</div>'
+          + '<div style="font-size:13px;color:#555;line-height:1.5;">' + (p.itemNote || '—') + '</div>'
+          + '</div>'
+          + '<div style="text-align:right;flex-shrink:0;">'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">💰 Total Amount</div>'
+          + '<div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹' + (p.amount || 0).toLocaleString('en-IN') + '</div>'
+          + '</div>'
+          + '</div>'
+          + '</div>';
+      }
+
+      function renderPickupLog() {
+        const con = document.getElementById("pickupLogContainer");
+        const summaryEl = document.getElementById("pickupSummaryCards");
+        if (!con) return;
+
+        const viewMode = window.pickupViewMode || "today";
+        updatePickupViewButtons(viewMode);
+
+        const areaF = (document.getElementById("pickupFilterArea") || {}).value || "all";
+        const boyF = (document.getElementById("pickupFilterBoy") || {}).value || "all";
+
+        let filtered = allPickups;
+        if (areaF !== "all") filtered = filtered.filter((p) => p.areaName === areaF);
+        if (boyF !== "all") filtered = filtered.filter((p) => p.boyName === boyF);
+
+        const todayKey = getDateKey(new Date());
+        const yesterdayKey = getDateKey(new Date(Date.now() - 86400000));
+        if (viewMode === "today") filtered = filtered.filter((p) => getPickupDayKey(p) === todayKey);
+        else if (viewMode === "yesterday") filtered = filtered.filter((p) => getPickupDayKey(p) === yesterdayKey);
+
+        const totalAmt = filtered.reduce((s, p) => s + (p.amount || 0), 0);
+        const totalTx = filtered.length;
+        const uniqueShops = new Set(filtered.map((p) => p.shopName).filter(Boolean)).size;
+        if (summaryEl) {
+          summaryEl.innerHTML = `
+            <div style="background:#fff3ec;border:1.5px solid #ffd5b0;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:var(--pr);">₹${totalAmt.toLocaleString('en-IN')}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Amount</div>
+            </div>
+            <div style="background:#e8f7f0;border:1.5px solid #a5d6c2;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;">${totalTx}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Pickups</div>
+            </div>
+            <div style="background:#f0f4ff;border:1.5px solid #c3cff5;border-radius:12px;padding:14px;text-align:center;">
+              <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#3b5bdb;">${uniqueShops}</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Shops</div>
+            </div>`;
+        }
+
+        if (!filtered.length) {
+          const label = viewMode === "today" ? "Today" : viewMode === "yesterday" ? "Yesterday" : "All days";
+          con.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No pickup logs found for ${label.toLowerCase()}.</div>`;
+          return;
+        }
+
+        const grouped = filtered.reduce((acc, p) => {
+          const key = getPickupDayKey(p);
+          (acc[key] ||= []).push(p);
+          return acc;
+        }, {});
+
+        const dayKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+        const cardsHtml = dayKeys.map((dayKey) => {
+          const items = grouped[dayKey] || [];
+          const dayAmount = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+          return '<div style="background:#fff;border:1.5px solid #edf0f5;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(15, 23, 42, 0.06);">'
+            + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 13px;border-bottom:1px solid #edf0f5;background:linear-gradient(135deg,#fffaf5,#ffffff);">'
+            + '<div>'
+            + '<div style="font-size:12px;font-weight:800;color:var(--pr);text-transform:uppercase;letter-spacing:0.6px;">' + getPickupDayLabel(dayKey) + '</div>'
+            + '<div style="font-size:12px;color:var(--muted);margin-top:2px;">' + items.length + ' pickups • ₹' + dayAmount.toLocaleString('en-IN') + '</div>'
+            + '</div>'
+            + '<span style="font-size:11px;color:var(--muted);background:#fff;border:1px solid #e7ebf5;border-radius:999px;padding:6px 10px;font-weight:700;">' + dayKey + '</span>'
+            + '</div>'
+            + '<div style="display:flex;flex-direction:column;gap:12px;padding:12px;">' + items.map((p, i) => buildPickupCard(p, i)).join('') + '</div>'
+            + '</div>';
+        }).join('');
+
+        con.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + cardsHtml + '</div>';
+      }
+
       // ── DELIVERY BOYS ─────────────────────────────────────────────
       function renderBoysAdmin() {
         const el = document.getElementById("boysListAdmin");
@@ -3737,22 +4348,22 @@ ${items}
       }
 
       function renderBoysStats() {
-        const el = document.getElementById("boysStatsContainer");
+        renderBoysQuickList();
+      }
+
+      // ── DELIVERY PERFORMANCE QUICK LIST ──────────────────────────
+      function renderBoysQuickList() {
+        const el = document.getElementById("boysQuickList");
         if (!el) return;
         if (!deliveryBoys.length) {
-          el.innerHTML =
-            '<p style="text-align:center;color:var(--muted);padding:16px;">No delivery boys.</p>';
+          el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:12px;font-size:13px;">No delivery boys added yet.</p>';
           return;
         }
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
-        const delivered = allOrders.filter(
-          (o) => o.status === "delivered" && o.deliveredBy,
-        );
-        el.innerHTML = deliveryBoys
-          .map((b) => {
+        const today = new Date(); today.setHours(0,0,0,0);
+        const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
+        const delivered = allOrders.filter((o) => o.status === "delivered" && o.deliveredBy);
+        el.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">All Delivery Boys — Tap to view details</div>'
+          + deliveryBoys.map((b) => {
             const byBoy = delivered.filter((o) => o.deliveredBy === b.phone);
             const todayCount = byBoy.filter((o) => {
               const ts = o.deliveredAt || o.createdAt;
@@ -3760,43 +4371,277 @@ ${items}
               const d = new Date((ts.seconds || ts._seconds) * 1000);
               return d >= today && d <= todayEnd;
             }).length;
-            const totalCount = byBoy.length;
-            return `
-            <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1.5px solid #eee;border-radius:12px;background:#fff;margin-bottom:10px;flex-wrap:wrap;">
-              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0;">${(b.name || "?")[0].toUpperCase()}</div>
-              <div style="flex:1;min-width:100px;">
-                <div style="font-weight:700;font-size:14px;color:#1a1a2e;">${b.name}</div>
-                <div style="font-size:12px;color:var(--muted);">📞 ${b.phone}</div>
+            const hasParcels = todayCount > 0;
+            return `<div class="boy-row" id="boyrow-${b.phone}" onclick="selectBoy('${b.phone}')">
+              <div class="boy-avatar">${(b.name || "?")[0].toUpperCase()}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:14px;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.name}</div>
+                <div style="font-size:11px;color:var(--muted);">📞 ${b.phone}</div>
               </div>
-              <div style="text-align:center;background:#fff3ec;border-radius:10px;padding:8px 14px;min-width:70px;">
-                <div style="font-size:22px;font-weight:800;color:var(--pr);font-family:'Baloo 2',cursive;">${todayCount}</div>
-                <div style="font-size:10px;color:var(--muted);font-weight:600;">Today</div>
+              <div class="boy-parcel-badge" style="background:${hasParcels ? '#fff3ec' : '#f5f5f5'};">
+                <div class="boy-parcel-num" style="color:${hasParcels ? 'var(--pr)' : '#bbb'};">${todayCount}</div>
+                <div class="boy-parcel-lbl">Today</div>
               </div>
-              <div style="text-align:center;background:#e8f7f0;border-radius:10px;padding:8px 14px;min-width:70px;">
-                <div style="font-size:22px;font-weight:800;color:#1a9e5c;font-family:'Baloo 2',cursive;">${totalCount}</div>
-                <div style="font-size:10px;color:var(--muted);font-weight:600;">Total</div>
-              </div>
-              <div style="width:100%;margin-top:6px;display:${todayCount > 0 ? "block" : "none"}">
-                <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;">Today's orders:</div>
-                ${byBoy
-                  .filter((o) => {
-                    const ts = o.deliveredAt || o.createdAt;
-                    if (!ts) return false;
-                    const d = new Date((ts.seconds || ts._seconds) * 1000);
-                    return d >= today && d <= todayEnd;
-                  })
-                  .map(
-                    (o) => `
-                  <div style="font-size:12px;background:#f8f9fa;border-radius:8px;padding:5px 10px;margin-bottom:4px;display:flex;justify-content:space-between;">
-                    <span>#${o.id.slice(-6).toUpperCase()} — ${o.name || "—"}</span>
-                    <span style="color:#1a9e5c;font-weight:700;">₹${o.total || 0}</span>
-                  </div>`,
-                  )
-                  .join("")}
-              </div>
+              <div style="font-size:18px;color:#ccc;margin-left:2px;">›</div>
             </div>`;
-          })
-          .join("");
+          }).join('');
+      }
+
+      // ── DELIVERY BOY SEARCH ───────────────────────────────────────
+      function onBoySearch(val) {
+        const dropdown = document.getElementById("boySearchDropdown");
+        const trimmed = val.trim().toLowerCase();
+        if (!trimmed) { dropdown.style.display = "none"; return; }
+        const matches = deliveryBoys.filter((b) => (b.name || "").toLowerCase().includes(trimmed));
+        if (!matches.length) {
+          dropdown.style.display = "block";
+          dropdown.innerHTML = '<div style="padding:12px 16px;color:var(--muted);font-size:13px;">No delivery boy found.</div>';
+          return;
+        }
+        dropdown.style.display = "block";
+        dropdown.innerHTML = matches.map((b) =>
+          `<div onmousedown="selectBoy('${b.phone}')" style="padding:10px 16px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f5f5f5;background:#fff;" onmouseover="this.style.background='#fff3ec'" onmouseout="this.style.background='#fff'">
+            <div class="boy-avatar" style="width:30px;height:30px;font-size:13px;">${(b.name || "?")[0].toUpperCase()}</div>
+            <div>
+              <div style="font-weight:700;color:#1a1a2e;font-size:13px;">${b.name}</div>
+              <div style="font-size:11px;color:var(--muted);">📞 ${b.phone}</div>
+            </div>
+          </div>`
+        ).join("");
+      }
+
+      let _selectedBoyPhone = null;
+
+      function selectBoy(phone) {
+        const boy = deliveryBoys.find((b) => b.phone === phone);
+        if (!boy) return;
+        const inp = document.getElementById("boySearchInput");
+        const dd = document.getElementById("boySearchDropdown");
+        if (inp) inp.value = boy.name;
+        if (dd) dd.style.display = "none";
+        // Highlight row
+        if (_selectedBoyPhone) {
+          const prev = document.getElementById("boyrow-" + _selectedBoyPhone);
+          if (prev) prev.classList.remove("selected");
+        }
+        _selectedBoyPhone = phone;
+        const row = document.getElementById("boyrow-" + phone);
+        if (row) row.classList.add("selected");
+        // Animate out then in
+        const container = document.getElementById("boysStatsContainer");
+        if (container && container.children.length) {
+          container.style.opacity = "0";
+          container.style.transform = "translateY(-8px)";
+          container.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+          setTimeout(() => {
+            container.style.transition = "";
+            container.style.opacity = "";
+            container.style.transform = "";
+            showBoyStats(boy);
+            setTimeout(() => container.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60);
+          }, 150);
+        } else {
+          showBoyStats(boy);
+          setTimeout(() => { if (container) container.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 80);
+        }
+      }
+
+      document.addEventListener("click", function (e) {
+        const inp = document.getElementById("boySearchInput");
+        const dd = document.getElementById("boySearchDropdown");
+        if (inp && dd && !inp.contains(e.target) && !dd.contains(e.target)) {
+          dd.style.display = "none";
+        }
+      });
+
+      function getWeekKey(date) {
+        const d = new Date(date);
+        const day = (d.getDay() + 6) % 7; // Mon=0
+        d.setDate(d.getDate() - day);
+        d.setHours(0,0,0,0);
+        return d.toISOString().split("T")[0]; // "2025-06-09" (Monday of that week)
+      }
+
+      function weekLabel(weekKey) {
+        const start = new Date(weekKey);
+        const end = new Date(start); end.setDate(start.getDate() + 6);
+        const fmt = (dt) => dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+        return `${fmt(start)} – ${fmt(end)}`;
+      }
+
+      async function showBoyStats(b) {
+        const el = document.getElementById("boysStatsContainer");
+        if (!el) return;
+        const today = new Date(); today.setHours(0,0,0,0);
+        const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
+        const delivered = allOrders.filter((o) => o.status === "delivered" && o.deliveredBy);
+        const byBoy = delivered.filter((o) => o.deliveredBy === b.phone);
+        const todayOrders = byBoy.filter((o) => {
+          const ts = o.deliveredAt || o.createdAt;
+          if (!ts) return false;
+          const d = new Date((ts.seconds || ts._seconds) * 1000);
+          return d >= today && d <= todayEnd;
+        });
+        const todayCount = todayOrders.length;
+        const totalAmount = todayOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+        const clearKey = "cleared_" + b.phone + "_" + today.toISOString().split("T")[0];
+        const clearedAmount = parseFloat(localStorage.getItem(clearKey) || "0");
+        const pendingAmount = Math.max(0, totalAmount - clearedAmount);
+        const orderRows = todayOrders.map((o) =>
+          `<div class="boy-order-row">
+            <span style="color:#333;font-size:12px;">#${o.id.slice(-6).toUpperCase()} — ${o.name || "—"}</span>
+            <span style="color:#1a9e5c;font-weight:700;font-family:'Baloo 2',cursive;font-size:13px;">₹${o.total || 0}</span>
+          </div>`
+        ).join("");
+
+        // ── WEEKLY SALARY BREAKDOWN ──
+        // Delivery rate: ₹15 normal, ₹10 if delivered after 30 mins
+        function panelRateForOrder(o) {
+          const created   = o.createdAt   ? (o.createdAt.seconds   || o.createdAt._seconds)   * 1000 : null;
+          const delivered = o.deliveredAt ? (o.deliveredAt.seconds || o.deliveredAt._seconds) * 1000 : null;
+          if (!created || !delivered) return 15;
+          const diffMin = (delivered - created) / 60000;
+          return diffMin <= 30 ? 15 : 10;
+        }
+        function panelSumEarnings(list) {
+          return list.reduce((acc, o) => acc + panelRateForOrder(o), 0);
+        }
+        const weekGroups = {};
+        byBoy.forEach(o => {
+          const ts = o.deliveredAt || o.createdAt;
+          if (!ts) return;
+          const d = new Date((ts.seconds || ts._seconds) * 1000);
+          const wk = getWeekKey(d);
+          if (!weekGroups[wk]) weekGroups[wk] = [];
+          weekGroups[wk].push(o);
+        });
+        const salaryCleared = await window.fbLoadSalaryCleared();
+        const weekKeys = Object.keys(weekGroups).sort().reverse();
+
+        let weeklyHtml = "";
+        if (weekKeys.length > 0) {
+          weeklyHtml = `<div style="margin-top:18px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">📅 Weekly Salary</div>
+            ${weekKeys.map(wk => {
+              const orders = weekGroups[wk];
+              const weekAmt = panelSumEarnings(orders);
+              const lateCount = orders.filter(o => panelRateForOrder(o) === 10).length;
+              const docId = b.phone + "_" + wk;
+              const isCleared = !!salaryCleared[docId];
+              const clearedAt = isCleared && salaryCleared[docId].clearedAt
+                ? new Date((salaryCleared[docId].clearedAt.seconds || salaryCleared[docId].clearedAt._seconds)*1000).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})
+                : "";
+              return `<div style="background:#fff;border:1.5px solid ${isCleared ? '#c3f0d9' : '#ffe0cc'};border-radius:14px;padding:14px 16px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:#1a1a2e;">📅 ${weekLabel(wk)}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;">${orders.length} parcel${orders.length!==1?'s':''}${lateCount > 0 ? ` <span style="color:#e05800;">(${lateCount} late @₹10)</span>` : ''}</div>
+                    ${isCleared ? `<div style="font-size:10px;color:#1a9e5c;margin-top:2px;">✅ Cleared on ${clearedAt}</div>` : ''}
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:${isCleared?'#1a9e5c':'var(--pr)'};line-height:1;">₹${weekAmt.toLocaleString("en-IN")}</div>
+                    ${isCleared
+                      ? `<div style="background:#e8f7f0;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;color:#1a9e5c;">✅ Salary Cleared</div>`
+                      : `<button onclick="clearWeeklySalary('${b.phone}','${b.name.replace(/'/g,"\\'")}','${wk}',${weekAmt})" style="background:linear-gradient(135deg,#ff6b00,#e05800);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💸 Salary Clear</button>`
+                    }
+                  </div>
+                </div>
+              </div>`;
+            }).join("")}
+          </div>`;
+        }
+
+        el.innerHTML = `<div class="boy-detail-panel">
+          <div class="boy-detail-header">
+            <div class="boy-avatar" style="width:46px;height:46px;font-size:20px;">${(b.name || "?")[0].toUpperCase()}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:800;font-size:15px;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.name}</div>
+              <div style="font-size:12px;color:var(--muted);">📞 ${b.phone}</div>
+            </div>
+            <div style="text-align:center;background:#fff;border-radius:10px;padding:8px 14px;box-shadow:0 2px 8px rgba(255,107,0,0.15);flex-shrink:0;">
+              <div style="font-size:26px;font-weight:800;color:var(--pr);font-family:'Baloo 2',cursive;line-height:1;">${todayCount}</div>
+              <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px;">Today's Parcels</div>
+            </div>
+            <div onclick="closeBoyDetail('${b.phone}')" style="width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;color:#666;transition:background 0.15s;" onmouseover="this.style.background='rgba(0,0,0,0.14)'" onmouseout="this.style.background='rgba(0,0,0,0.07)'">✕</div>
+          </div>
+          <div class="boy-detail-body">
+            ${todayCount === 0
+              ? `<div style="text-align:center;padding:18px 0;color:var(--muted);font-size:13px;">📭 No deliveries today yet.</div>`
+              : `<div style="margin-bottom:14px;">
+                  <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📦 Today's Orders</div>
+                  ${orderRows}
+                </div>
+                <div class="boy-amount-card">
+                  <div style="display:flex;justify-content:space-between;align-items:center;${clearedAmount > 0 ? 'margin-bottom:10px;' : ''}">
+                    <div>
+                      <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">💰 Today's Total</div>
+                      <div style="font-family:'Baloo 2',cursive;font-size:28px;font-weight:800;color:var(--pr);line-height:1;">₹${totalAmount.toLocaleString("en-IN")}</div>
+                    </div>
+                    ${clearedAmount > 0 ? `<div style="text-align:right;"><div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">✅ Cleared</div><div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:#2ecc71;line-height:1;">₹${clearedAmount.toLocaleString("en-IN")}</div></div>` : ""}
+                  </div>
+                  ${clearedAmount > 0 ? `<div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;display:flex;justify-content:space-between;align-items:center;"><div style="font-size:12px;opacity:0.7;">⏳ Pending (to collect)</div><div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:#f39c12;">₹${pendingAmount.toLocaleString("en-IN")}</div></div>` : ""}
+                </div>
+                ${pendingAmount > 0
+                  ? `<button class="boy-clear-btn" onclick="clearBoyAmount('${b.phone}', ${totalAmount})">✅ Mark as Cleared &nbsp;—&nbsp; ₹${pendingAmount.toLocaleString("en-IN")}</button>`
+                  : `<div style="text-align:center;padding:12px;background:#e8f7f0;border-radius:12px;color:#1a9e5c;font-weight:700;font-size:14px;">✅ Today's amount fully cleared!</div>`
+                }`
+            }
+            ${weeklyHtml}
+          </div>
+        </div>`;
+      }
+
+      async function clearWeeklySalary(phone, boyName, weekKey, amount) {
+        if (!confirm(`Confirm: "${boyName}" ka week (${weekLabel(weekKey)}) ka salary ₹${amount.toLocaleString("en-IN")} clear karna hai?`)) return;
+        try {
+          const result = await window.fbSaveSalaryClear(phone, weekKey, amount, boyName);
+          if (result === true) {
+            showToast(`✅ Salary cleared! ${boyName} — ₹${amount.toLocaleString("en-IN")}`);
+            const boy = deliveryBoys.find(b => b.phone === phone);
+            if (boy) showBoyStats(boy);
+          } else {
+            const errCode = (result && result.error) ? result.error : "unknown";
+            if (errCode.includes("permission") || errCode.includes("PERMISSION")) {
+              showToast("❌ Permission denied! Please allow salary_cleared in Firestore rules.");
+            } else {
+              showToast("❌ Clear failed! Error: " + errCode);
+            }
+            console.error("clearWeeklySalary failed:", errCode);
+          }
+        } catch(e) {
+          showToast("❌ Clear failed! " + (e.message || "Unknown error"));
+          console.error("clearWeeklySalary error:", e);
+        }
+      }
+
+      function closeBoyDetail(phone) {
+        const container = document.getElementById("boysStatsContainer");
+        if (!container) return;
+        container.style.opacity = "0";
+        container.style.transform = "translateY(-8px)";
+        container.style.transition = "opacity 0.18s ease, transform 0.18s ease";
+        setTimeout(() => {
+          container.innerHTML = "";
+          container.style.transition = "";
+          container.style.opacity = "";
+          container.style.transform = "";
+        }, 180);
+        const row = document.getElementById("boyrow-" + phone);
+        if (row) row.classList.remove("selected");
+        _selectedBoyPhone = null;
+        const inp = document.getElementById("boySearchInput");
+        if (inp) inp.value = "";
+      }
+
+      function clearBoyAmount(phone, totalAmount) {
+        const boy = deliveryBoys.find((b) => b.phone === phone);
+        const name = boy ? boy.name : "Delivery Boy";
+        if (!confirm(`Confirm: Collected ₹${totalAmount.toLocaleString("en-IN")} from "${name}"? This will mark the amount as cleared.`)) return;
+        const today = new Date(); today.setHours(0,0,0,0);
+        const clearKey = "cleared_" + phone + "_" + today.toISOString().split("T")[0];
+        localStorage.setItem(clearKey, totalAmount.toString());
+        showToast("✅ Amount cleared! " + name + " — ₹" + totalAmount.toLocaleString("en-IN"));
+        if (boy) showBoyStats(boy);
       }
 
       function addBoy() {

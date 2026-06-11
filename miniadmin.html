@@ -1001,6 +1001,86 @@
         font-weight: 600;
       }
 
+      /* ══ WEEKLY SALARY ══════════════════════════════════════════ */
+      .week-sal-section {
+        margin-top: 8px;
+      }
+      .week-sal-item {
+        background: var(--card);
+        border: 1.5px solid var(--border);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .week-sal-item::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 2px 2px 0 0;
+        background: var(--blue);
+      }
+      .week-sal-item.cleared::before {
+        background: var(--green);
+      }
+      .week-sal-item.cleared {
+        border-color: rgba(16,185,129,0.25);
+        background: rgba(16,185,129,0.04);
+      }
+      .week-sal-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .week-sal-label {
+        font-family: "Baloo 2", cursive;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .week-sal-badge-cleared {
+        background: rgba(16,185,129,0.15);
+        color: var(--green);
+        border: 1px solid rgba(16,185,129,0.3);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .week-sal-badge-pending {
+        background: rgba(245,158,11,0.15);
+        color: var(--yellow);
+        border: 1px solid rgba(245,158,11,0.3);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .week-sal-amounts {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .week-sal-amount-num {
+        font-family: "Baloo 2", cursive;
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .week-sal-cleared-on {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
       /* ══ YN HISTORY TAB ══════════════════════════════════ */
       .ynh-hero {
         background: var(--card);
@@ -1214,6 +1294,9 @@
         <button class="tab-btn" onclick="switchTab('earnings', this)">
           💰 My Earnings
         </button>
+        <button class="tab-btn" onclick="switchTab('weekly-salary', this)">
+          📅 Weekly Salary
+        </button>
         <button class="tab-btn" onclick="switchTab('yn-history', this)">
           🎯 YN Parcels
         </button>
@@ -1356,6 +1439,17 @@
 
           <div id="earnBreakdown">
             <div class="empty"><div class="empty-icon">📦</div><p>No deliveries found</p></div>
+          </div>
+        </div>
+
+        <!-- WEEKLY SALARY TAB -->
+        <div class="tab-panel" id="tab-weekly-salary">
+          <div class="earn-rate-box">
+            📅 Weekly parcel amount — it turns green after the admin clears it
+          </div>
+          <div class="earn-section-title">💰 Weekly Salary</div>
+          <div id="weeklySalaryContainer">
+            <div class="empty"><div class="empty-icon">⏳</div><p>Loading...</p></div>
           </div>
         </div>
 
@@ -1545,6 +1639,13 @@
           return false;
         }
       };
+      window.fbWatchSalaryCleared = (cb) => {
+        return onSnapshot(collection(db, "salary_cleared"), (snap) => {
+          const data = {};
+          snap.docs.forEach(d => { data[d.id] = d.data(); });
+          cb(data);
+        });
+      };
       document.dispatchEvent(new CustomEvent("fbReady"));
     </script>
 
@@ -1560,7 +1661,8 @@
         allYN = [];
       let unsubO = null,
         unsubYN = null,
-        unsubDA = null;
+        unsubDA = null,
+        unsubSal = null;
       let aFilter = "all",
         ynFilter = "all";
       let fbReady = false,
@@ -1568,6 +1670,7 @@
       let currentBoy = null; // { name, phone }
       let deliveryAreas = [];
       let daSelectedArea = null;
+      let salaryCleared = {}; // { "phone_weekKey": { phone, weekKey, amount, boyName, clearedAt } }
 
       // ━━ PHONE LOGIN ━━
       async function phoneLogin() {
@@ -1600,7 +1703,8 @@
       function doLogout() {
         if (unsubO) unsubO();
         if (unsubYN) unsubYN();
-        unsubO = unsubYN = null;
+        if (unsubSal) unsubSal();
+        unsubO = unsubYN = unsubSal = null;
         allOrders = [];
         allYN = [];
         currentBoy = null;
@@ -1663,6 +1767,12 @@
           deliveryAreas = areas || [];
           renderDAAreasList();
         });
+        // Watch salary cleared status live
+        if (unsubSal) unsubSal();
+        unsubSal = window.fbWatchSalaryCleared((data) => {
+          salaryCleared = data || {};
+          renderWeeklySalary();
+        });
       }
 
       // ━━ TABS ━━
@@ -1673,6 +1783,7 @@
         btn.classList.add("active");
         if (id === 'earnings') renderEarnings();
         if (id === 'yn-history') renderYNHistory();
+        if (id === 'weekly-salary') renderWeeklySalary();
         if (id === 'deliveryarea') {
           daSelectedArea = null;
           renderDAAreasList();
@@ -2406,6 +2517,76 @@
           </div>`;
         }).join('');
       }
+      // ━━ WEEKLY SALARY ━━
+      function getWeekKey(date) {
+        const d = new Date(date);
+        const day = (d.getDay() + 6) % 7; // Mon=0
+        d.setDate(d.getDate() - day);
+        d.setHours(0,0,0,0);
+        return d.toISOString().split("T")[0];
+      }
+
+      function weekLabel(weekKey) {
+        const start = new Date(weekKey);
+        const end = new Date(start); end.setDate(start.getDate() + 6);
+        const fmt = (dt) => dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+        return `${fmt(start)} – ${fmt(end)}`;
+      }
+
+      function renderWeeklySalary() {
+        const con = document.getElementById("weeklySalaryContainer");
+        if (!con) return;
+        const myDeliveries = getMyDeliveries();
+        if (!myDeliveries.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>No deliveries yet</p></div>`;
+          return;
+        }
+        // Group by week
+        const weekGroups = {};
+        myDeliveries.forEach(o => {
+          const ts = o.deliveredAt || o.createdAt;
+          if (!ts) return;
+          const d = new Date((ts.seconds || ts._seconds) * 1000);
+          const wk = getWeekKey(d);
+          if (!weekGroups[wk]) weekGroups[wk] = { orders: [], count: 0 };
+          weekGroups[wk].orders.push(o);
+          weekGroups[wk].count++;
+        });
+        const sortedWeeks = Object.keys(weekGroups).sort().reverse();
+        if (!sortedWeeks.length) {
+          con.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>No deliveries found</p></div>`;
+          return;
+        }
+        con.innerHTML = `<div class="week-sal-section">${sortedWeeks.map(wk => {
+          const { orders, count } = weekGroups[wk];
+          // Use delivery rate (₹15 normal, ₹10 late) — same as earnings tab
+          const weekEarning = sumEarnings(orders);
+          const lateCount = orders.filter(o => rateForOrder(o) === DELIVERY_RATE_LATE).length;
+          const docId = currentBoy ? currentBoy.phone + "_" + wk : "";
+          const isCleared = docId && !!salaryCleared[docId];
+          const clearedAt = isCleared && salaryCleared[docId].clearedAt
+            ? new Date((salaryCleared[docId].clearedAt.seconds || salaryCleared[docId].clearedAt._seconds)*1000)
+                .toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})
+            : "";
+          return `<div class="week-sal-item ${isCleared ? 'cleared' : ''}">
+            <div class="week-sal-top">
+              <div class="week-sal-label">📅 ${weekLabel(wk)}</div>
+              ${isCleared
+                ? `<span class="week-sal-badge-cleared">✅ Salary Cleared</span>`
+                : `<span class="week-sal-badge-pending">⏳ Pending</span>`
+              }
+            </div>
+            <div class="week-sal-amounts">
+              <div>
+                <div class="week-sal-amount-num" style="color:${isCleared ? 'var(--green)' : 'var(--pr)'}">₹${weekEarning}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:3px;">${count} parcel${count!==1?'s':''}${lateCount > 0 ? ` · <span style="color:var(--danger);">${lateCount} late @₹10</span>` : ''}</div>
+                ${isCleared ? `<div class="week-sal-cleared-on">✅ Cleared on ${clearedAt}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+        }).join("")}</div>`;
+      }
+
       const PARCEL_RATE = 15;
       let earnPeriod = 'day';
 
@@ -2573,10 +2754,10 @@
         window._pmOrderId = id;
         window._pmOrder   = order;
         var pmArea = document.getElementById('pmArea');
-        pmArea.innerHTML = '<option value="">-- Area chunein --</option>' +
+        pmArea.innerHTML = '<option value="">-- Select Area --</option>' +
           (deliveryAreas || []).map(function(a){ return '<option value="' + a.name + '">' + a.name + '</option>'; }).join('');
         var pmShop = document.getElementById('pmShop');
-        pmShop.innerHTML = '<option value="">-- Pehle area chunein --</option>';
+        pmShop.innerHTML = '<option value="">-- Select an area first --</option>';
         pmShop.disabled = true;
         var info = document.getElementById('pickupModalOrderInfo');
         var items = (order.items || []).map(function(i){ return (i.name||'Item') + ' x' + (i.qty||1); }).join(', ') || '-';
@@ -2589,7 +2770,7 @@
         var pmShop = document.getElementById('pmShop');
         var areaObj = (deliveryAreas || []).find(function(a){ return a.name === area; });
         if (!areaObj || !(areaObj.shops||[]).length) {
-          pmShop.innerHTML = '<option value="">Is area mein koi shop nahi</option>';
+          pmShop.innerHTML = '<option value="">No shops available in this area</option>';
           pmShop.disabled = true;
           return;
         }
@@ -2611,8 +2792,8 @@
       async function submitPM() {
         var areaName = document.getElementById('pmArea').value;
         var shopRaw  = document.getElementById('pmShop').value;
-        if (!areaName) { showToast(' Plz Area select!'); return; }
-        if (!shopRaw)  { showToast(' Plz Shop select!'); return; }
+        if (!areaName) { showToast('Please select an area!'); return; }
+        if (!shopRaw)  { showToast('Please select a shop!'); return; }
         var btn = document.getElementById('pmSubmitBtn');
         btn.disabled = true;
         btn.textContent = 'Saving...';
@@ -2780,3 +2961,4 @@
     </script>
   </body>
 </html>
+
