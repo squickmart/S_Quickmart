@@ -308,6 +308,42 @@
         } catch(e) { return {}; }
       };
 
+      // ── PICKUP (SHOP) AMOUNT CLEAR ────────────────────────────────
+      window.fbSavePickupClear = async (shopName, areaName, dayKey, mode, amount) => {
+        try {
+          const safeShop = String(shopName || "unknown-shop")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "");
+          const docId = dayKey + "_" + safeShop;
+          await setDoc(doc(db, "pickup_clears", docId), {
+            shopName, areaName, dayKey, mode, amount,
+            clearedAt: serverTimestamp()
+          });
+          return true;
+        } catch (e) {
+          console.error("❌ Pickup clear Firestore error:", e.code, e.message);
+          // Common fix: Add this to Firestore Rules:
+          // match /pickup_clears/{docId} { allow read, write: if request.auth != null; }
+          return { error: e.code || e.message };
+        }
+      };
+      window.fbLoadPickupClears = async () => {
+        try {
+          const snap = await getDocs(collection(db, "pickup_clears"));
+          const data = {};
+          snap.docs.forEach(d => { data[d.id] = d.data(); });
+          return data;
+        } catch (e) { return {}; }
+      };
+      window.fbWatchPickupClears = (cb) => {
+        return onSnapshot(collection(db, "pickup_clears"), (snap) => {
+          const data = {};
+          snap.docs.forEach(d => { data[d.id] = d.data(); });
+          cb(data);
+        });
+      };
+
       onSnapshot(doc(db, "store", "status"), (snap) => {
         if (snap.exists()) window._storeStatus = snap.data();
       });
@@ -1186,6 +1222,20 @@
         to {
           opacity: 1;
           transform: translateY(0);
+        }
+      }
+      .pickup-detail-open {
+        animation: pickupDetailSlide 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+        transform-origin: top center;
+      }
+      @keyframes pickupDetailSlide {
+        from {
+          opacity: 0;
+          transform: translateY(-16px) scaleY(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scaleY(1);
         }
       }
       .oc-toggle {
@@ -2495,6 +2545,10 @@
           unsubPickups();
           unsubPickups = null;
         }
+        if (unsubPickupClears) {
+          unsubPickupClears();
+          unsubPickupClears = null;
+        }
         await window.fbSignOut();
         // UI update handled by onAuthStateChanged
       }
@@ -2578,6 +2632,23 @@
         unsubDelivAreas = window.fbWatchDeliveryAreas((areas) => {
           deliveryAreas = areas || [];
           renderDelivAreasList();
+        });
+
+        // Load pickup amount clears (synced via Firebase, so "Clear Payment" persists)
+        const savedPickupClears = await window.fbLoadPickupClears();
+        Object.entries(savedPickupClears).forEach(([docId, d]) => {
+          if (d && typeof d.amount !== "undefined") {
+            localStorage.setItem("pickup_clear_" + docId, String(d.amount));
+          }
+        });
+        if (unsubPickupClears) unsubPickupClears();
+        unsubPickupClears = window.fbWatchPickupClears((clears) => {
+          Object.entries(clears).forEach(([docId, d]) => {
+            if (d && typeof d.amount !== "undefined") {
+              localStorage.setItem("pickup_clear_" + docId, String(d.amount));
+            }
+          });
+          renderPickupLog();
         });
 
         // Load pickup log
@@ -2676,8 +2747,10 @@
       let allPickups = [];
       let deliveryBoys = [];
       let allCustomers = [];
+      let selectedPickupShop = null;
       let unsubDelivAreas = null;
       let unsubPickups = null;
+      let unsubPickupClears = null;
       let unsubCustomers = null;
       let storeIsOpen = true;
       let _custState = { view: 'areas', area: null, custIdx: -1 };
@@ -4166,6 +4239,33 @@ ${items}
         return createdAt && !Number.isNaN(createdAt.getTime()) ? getDateKey(createdAt) : "unknown";
       }
 
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function getPickupItemPrice(p) {
+        const order = (allOrders || []).find((o) => {
+          const orderId = String(p.orderId || "").trim();
+          return orderId && (String(o.id) === orderId || String(o.orderId) === orderId);
+        });
+
+        if (order && Array.isArray(order.items) && order.items.length) {
+          const itemTotal = order.items.reduce((sum, item) => {
+            const qty = Number(item.qty || item.q || 1) || 1;
+            const price = Number(item.price || item.amount || item.total || 0) || 0;
+            return sum + price * qty;
+          }, 0);
+          if (itemTotal > 0) return itemTotal;
+        }
+
+        return Number(p.amount || 0) || 0;
+      }
+
       function getPickupDayLabel(dayKey) {
         const today = getDateKey(new Date());
         const yesterday = getDateKey(new Date(Date.now() - 86400000));
@@ -4173,6 +4273,40 @@ ${items}
         if (dayKey === yesterday) return "Yesterday";
         const date = new Date(`${dayKey}T00:00:00`);
         return date.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+      }
+
+      function getPickupClearKey(shopName, mode) {
+        const safeShop = String(shopName || "unknown-shop")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "");
+        const dayKey = mode === "today" ? getDateKey(new Date()) : mode === "yesterday" ? getDateKey(new Date(Date.now() - 86400000)) : "all";
+        return "pickup_clear_" + dayKey + "_" + safeShop;
+      }
+
+      function selectPickupShop(shopKey) {
+        selectedPickupShop = selectedPickupShop === shopKey ? null : shopKey;
+        renderPickupLog();
+      }
+
+      async function clearPickupAmount(shopKey, amount) {
+        const [shopName = "This shop", areaName = ""] = String(shopKey || "").split("||");
+        if (!confirm(`Confirm: ${shopName} ka ₹${amount.toLocaleString("en-IN")} amount clear kar diya?`)) return;
+        const mode = window.pickupViewMode || "today";
+        const dayKey = mode === "today" ? getDateKey(new Date()) : mode === "yesterday" ? getDateKey(new Date(Date.now() - 86400000)) : "all";
+        localStorage.setItem(getPickupClearKey(shopName, mode), String(amount));
+        showToast(`✅ ${shopName} ka amount clear kar diya gaya.`);
+        renderPickupLog();
+        const result = await window.fbSavePickupClear(shopName, areaName, dayKey, mode, amount);
+        if (result !== true) {
+          const errCode = (result && result.error) ? result.error : "unknown";
+          if (errCode.includes("permission") || errCode.includes("PERMISSION")) {
+            showToast("❌ Saved on this device only — Firestore permission denied! Check pickup_clears rules.");
+          } else {
+            showToast("⚠️ Saved on this device only — cloud sync failed: " + errCode);
+          }
+          console.error("clearPickupAmount cloud sync failed:", errCode);
+        }
       }
 
       function setPickupView(mode) {
@@ -4213,6 +4347,7 @@ ${items}
         const ts = p.createdAt ? new Date((p.createdAt.seconds || p.createdAt._seconds || 0) * 1000).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
         const orderId = p.orderId && p.orderId !== '—' ? '#' + p.orderId.slice(-6).toUpperCase() : '—';
         const shopPhoneHtml = p.shopPhone ? '<a href="tel:' + p.shopPhone + '" style="font-size:11px;color:var(--pr);font-weight:600;text-decoration:none;">📞 ' + p.shopPhone + '</a>' : '';
+        const itemPrice = getPickupItemPrice(p);
         return '<div style="background:#fff;border:1.5px solid #edf0f5;border-radius:14px;padding:14px;box-shadow:0 3px 10px rgba(0,0,0,0.04);">'
           + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">'
           + '<div style="display:flex;align-items:center;gap:8px;">'
@@ -4242,8 +4377,8 @@ ${items}
           + '<div style="font-size:13px;color:#555;line-height:1.5;">' + (p.itemNote || '—') + '</div>'
           + '</div>'
           + '<div style="text-align:right;flex-shrink:0;">'
-          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">💰 Total Amount</div>'
-          + '<div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹' + (p.amount || 0).toLocaleString('en-IN') + '</div>'
+          + '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">�️ Item Price</div>'
+          + '<div style="font-family:\'Baloo 2\',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹' + itemPrice.toLocaleString('en-IN') + '</div>'
           + '</div>'
           + '</div>'
           + '</div>';
@@ -4269,22 +4404,22 @@ ${items}
         if (viewMode === "today") filtered = filtered.filter((p) => getPickupDayKey(p) === todayKey);
         else if (viewMode === "yesterday") filtered = filtered.filter((p) => getPickupDayKey(p) === yesterdayKey);
 
-        const totalAmt = filtered.reduce((s, p) => s + (p.amount || 0), 0);
+        const totalAmt = filtered.reduce((s, p) => s + getPickupItemPrice(p), 0);
         const totalTx = filtered.length;
         const uniqueShops = new Set(filtered.map((p) => p.shopName).filter(Boolean)).size;
         if (summaryEl) {
           summaryEl.innerHTML = `
             <div style="background:#fff3ec;border:1.5px solid #ffd5b0;border-radius:12px;padding:14px;text-align:center;">
               <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:var(--pr);">₹${totalAmt.toLocaleString('en-IN')}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Amount</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">${viewMode === 'today' ? 'Today' : viewMode === 'yesterday' ? 'Yesterday' : 'All Days'} Item Price</div>
             </div>
             <div style="background:#e8f7f0;border:1.5px solid #a5d6c2;border-radius:12px;padding:14px;text-align:center;">
               <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;">${totalTx}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Total Pickups</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Pickups</div>
             </div>
             <div style="background:#f0f4ff;border:1.5px solid #c3cff5;border-radius:12px;padding:14px;text-align:center;">
               <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#3b5bdb;">${uniqueShops}</div>
-              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Shops</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;">Shop Count</div>
             </div>`;
         }
 
@@ -4293,6 +4428,86 @@ ${items}
           con.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No pickup logs found for ${label.toLowerCase()}.</div>`;
           return;
         }
+
+        const shopGroups = filtered.reduce((acc, p) => {
+          const shopName = p.shopName || "Unknown Shop";
+          const areaName = p.areaName || "Unknown Area";
+          const key = `${shopName}||${areaName}`;
+          if (!acc[key]) {
+            acc[key] = { shopName, areaName, totalAmount: 0, totalPickups: 0, items: [] };
+          }
+          acc[key].totalAmount += getPickupItemPrice(p);
+          acc[key].totalPickups += 1;
+          acc[key].items.push(p);
+          return acc;
+        }, {});
+
+        const shopCardsHtml = Object.values(shopGroups)
+          .sort((a, b) => b.totalAmount - a.totalAmount)
+          .map((grp) => {
+            const key = `${grp.shopName}||${grp.areaName}`;
+            const isSelected = selectedPickupShop === key;
+            const clearKey = getPickupClearKey(grp.shopName, viewMode);
+            const clearedAmount = Number(localStorage.getItem(clearKey) || 0);
+            const pendingAmount = Math.max(0, grp.totalAmount - clearedAmount);
+            return `
+              <div onclick='selectPickupShop(${JSON.stringify(key)})' style="background:${isSelected ? '#fff7f2' : '#fff'};border:${isSelected ? '1.5px solid #ffb070' : '1.5px solid #edf0f5'};border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:all 0.15s ease;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                  <div>
+                    <div style="font-size:12px;font-weight:800;color:var(--pr);text-transform:uppercase;letter-spacing:0.6px;">${escapeHtml(grp.shopName)}</div>
+                    <div style="font-size:13px;color:var(--dark);font-weight:700;margin-top:2px;">📍 ${escapeHtml(grp.areaName)}</div>
+                  </div>
+                  <span style="background:#fff3ec;color:var(--pr);border:1px solid #ffd5b0;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700;">${grp.totalPickups} pickups</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">�️ ${viewMode === 'today' ? 'Today' : viewMode === 'yesterday' ? 'Yesterday' : 'All Days'} Item Price</div>
+                    <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:#1a9e5c;">₹${grp.totalAmount.toLocaleString('en-IN')}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">⏳ Pending</div>
+                    <div style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:${pendingAmount > 0 ? '#f39c12' : '#1a9e5c'};">₹${pendingAmount.toLocaleString('en-IN')}</div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:11px;color:var(--muted);">Click to see all items and payment details.</span>
+                  ${pendingAmount > 0
+                    ? `<button type="button" onclick='event.stopPropagation(); clearPickupAmount(${JSON.stringify(key)}, ${grp.totalAmount})' style="border:none;background:linear-gradient(135deg,#ff6b00,#e05e00);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,0,0.18);">✅ Clear Payment</button>`
+                    : `<span style="background:#e8f7f0;color:#1a9e5c;border-radius:999px;padding:8px 10px;font-size:12px;font-weight:700;">✅ Cleared</span>`}
+                </div>
+              </div>`;
+          }).join('');
+
+        const selectedDetailsHtml = selectedPickupShop
+          ? (() => {
+              const grp = shopGroups[selectedPickupShop];
+              if (!grp) return '';
+              const clearKey = getPickupClearKey(grp.shopName, viewMode);
+              const clearedAmount = Number(localStorage.getItem(clearKey) || 0);
+              const pendingAmount = Math.max(0, grp.totalAmount - clearedAmount);
+              return `
+                <div style="background:#fff;border:1.5px solid #edf0f5;border-radius:16px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06);">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                    <div>
+                      <div style="font-size:12px;font-weight:800;color:var(--pr);text-transform:uppercase;letter-spacing:0.6px;">Selected Shop</div>
+                      <div style="font-size:15px;font-weight:800;color:var(--dark);margin-top:2px;">${escapeHtml(grp.shopName)}</div>
+                      <div style="font-size:12px;color:var(--muted);margin-top:2px;">📍 ${escapeHtml(grp.areaName)} • ${grp.totalPickups} pickups</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">�️ Item Price</div>
+                      <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#1a9e5c;">₹${grp.totalAmount.toLocaleString('en-IN')}</div>
+                    </div>
+                  </div>
+                  <div style="display:grid;gap:10px;">${grp.items.map((p) => buildPickupCard(p, 0)).join('')}</div>
+                  <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <div style="font-size:12px;color:var(--muted);">${clearedAmount > 0 ? `Cleared: ₹${clearedAmount.toLocaleString('en-IN')}` : 'Pending amount will be shown here until you mark it clear.'}</div>
+                    ${pendingAmount > 0
+                      ? `<button type="button" onclick='clearPickupAmount(${JSON.stringify(selectedPickupShop)}, ${grp.totalAmount})' style="border:none;background:linear-gradient(135deg,#ff6b00,#e05e00);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,0,0.18);">✅ Clear Payment</button>`
+                      : `<span style="background:#e8f7f0;color:#1a9e5c;border-radius:999px;padding:8px 10px;font-size:12px;font-weight:700;">✅ This amount is cleared</span>`}
+                  </div>
+                </div>`;
+            })()
+          : '';
 
         const grouped = filtered.reduce((acc, p) => {
           const key = getPickupDayKey(p);
@@ -4303,7 +4518,7 @@ ${items}
         const dayKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
         const cardsHtml = dayKeys.map((dayKey) => {
           const items = grouped[dayKey] || [];
-          const dayAmount = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+          const dayAmount = items.reduce((sum, item) => sum + getPickupItemPrice(item), 0);
           return '<div style="background:#fff;border:1.5px solid #edf0f5;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(15, 23, 42, 0.06);">'
             + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 13px;border-bottom:1px solid #edf0f5;background:linear-gradient(135deg,#fffaf5,#ffffff);">'
             + '<div>'
@@ -4316,7 +4531,21 @@ ${items}
             + '</div>';
         }).join('');
 
-        con.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + cardsHtml + '</div>';
+        con.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="background:linear-gradient(135deg,#fffaf5,#ffffff);border:1.5px solid #edf0f5;border-radius:18px;padding:14px;box-shadow:0 8px 22px rgba(15,23,42,0.06);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                <div>
+                  <div style="font-size:12px;font-weight:800;color:var(--pr);text-transform:uppercase;letter-spacing:0.6px;">Shop-wise view</div>
+                  <div style="font-size:13px;color:var(--muted);margin-top:2px;">Tap any shop to open its full pickup details and clear the amount once payment is done.</div>
+                </div>
+                <div style="background:#fff;border:1px solid #ffe0cc;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--pr);">${Object.keys(shopGroups).length} active shops</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px;">${shopCardsHtml}</div>
+            </div>
+            ${selectedDetailsHtml ? `<div class="pickup-detail-open" style="display:flex;flex-direction:column;gap:10px;">${selectedDetailsHtml}</div>` : ''}
+            <div style="display:flex;flex-direction:column;gap:14px;">${cardsHtml}</div>
+          </div>`;
       }
 
       // ── DELIVERY BOYS ─────────────────────────────────────────────
