@@ -149,17 +149,14 @@
         margin-bottom: 14px;
       }
       .logo {
-        width: 34px;
-        height: 34px;
-        background: var(--amb);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-        font-weight: 900;
-        color: var(--gd);
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: block;
+        object-fit: cover;
         flex-shrink: 0;
+        background: #fff;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
       }
       .hdr-text {
         flex: 1;
@@ -967,7 +964,7 @@
       }
 
       .home-shop-card {
-        background: linear-gradient(135deg, #fff 0%, #F6FFF8 100%);
+        background: linear-gradient(135deg, #fff 0%, #f6fff8 100%);
         border: 1px solid var(--g3);
         border-radius: 14px;
         padding: 10px;
@@ -975,60 +972,139 @@
         box-shadow: 0 8px 18px rgba(27, 67, 50, 0.08);
       }
       .home-shop-head {
-        display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
       }
       .home-chip {
-        display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px;
-        background: var(--mint); color: var(--gm); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.55px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: var(--mint);
+        color: var(--gm);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.55px;
       }
       .home-shop-title {
-        font-size: 12px; color: var(--g7); line-height: 1.35; margin-top: 4px;
+        font-size: 12px;
+        color: var(--g7);
+        line-height: 1.35;
+        margin-top: 4px;
       }
       .home-status-pill {
-        border-radius: 999px; padding: 4px 8px; background: var(--g1); border: 1px solid var(--g3);
-        font-size: 10px; font-weight: 800; color: var(--g5); text-transform: uppercase; letter-spacing: 0.5px;
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: var(--g1);
+        border: 1px solid var(--g3);
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--g5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .home-select-grid {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
       }
       .home-select-wrap {
-        display: flex; flex-direction: column; gap: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
       .home-select-wrap span {
-        font-size: 10px; font-weight: 700; color: var(--g5); text-transform: uppercase; letter-spacing: 0.45px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--g5);
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
       }
       .home-select-wrap select {
-        width: 100%; border: 1px solid var(--g3); border-radius: 10px; padding: 9px 10px; background: #fff;
-        font: inherit; color: var(--g9); outline: none;
+        width: 100%;
+        border: 1px solid var(--g3);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: #fff;
+        font: inherit;
+        color: var(--g9);
+        outline: none;
       }
       .home-select-wrap select:focus {
-        border-color: var(--gl); box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
+        border-color: var(--gl);
+        box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
       }
       .home-help-text {
-        margin-top: 8px; font-size: 11px; color: var(--g5); line-height: 1.35;
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--g5);
+        line-height: 1.35;
       }
       .home-stock-card {
-        border: 1px solid var(--g3); border-radius: 14px; background: #fff; padding: 10px; margin-bottom: 12px;
+        border: 1px solid var(--g3);
+        border-radius: 14px;
+        background: #fff;
+        padding: 10px;
+        margin-bottom: 12px;
         box-shadow: 0 8px 18px rgba(17, 24, 39, 0.04);
       }
       .home-stock-title {
-        font-size: 12px; font-weight: 800; color: var(--g9); margin-bottom: 2px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--g9);
+        margin-bottom: 2px;
       }
       .home-stock-sub {
-        font-size: 11px; color: var(--g5); margin-bottom: 8px;
+        font-size: 11px;
+        color: var(--g5);
+        margin-bottom: 8px;
       }
       .home-stock-row {
-        display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--g2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 0;
+        border-top: 1px solid var(--g2);
       }
-      .home-stock-row:first-child { border-top: none; padding-top: 0; }
-      .home-stock-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--g9); }
-      .home-stock-meta { font-size: 10px; color: var(--g5); text-transform: uppercase; letter-spacing: 0.4px; }
+      .home-stock-row:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+      .home-stock-name {
+        flex: 1;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--g9);
+      }
+      .home-stock-meta {
+        font-size: 10px;
+        color: var(--g5);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
       .home-stock-chip {
-        border: 1px solid #BBF7D0; background: #ECFDF5; color: #166534; border-radius: 999px;
-        padding: 5px 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+        border: 1px solid #bbf7d0;
+        background: #ecfdf5;
+        color: #166534;
+        border-radius: 999px;
+        padding: 5px 8px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .home-stock-empty {
-        border-radius: 12px; background: var(--g1); color: var(--g7); padding: 10px; font-size: 12px; line-height: 1.4;
+        border-radius: 12px;
+        background: var(--g1);
+        color: var(--g7);
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.4;
       }
 
       /* Qty row */
@@ -1451,7 +1527,7 @@
       <!-- HEADER -->
       <div class="hdr">
         <div class="hdr-top">
-          <div class="logo">SF</div>
+          <img class="logo" src="SLOGO.png" alt="StockFlow logo" />
           <div class="hdr-text">
             <div class="hdr-title">StockFlow</div>
             <div class="hdr-sub">Price & Profit Tracker</div>
@@ -1591,6 +1667,13 @@
                 >
                   BOX
                 </button>
+                <button
+                  class="qty-unit-btn"
+                  id="unit-ml"
+                  onclick="setUnit('ML')"
+                >
+                  ML
+                </button>
               </div>
             </div>
           </div>
@@ -1686,11 +1769,11 @@
           id: "area-" + (area.name || "").replace(/\s+/g, "_").toLowerCase(),
           name: area.name || "",
           shops: (area.shops || []).map((shop) => {
-            const shopName = typeof shop === "string" ? shop : (shop.name || "");
+            const shopName = typeof shop === "string" ? shop : shop.name || "";
             return {
               id: "shop-" + shopName.replace(/\s+/g, "_").toLowerCase(),
               name: shopName,
-              phone: typeof shop === "object" ? (shop.phone || "") : "",
+              phone: typeof shop === "object" ? shop.phone || "" : "",
             };
           }),
         }));
@@ -1757,47 +1840,54 @@
       }
 
       function renderHomeAvailability() {
-  const areaEl = document.getElementById('inp-area');
-  const shopEl = document.getElementById('inp-shop');
-  const statusEl = document.getElementById('home-status-pill');
-  const cardEl = document.getElementById('home-stock-card');
+        const areaEl = document.getElementById("inp-area");
+        const shopEl = document.getElementById("inp-shop");
+        const statusEl = document.getElementById("home-status-pill");
+        const cardEl = document.getElementById("home-stock-card");
 
-  if (!areaEl || !shopEl || !cardEl) return;
+        if (!areaEl || !shopEl || !cardEl) return;
 
-  const areaId = areaEl.value;
-  const shopId = shopEl.value;
-  const area = areas.find(a => a.id === areaId);
-  const shop = area ? area.shops.find(s => s.id === shopId) : null;
+        const areaId = areaEl.value;
+        const shopId = shopEl.value;
+        const area = areas.find((a) => a.id === areaId);
+        const shop = area ? area.shops.find((s) => s.id === shopId) : null;
 
-  if (!area || !shop) {
-    cardEl.innerHTML = `<div class="home-stock-title">Select an area and shop</div>
+        if (!area || !shop) {
+          cardEl.innerHTML = `<div class="home-stock-title">Select an area and shop</div>
       <div class="home-stock-sub">Choose a shop to view the items available there and the current status.</div>
       <div class="home-stock-empty">NO — no shop is selected yet.</div>`;
-    if (statusEl) statusEl.textContent = 'Waiting';
-    return;
-  }
+          if (statusEl) statusEl.textContent = "Waiting";
+          return;
+        }
 
-  const shopItems = items.filter(i => i.area === area.name && i.shop === shop.name);
-  const itemRows = shopItems.length
-    ? shopItems.map(item => `
+        const shopItems = items.filter(
+          (i) => i.area === area.name && i.shop === shop.name,
+        );
+        const itemRows = shopItems.length
+          ? shopItems
+              .map(
+                (item) => `
         <div class="home-stock-row">
           <div>
             <div class="home-stock-name">${item.name}</div>
-            <div class="home-stock-meta">${item.qty || 0} ${item.unit || 'PCS'} • ₹${(item.sell || 0).toFixed(2)}</div>
+            <div class="home-stock-meta">${item.qty || 0} ${item.unit || "PCS"} • ₹${(item.sell || 0).toFixed(2)}</div>
           </div>
           <button class="home-stock-chip" type="button">YES</button>
-        </div>`).join('')
-    : `<div class="home-stock-empty">NO — no items are available in <strong>${shop.name}</strong> yet.</div>`;
+        </div>`,
+              )
+              .join("")
+          : `<div class="home-stock-empty">NO — no items are available in <strong>${shop.name}</strong> yet.</div>`;
 
-  cardEl.innerHTML = `
+        cardEl.innerHTML = `
     <div class="home-stock-title">${area.name} • ${shop.name}</div>
-    <div class="home-stock-sub">${shopItems.length} item${shopItems.length !== 1 ? 's' : ''} found in this shop.</div>
+    <div class="home-stock-sub">${shopItems.length} item${shopItems.length !== 1 ? "s" : ""} found in this shop.</div>
     ${itemRows}`;
 
-  if (statusEl) statusEl.textContent = shopItems.length ? 'Live' : 'No stock';
-}
+        if (statusEl)
+          statusEl.textContent = shopItems.length ? "Live" : "No stock";
+      }
 
-function renderBrowse() {
+      function renderBrowse() {
         const el = document.getElementById("browse-section");
         const { view, areaId, shopId } = browseState;
 
@@ -1885,25 +1975,27 @@ function renderBrowse() {
                   style="width:100%;border:1.5px solid var(--g3);border-radius:10px;padding:9px 12px 9px 36px;font-size:14px;font-family:inherit;color:var(--g9);background:var(--g1);outline:none;"
                   placeholder="Search items in this shop..."
                   oninput="browseFilterItems()"
-                  value="${browseItemSearch || ''}"
+                  value="${browseItemSearch || ""}"
                 />
               </div>
               <div id="browse-search-count" style="font-size:11px;color:var(--g5);font-weight:600;padding:4px 0 0 2px;"></div>
             </div>`;
 
           const q = (browseItemSearch || "").toLowerCase().trim();
-          const shopItems = q ? allShopItems.filter(i => i.name.toLowerCase().includes(q)) : allShopItems;
+          const shopItems = q
+            ? allShopItems.filter((i) => i.name.toLowerCase().includes(q))
+            : allShopItems;
 
           const cards = shopItems
             .map((item) => {
               const diff = item.sell - item.buy;
               const pct = item.buy ? ((diff / item.buy) * 100).toFixed(1) : 0;
               const isAvailable = item.available !== false;
-              return `<div class="browse-item-card ${!isAvailable ? 'browse-item-unavailable' : ''}" id="bic-${item.id}">
+              return `<div class="browse-item-card ${!isAvailable ? "browse-item-unavailable" : ""}" id="bic-${item.id}">
         <div class="browse-item-top">
-          <div class="browse-item-name" style="${!isAvailable ? 'text-decoration:line-through;color:var(--g5);' : ''}">${item.name}</div>
+          <div class="browse-item-name" style="${!isAvailable ? "text-decoration:line-through;color:var(--g5);" : ""}">${item.name}</div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button class="toggle-btn ${isAvailable ? 'on' : 'off'}" onclick="browseToggle('${item.id}')">${isAvailable ? 'ON' : 'OFF'}</button>
+            <button class="toggle-btn ${isAvailable ? "on" : "off"}" onclick="browseToggle('${item.id}')">${isAvailable ? "ON" : "OFF"}</button>
             <button class="mini-del-btn" onclick="browseDel('${item.id}')">Del</button>
           </div>
         </div>
@@ -1917,6 +2009,16 @@ function renderBrowse() {
             <span class="browse-price-chip-lbl">Sell Price</span>
             <span class="browse-price-chip-val">₹${item.sell.toFixed(2)}</span>
           </div>
+          ${
+            item.qty
+              ? `
+          <div class="browse-price-arrow">·</div>
+          <div class="browse-price-chip">
+            <span class="browse-price-chip-lbl">Stock</span>
+            <span class="browse-price-chip-val" style="color:var(--gd);">${item.qty} ${item.unit || "PCS"}</span>
+          </div>`
+              : ""
+          }
           <div style="margin-left:auto;text-align:right;">
             <div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.4px;">Margin</div>
             <div style="font-size:13px;font-weight:800;color:var(--g5);">${pct}%</div>
@@ -1935,20 +2037,27 @@ function renderBrowse() {
             })
             .join("");
 
-          const noResultHtml = q && !shopItems.length
-            ? `<div class="browse-empty"><p>No items matched "${q}".</p></div>`
-            : '';
+          const noResultHtml =
+            q && !shopItems.length
+              ? `<div class="browse-empty"><p>No items matched "${q}".</p></div>`
+              : "";
 
-          el.innerHTML = breadcrumbHtml + searchBarHtml +
+          el.innerHTML =
+            breadcrumbHtml +
+            searchBarHtml +
             (noResultHtml || `<div class="browse-items-list">${cards}</div>`);
 
           // update count
           const cnt = document.getElementById("browse-search-count");
-          if (cnt && q) cnt.textContent = `${shopItems.length} result${shopItems.length !== 1 ? 's' : ''}`;
+          if (cnt && q)
+            cnt.textContent = `${shopItems.length} result${shopItems.length !== 1 ? "s" : ""}`;
 
           // keep focus on search input
           const si = document.getElementById("browse-search-inp");
-          if (si && q) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
+          if (si && q) {
+            si.focus();
+            si.setSelectionRange(si.value.length, si.value.length);
+          }
         }
       }
 
@@ -1972,7 +2081,11 @@ function renderBrowse() {
         renderBrowse();
         renderList();
         scheduleSave();
-        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
+        showToast(
+          item.available
+            ? "✅ " + item.name + " — Available"
+            : "⛔ " + item.name + " — Unavailable",
+        );
       }
 
       function browseDel(id) {
@@ -2227,7 +2340,7 @@ function renderBrowse() {
           <span class="price-arrow">→</span>
           <span class="price-tag sell-tag">₹${item.sell.toFixed(2)}</span>
         </div>
-        ${qtyTxt ? `<div class="item-qty-badge">📦 ${qtyTxt}</div>` : ""}
+        ${item.qty ? `<div class="item-qty-badge">📦 ${item.qty}</div>` : ""}
         ${shopTxt ? `<div class="item-shop-badge">🏪 ${shopTxt}</div>` : ""}
       </div>
       <div class="item-right">
@@ -2322,7 +2435,11 @@ function renderBrowse() {
         item.available = item.available === false ? true : false;
         renderList();
         scheduleSave();
-        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
+        showToast(
+          item.available
+            ? "✅ " + item.name + " — Available"
+            : "⛔ " + item.name + " — Unavailable",
+        );
       }
 
       // ══ SUMMARY ════════════════════════════════════════════
