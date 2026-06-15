@@ -217,6 +217,16 @@
           return [];
         }
       };
+
+      // ── STOCKFLOW PRICES (for Buy price lookup) ───────────────
+      window.fbLoadStockflow = async () => {
+        try {
+          const s = await getDoc(doc(db, "stockflow", "prices"));
+          return s.exists() ? s.data().items || [] : [];
+        } catch (e) {
+          return [];
+        }
+      };
       window.fbWatchDeliveryAreas = (cb) => {
         return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
           cb(snap.exists() ? snap.data().list || [] : []);
@@ -2665,6 +2675,10 @@
         renderBoysAdmin();
         renderBoysStats();
 
+        // Load stockflow buy prices (for pickup log)
+        stockflowItems = await window.fbLoadStockflow();
+        renderPickupLog();
+
         // Live customers listener
         if (unsubCustomers) unsubCustomers();
         unsubCustomers = window.fbWatchCustomers((customers) => {
@@ -2747,6 +2761,7 @@
       let allPickups = [];
       let deliveryBoys = [];
       let allCustomers = [];
+      let stockflowItems = [];
       let selectedPickupShop = null;
       let unsubDelivAreas = null;
       let unsubPickups = null;
@@ -4130,15 +4145,23 @@ ${items}
                     value="${typeof shop === 'object' ? shop.name : shop}"
                     class="form-input"
                     style="flex:1;min-width:120px;font-size:13px;padding:7px 10px;"
-                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], name:this.value} : {name:this.value, phone:''};"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], name:this.value} : {name:this.value, phone:'', owner:''};"
                     placeholder="Shop name"
+                  />
+                  <input
+                    type="text"
+                    value="${typeof shop === 'object' ? (shop.owner || '') : ''}"
+                    class="form-input"
+                    style="width:140px;font-size:13px;padding:7px 10px;"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], owner:this.value} : {name:'', phone:'', owner:this.value};"
+                    placeholder="👤 Owner name"
                   />
                   <input
                     type="tel"
                     value="${typeof shop === 'object' ? (shop.phone || '') : ''}"
                     class="form-input"
                     style="width:140px;font-size:13px;padding:7px 10px;"
-                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], phone:this.value} : {name:'', phone:this.value};"
+                    onchange="deliveryAreas[${ai}].shops[${si}] = typeof deliveryAreas[${ai}].shops[${si}]==='object' ? {...deliveryAreas[${ai}].shops[${si}], phone:this.value} : {name:'', phone:this.value, owner:''};"
                     placeholder="📞 Shop number"
                     maxlength="10"
                   />
@@ -4155,6 +4178,14 @@ ${items}
                 class="form-input"
                 placeholder="Shop name..."
                 style="flex:1;min-width:120px;font-size:13px;"
+                onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
+              />
+              <input
+                type="text"
+                id="newShopOwner-${ai}"
+                class="form-input"
+                placeholder="👤 Owner name (optional)"
+                style="width:170px;font-size:13px;"
                 onkeydown="if(event.key==='Enter') addDelivShop(${ai});"
               />
               <input
@@ -4193,13 +4224,16 @@ ${items}
 
       function addDelivShop(ai) {
         const inp = document.getElementById(`newShopInput-${ai}`);
+        const ownerInp = document.getElementById(`newShopOwner-${ai}`);
         const phoneInp = document.getElementById(`newShopPhone-${ai}`);
         const name = inp.value.trim();
+        const owner = ownerInp ? ownerInp.value.trim() : '';
         const phone = phoneInp ? phoneInp.value.trim() : '';
         if (!name) { showToast("❌ Please enter a shop name!"); return; }
         if (!deliveryAreas[ai].shops) deliveryAreas[ai].shops = [];
-        deliveryAreas[ai].shops.push({ name, phone });
+        deliveryAreas[ai].shops.push({ name, owner, phone });
         inp.value = "";
+        if (ownerInp) ownerInp.value = "";
         if (phoneInp) phoneInp.value = "";
         renderDelivAreasList();
         showToast(`✅ "${name}" added!`);
@@ -4248,6 +4282,57 @@ ${items}
           .replaceAll("'", "&#39;");
       }
 
+      function normalizeItemName(name) {
+        return String(name || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim()
+          .replace(/\s+/g, " ");
+      }
+
+      function findStockflowBuyPrice(itemName) {
+        const target = normalizeItemName(itemName);
+        if (!target) return null;
+
+        // 1. exact normalized match
+        let match = stockflowItems.find((s) => normalizeItemName(s.name) === target);
+        if (match) return Number(match.buy || 0) || 0;
+
+        // 2. one name fully contains the other
+        match = stockflowItems.find((s) => {
+          const sName = normalizeItemName(s.name);
+          return sName && (sName.includes(target) || target.includes(sName));
+        });
+        if (match) return Number(match.buy || 0) || 0;
+
+        // 3. token-overlap based best match (handles bracket/word-order/minor spelling diffs)
+        const targetTokens = new Set(target.split(" ").filter((t) => t.length > 1));
+        if (targetTokens.size === 0) return null;
+
+        let best = null;
+        let bestScore = 0;
+        stockflowItems.forEach((s) => {
+          const sName = normalizeItemName(s.name);
+          if (!sName) return;
+          const sTokens = new Set(sName.split(" ").filter((t) => t.length > 1));
+          if (sTokens.size === 0) return;
+          let common = 0;
+          targetTokens.forEach((t) => {
+            if (sTokens.has(t)) common++;
+          });
+          const score = common / Math.max(targetTokens.size, sTokens.size);
+          if (score > bestScore) {
+            bestScore = score;
+            best = s;
+          }
+        });
+
+        // require a reasonably strong overlap (at least half the tokens match)
+        if (best && bestScore >= 0.5) return Number(best.buy || 0) || 0;
+
+        return null;
+      }
+
       function getPickupItemPrice(p) {
         const order = (allOrders || []).find((o) => {
           const orderId = String(p.orderId || "").trim();
@@ -4257,7 +4342,11 @@ ${items}
         if (order && Array.isArray(order.items) && order.items.length) {
           const itemTotal = order.items.reduce((sum, item) => {
             const qty = Number(item.qty || item.q || 1) || 1;
-            const price = Number(item.price || item.amount || item.total || 0) || 0;
+            const buyPrice = findStockflowBuyPrice(item.name);
+            const price =
+              buyPrice !== null
+                ? buyPrice
+                : Number(item.price || item.amount || item.total || 0) || 0;
             return sum + price * qty;
           }, 0);
           if (itemTotal > 0) return itemTotal;

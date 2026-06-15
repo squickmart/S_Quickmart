@@ -637,6 +637,39 @@
       .save-ie:active {
         background: var(--gm);
       }
+      .browse-edit-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 10px 0;
+        padding: 12px;
+        background: var(--g1);
+        border: 1.5px solid var(--g3);
+        border-radius: 12px;
+      }
+      .browse-edit-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+      }
+      .browse-edit-field-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .browse-edit-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--g5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .browse-edit-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
 
       /* ── EMPTY ── */
       .empty-state {
@@ -964,7 +997,7 @@
       }
 
       .home-shop-card {
-        background: linear-gradient(135deg, #fff 0%, #f6fff8 100%);
+        background: linear-gradient(135deg, #fff 0%, #F6FFF8 100%);
         border: 1px solid var(--g3);
         border-radius: 14px;
         padding: 10px;
@@ -972,139 +1005,60 @@
         box-shadow: 0 8px 18px rgba(27, 67, 50, 0.08);
       }
       .home-shop-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 8px;
+        display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px;
       }
       .home-chip {
-        display: inline-flex;
-        align-items: center;
-        border-radius: 999px;
-        padding: 4px 8px;
-        background: var(--mint);
-        color: var(--gm);
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.55px;
+        display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px;
+        background: var(--mint); color: var(--gm); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.55px;
       }
       .home-shop-title {
-        font-size: 12px;
-        color: var(--g7);
-        line-height: 1.35;
-        margin-top: 4px;
+        font-size: 12px; color: var(--g7); line-height: 1.35; margin-top: 4px;
       }
       .home-status-pill {
-        border-radius: 999px;
-        padding: 4px 8px;
-        background: var(--g1);
-        border: 1px solid var(--g3);
-        font-size: 10px;
-        font-weight: 800;
-        color: var(--g5);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        border-radius: 999px; padding: 4px 8px; background: var(--g1); border: 1px solid var(--g3);
+        font-size: 10px; font-weight: 800; color: var(--g5); text-transform: uppercase; letter-spacing: 0.5px;
       }
       .home-select-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
       }
       .home-select-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+        display: flex; flex-direction: column; gap: 4px;
       }
       .home-select-wrap span {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        text-transform: uppercase;
-        letter-spacing: 0.45px;
+        font-size: 10px; font-weight: 700; color: var(--g5); text-transform: uppercase; letter-spacing: 0.45px;
       }
       .home-select-wrap select {
-        width: 100%;
-        border: 1px solid var(--g3);
-        border-radius: 10px;
-        padding: 9px 10px;
-        background: #fff;
-        font: inherit;
-        color: var(--g9);
-        outline: none;
+        width: 100%; border: 1px solid var(--g3); border-radius: 10px; padding: 9px 10px; background: #fff;
+        font: inherit; color: var(--g9); outline: none;
       }
       .home-select-wrap select:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
+        border-color: var(--gl); box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
       }
       .home-help-text {
-        margin-top: 8px;
-        font-size: 11px;
-        color: var(--g5);
-        line-height: 1.35;
+        margin-top: 8px; font-size: 11px; color: var(--g5); line-height: 1.35;
       }
       .home-stock-card {
-        border: 1px solid var(--g3);
-        border-radius: 14px;
-        background: #fff;
-        padding: 10px;
-        margin-bottom: 12px;
+        border: 1px solid var(--g3); border-radius: 14px; background: #fff; padding: 10px; margin-bottom: 12px;
         box-shadow: 0 8px 18px rgba(17, 24, 39, 0.04);
       }
       .home-stock-title {
-        font-size: 12px;
-        font-weight: 800;
-        color: var(--g9);
-        margin-bottom: 2px;
+        font-size: 12px; font-weight: 800; color: var(--g9); margin-bottom: 2px;
       }
       .home-stock-sub {
-        font-size: 11px;
-        color: var(--g5);
-        margin-bottom: 8px;
+        font-size: 11px; color: var(--g5); margin-bottom: 8px;
       }
       .home-stock-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 8px 0;
-        border-top: 1px solid var(--g2);
+        display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--g2);
       }
-      .home-stock-row:first-child {
-        border-top: none;
-        padding-top: 0;
-      }
-      .home-stock-name {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--g9);
-      }
-      .home-stock-meta {
-        font-size: 10px;
-        color: var(--g5);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-      }
+      .home-stock-row:first-child { border-top: none; padding-top: 0; }
+      .home-stock-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--g9); }
+      .home-stock-meta { font-size: 10px; color: var(--g5); text-transform: uppercase; letter-spacing: 0.4px; }
       .home-stock-chip {
-        border: 1px solid #bbf7d0;
-        background: #ecfdf5;
-        color: #166534;
-        border-radius: 999px;
-        padding: 5px 8px;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        border: 1px solid #BBF7D0; background: #ECFDF5; color: #166534; border-radius: 999px;
+        padding: 5px 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
       }
       .home-stock-empty {
-        border-radius: 12px;
-        background: var(--g1);
-        color: var(--g7);
-        padding: 10px;
-        font-size: 12px;
-        line-height: 1.4;
+        border-radius: 12px; background: var(--g1); color: var(--g7); padding: 10px; font-size: 12px; line-height: 1.4;
       }
 
       /* Qty row */
@@ -1527,7 +1481,11 @@
       <!-- HEADER -->
       <div class="hdr">
         <div class="hdr-top">
-          <img class="logo" src="SLOGO.png" alt="StockFlow logo" />
+          <img
+            class="logo"
+            src="SLOGO.png"
+            alt="StockFlow logo"
+          />
           <div class="hdr-text">
             <div class="hdr-title">StockFlow</div>
             <div class="hdr-sub">Price & Profit Tracker</div>
@@ -1764,19 +1722,104 @@
         return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       }
 
+      function itemBelongsToShop(item, area, shop) {
+        if (item.areaId && item.shopId) {
+          return item.areaId === area.id && item.shopId === shop.id;
+        }
+        // legacy items without stable ids — fall back to name match
+        return item.area === area.name && item.shop === shop.name;
+      }
+      function itemBelongsToArea(item, area) {
+        if (item.areaId) return item.areaId === area.id;
+        return item.area === area.name;
+      }
+
       function normalizePanelAreas(rawAreas) {
-        return (rawAreas || []).map((area) => ({
-          id: "area-" + (area.name || "").replace(/\s+/g, "_").toLowerCase(),
-          name: area.name || "",
-          shops: (area.shops || []).map((shop) => {
-            const shopName = typeof shop === "string" ? shop : shop.name || "";
-            return {
-              id: "shop-" + shopName.replace(/\s+/g, "_").toLowerCase(),
-              name: shopName,
-              phone: typeof shop === "object" ? shop.phone || "" : "",
-            };
-          }),
-        }));
+        let idsAssigned = false;
+        const normalized = (rawAreas || []).map((area) => {
+          // Preserve existing stable id if present; otherwise generate one (name-based, first time only)
+          let areaId = area.id;
+          if (!areaId) {
+            areaId = "area-" + (area.name || "").replace(/\s+/g, "_").toLowerCase() + "-" + uid();
+            idsAssigned = true;
+          }
+          return {
+            id: areaId,
+            name: area.name || "",
+            shops: (area.shops || []).map((shop) => {
+              const shopName = typeof shop === "string" ? shop : (shop.name || "");
+              let shopId = typeof shop === "object" ? shop.id : null;
+              if (!shopId) {
+                shopId = "shop-" + shopName.replace(/\s+/g, "_").toLowerCase() + "-" + uid();
+                idsAssigned = true;
+              }
+              return {
+                id: shopId,
+                name: shopName,
+                phone: typeof shop === "object" ? (shop.phone || "") : "",
+                owner: typeof shop === "object" ? (shop.owner || "") : "",
+              };
+            }),
+          };
+        });
+
+        // If new stable ids were generated, persist them so they remain stable on future loads
+        if (idsAssigned && window.sfSaveShops) {
+          const toSave = normalized.map((a) => ({
+            id: a.id,
+            name: a.name,
+            shops: a.shops.map((s) => ({ id: s.id, name: s.name, phone: s.phone, owner: s.owner })),
+          }));
+          window.sfSaveShops(toSave);
+        }
+
+        // Sync renamed area/shop names onto existing items (matched by stable id)
+        if (items && items.length) {
+          let itemsChanged = false;
+          items.forEach((item) => {
+            if (item.areaId) {
+              const a = normalized.find((x) => x.id === item.areaId);
+              if (a && a.name !== item.area) {
+                item.area = a.name;
+                itemsChanged = true;
+              }
+              if (item.shopId) {
+                const sh = a ? a.shops.find((x) => x.id === item.shopId) : null;
+                if (sh && sh.name !== item.shop) {
+                  item.shop = sh.name;
+                  itemsChanged = true;
+                }
+              }
+            } else if (item.area) {
+              // Legacy item without stable ids — try to heal it.
+              const a = normalized.find((x) => x.name === item.area);
+              if (a) {
+                let sh = item.shop ? a.shops.find((x) => x.name === item.shop) : null;
+                // If the shop name no longer matches (e.g. shop was renamed),
+                // and this area has only one shop, assume it's the same shop.
+                if (!sh && a.shops.length === 1) {
+                  sh = a.shops[0];
+                }
+                if (sh) {
+                  item.areaId = a.id;
+                  item.shopId = sh.id;
+                  if (sh.name !== item.shop) item.shop = sh.name;
+                  itemsChanged = true;
+                } else if (item.area !== a.name) {
+                  item.areaId = a.id;
+                  itemsChanged = true;
+                }
+              }
+            }
+          });
+          if (itemsChanged) {
+            scheduleSave();
+            if (typeof renderList === "function") renderList();
+            if (typeof renderBrowse === "function") renderBrowse();
+          }
+        }
+
+        return normalized;
       }
 
       // ══ FIREBASE READY ══════════════════════════════════════
@@ -1826,6 +1869,7 @@
       // ══ BROWSE ════════════════════════════════════════════
       let browseState = { view: "areas", areaId: null, shopId: null };
       let browseItemSearch = "";
+      let browseEditId = null;
 
       function switchTab(tab) {
         document
@@ -1840,54 +1884,47 @@
       }
 
       function renderHomeAvailability() {
-        const areaEl = document.getElementById("inp-area");
-        const shopEl = document.getElementById("inp-shop");
-        const statusEl = document.getElementById("home-status-pill");
-        const cardEl = document.getElementById("home-stock-card");
+  const areaEl = document.getElementById('inp-area');
+  const shopEl = document.getElementById('inp-shop');
+  const statusEl = document.getElementById('home-status-pill');
+  const cardEl = document.getElementById('home-stock-card');
 
-        if (!areaEl || !shopEl || !cardEl) return;
+  if (!areaEl || !shopEl || !cardEl) return;
 
-        const areaId = areaEl.value;
-        const shopId = shopEl.value;
-        const area = areas.find((a) => a.id === areaId);
-        const shop = area ? area.shops.find((s) => s.id === shopId) : null;
+  const areaId = areaEl.value;
+  const shopId = shopEl.value;
+  const area = areas.find(a => a.id === areaId);
+  const shop = area ? area.shops.find(s => s.id === shopId) : null;
 
-        if (!area || !shop) {
-          cardEl.innerHTML = `<div class="home-stock-title">Select an area and shop</div>
+  if (!area || !shop) {
+    cardEl.innerHTML = `<div class="home-stock-title">Select an area and shop</div>
       <div class="home-stock-sub">Choose a shop to view the items available there and the current status.</div>
       <div class="home-stock-empty">NO — no shop is selected yet.</div>`;
-          if (statusEl) statusEl.textContent = "Waiting";
-          return;
-        }
+    if (statusEl) statusEl.textContent = 'Waiting';
+    return;
+  }
 
-        const shopItems = items.filter(
-          (i) => i.area === area.name && i.shop === shop.name,
-        );
-        const itemRows = shopItems.length
-          ? shopItems
-              .map(
-                (item) => `
+  const shopItems = items.filter(i => itemBelongsToShop(i, area, shop));
+  const itemRows = shopItems.length
+    ? shopItems.map(item => `
         <div class="home-stock-row">
           <div>
             <div class="home-stock-name">${item.name}</div>
-            <div class="home-stock-meta">${item.qty || 0} ${item.unit || "PCS"} • ₹${(item.sell || 0).toFixed(2)}</div>
+            <div class="home-stock-meta">${item.qty || 0} ${item.unit || 'PCS'} • ₹${(item.sell || 0).toFixed(2)}</div>
           </div>
           <button class="home-stock-chip" type="button">YES</button>
-        </div>`,
-              )
-              .join("")
-          : `<div class="home-stock-empty">NO — no items are available in <strong>${shop.name}</strong> yet.</div>`;
+        </div>`).join('')
+    : `<div class="home-stock-empty">NO — no items are available in <strong>${shop.name}</strong> yet.</div>`;
 
-        cardEl.innerHTML = `
+  cardEl.innerHTML = `
     <div class="home-stock-title">${area.name} • ${shop.name}</div>
-    <div class="home-stock-sub">${shopItems.length} item${shopItems.length !== 1 ? "s" : ""} found in this shop.</div>
+    <div class="home-stock-sub">${shopItems.length} item${shopItems.length !== 1 ? 's' : ''} found in this shop.</div>
     ${itemRows}`;
 
-        if (statusEl)
-          statusEl.textContent = shopItems.length ? "Live" : "No stock";
-      }
+  if (statusEl) statusEl.textContent = shopItems.length ? 'Live' : 'No stock';
+}
 
-      function renderBrowse() {
+function renderBrowse() {
         const el = document.getElementById("browse-section");
         const { view, areaId, shopId } = browseState;
 
@@ -1913,7 +1950,7 @@
           }
           const cards = areas
             .map((a) => {
-              const itemCount = items.filter((i) => i.area === a.name).length;
+              const itemCount = items.filter((i) => itemBelongsToArea(i, a)).length;
               return `<div class="browse-area-card" onclick="browseGoShops('${a.id}')">
         <div class="browse-area-icon">📍</div>
         <div class="browse-area-name">${a.name}</div>
@@ -1938,7 +1975,7 @@
           const cards = selectedArea.shops
             .map((shop) => {
               const count = items.filter(
-                (i) => i.area === selectedArea.name && i.shop === shop.name,
+                (i) => itemBelongsToShop(i, selectedArea, shop),
               ).length;
               return `<div class="browse-shop-card" onclick="browseGoItems('${selectedArea.id}','${shop.id}')">
         <div class="browse-shop-icon">🏪</div>
@@ -1958,7 +1995,7 @@
             return;
           }
           const allShopItems = items.filter(
-            (i) => i.area === selectedArea.name && i.shop === selectedShop.name,
+            (i) => itemBelongsToShop(i, selectedArea, selectedShop),
           );
           if (!allShopItems.length) {
             el.innerHTML =
@@ -1975,30 +2012,56 @@
                   style="width:100%;border:1.5px solid var(--g3);border-radius:10px;padding:9px 12px 9px 36px;font-size:14px;font-family:inherit;color:var(--g9);background:var(--g1);outline:none;"
                   placeholder="Search items in this shop..."
                   oninput="browseFilterItems()"
-                  value="${browseItemSearch || ""}"
+                  value="${browseItemSearch || ''}"
                 />
               </div>
               <div id="browse-search-count" style="font-size:11px;color:var(--g5);font-weight:600;padding:4px 0 0 2px;"></div>
             </div>`;
 
           const q = (browseItemSearch || "").toLowerCase().trim();
-          const shopItems = q
-            ? allShopItems.filter((i) => i.name.toLowerCase().includes(q))
-            : allShopItems;
+          const shopItems = q ? allShopItems.filter(i => i.name.toLowerCase().includes(q)) : allShopItems;
 
           const cards = shopItems
             .map((item) => {
               const diff = item.sell - item.buy;
               const pct = item.buy ? ((diff / item.buy) * 100).toFixed(1) : 0;
               const isAvailable = item.available !== false;
-              return `<div class="browse-item-card ${!isAvailable ? "browse-item-unavailable" : ""}" id="bic-${item.id}">
+              const isEditing = browseEditId === item.id;
+              return `<div class="browse-item-card ${!isAvailable ? 'browse-item-unavailable' : ''}" id="bic-${item.id}">
         <div class="browse-item-top">
-          <div class="browse-item-name" style="${!isAvailable ? "text-decoration:line-through;color:var(--g5);" : ""}">${item.name}</div>
+          <div class="browse-item-name" style="${!isAvailable ? 'text-decoration:line-through;color:var(--g5);' : ''}cursor:pointer;" onclick="browseEditToggle('${item.id}')">${item.name}</div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button class="toggle-btn ${isAvailable ? "on" : "off"}" onclick="browseToggle('${item.id}')">${isAvailable ? "ON" : "OFF"}</button>
+            <button class="toggle-btn" onclick="browseEditToggle('${item.id}')" title="Edit name/price">${isEditing ? 'Close' : 'Edit'}</button>
+            <button class="toggle-btn ${isAvailable ? 'on' : 'off'}" onclick="browseToggle('${item.id}')">${isAvailable ? 'ON' : 'OFF'}</button>
             <button class="mini-del-btn" onclick="browseDel('${item.id}')">Del</button>
           </div>
         </div>
+        ${isEditing ? `
+        <div class="browse-edit-row">
+          <div class="browse-edit-field">
+            <span class="browse-edit-label">Item Name</span>
+            <input class="ie-inp" id="bie-name-${item.id}" type="text" placeholder="Item name" value="${item.name}" style="width:100%;padding-left:10px;"/>
+          </div>
+          <div class="browse-edit-field-row">
+            <div class="browse-edit-field">
+              <span class="browse-edit-label">Buy Price</span>
+              <div class="ie-wrap">
+                <span class="ie-rupee">₹</span>
+                <input class="ie-inp" id="bie-buy-${item.id}" type="number" inputmode="decimal" placeholder="Buy" value="${item.buy}" style="width:100%;"/>
+              </div>
+            </div>
+            <div class="browse-edit-field">
+              <span class="browse-edit-label">Sell Price</span>
+              <div class="ie-wrap">
+                <span class="ie-rupee">₹</span>
+                <input class="ie-inp" id="bie-sell-${item.id}" type="number" inputmode="decimal" placeholder="Sell" value="${item.sell}" style="width:100%;" onkeydown="if(event.key==='Enter')browseSaveEdit('${item.id}')"/>
+              </div>
+            </div>
+          </div>
+          <div class="browse-edit-actions">
+            <button class="save-ie" onclick="browseSaveEdit('${item.id}')">Save</button>
+          </div>
+        </div>` : ''}
         <div class="browse-item-prices">
           <div class="browse-price-chip buy">
             <span class="browse-price-chip-lbl">Buy Price</span>
@@ -2009,16 +2072,12 @@
             <span class="browse-price-chip-lbl">Sell Price</span>
             <span class="browse-price-chip-val">₹${item.sell.toFixed(2)}</span>
           </div>
-          ${
-            item.qty
-              ? `
+          ${item.qty ? `
           <div class="browse-price-arrow">·</div>
           <div class="browse-price-chip">
             <span class="browse-price-chip-lbl">Stock</span>
-            <span class="browse-price-chip-val" style="color:var(--gd);">${item.qty} ${item.unit || "PCS"}</span>
-          </div>`
-              : ""
-          }
+            <span class="browse-price-chip-val" style="color:var(--gd);">${item.qty} ${item.unit || 'PCS'}</span>
+          </div>` : ''}
           <div style="margin-left:auto;text-align:right;">
             <div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.4px;">Margin</div>
             <div style="font-size:13px;font-weight:800;color:var(--g5);">${pct}%</div>
@@ -2037,27 +2096,20 @@
             })
             .join("");
 
-          const noResultHtml =
-            q && !shopItems.length
-              ? `<div class="browse-empty"><p>No items matched "${q}".</p></div>`
-              : "";
+          const noResultHtml = q && !shopItems.length
+            ? `<div class="browse-empty"><p>No items matched "${q}".</p></div>`
+            : '';
 
-          el.innerHTML =
-            breadcrumbHtml +
-            searchBarHtml +
+          el.innerHTML = breadcrumbHtml + searchBarHtml +
             (noResultHtml || `<div class="browse-items-list">${cards}</div>`);
 
           // update count
           const cnt = document.getElementById("browse-search-count");
-          if (cnt && q)
-            cnt.textContent = `${shopItems.length} result${shopItems.length !== 1 ? "s" : ""}`;
+          if (cnt && q) cnt.textContent = `${shopItems.length} result${shopItems.length !== 1 ? 's' : ''}`;
 
           // keep focus on search input
           const si = document.getElementById("browse-search-inp");
-          if (si && q) {
-            si.focus();
-            si.setSelectionRange(si.value.length, si.value.length);
-          }
+          if (si && q) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
         }
       }
 
@@ -2074,6 +2126,46 @@
         res.innerHTML = `<div class="browse-profit-val${cls}">${total >= 0 ? "+₹" : "₹"}${Math.abs(total).toFixed(2)}</div><div class="browse-profit-hint">on ${qty} unit${qty !== 1 ? "s" : ""}</div>`;
       }
 
+      function browseEditToggle(id) {
+        browseEditId = browseEditId === id ? null : id;
+        renderBrowse();
+        if (browseEditId) {
+          setTimeout(() => {
+            const inp = document.getElementById("bie-name-" + id);
+            if (inp) inp.focus();
+          }, 50);
+        }
+      }
+
+      function browseSaveEdit(id) {
+        const nameInp = document.getElementById("bie-name-" + id);
+        const buyInp = document.getElementById("bie-buy-" + id);
+        const sellInp = document.getElementById("bie-sell-" + id);
+        const newName = nameInp ? nameInp.value.trim() : "";
+        const b = parseFloat(buyInp ? buyInp.value : "") || 0;
+        const s = parseFloat(sellInp ? sellInp.value : "") || 0;
+        if (!newName) {
+          showToast("⚠️ Item name can't be empty!");
+          return;
+        }
+        if (!b || !s) {
+          showToast("⚠️ Please enter both prices!");
+          return;
+        }
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item.name = newName;
+          item.buy = b;
+          item.sell = s;
+        }
+        browseEditId = null;
+        renderBrowse();
+        renderList();
+        updateSummary();
+        scheduleSave();
+        showToast("✅ Item updated!");
+      }
+
       function browseToggle(id) {
         const item = items.find((i) => i.id === id);
         if (!item) return;
@@ -2081,11 +2173,7 @@
         renderBrowse();
         renderList();
         scheduleSave();
-        showToast(
-          item.available
-            ? "✅ " + item.name + " — Available"
-            : "⛔ " + item.name + " — Unavailable",
-        );
+        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
       }
 
       function browseDel(id) {
@@ -2263,6 +2351,8 @@
           existing.unit = currentUnit;
           existing.area = areaName;
           existing.shop = shopName;
+          existing.areaId = areaObj ? areaObj.id : null;
+          existing.shopId = shopObj ? shopObj.id : null;
           showToast("✅ " + name + " updated!");
         } else {
           items.unshift({
@@ -2274,6 +2364,8 @@
             unit: currentUnit,
             area: areaName,
             shop: shopName,
+            areaId: areaObj ? areaObj.id : null,
+            shopId: shopObj ? shopObj.id : null,
             available: true,
           });
           showToast("✅ " + name + " added!");
@@ -2352,6 +2444,9 @@
         </div>
       </div>
       <div class="item-edit-row">
+        <div class="ie-wrap" style="flex:2;min-width:120px;">
+          <input class="ie-inp" id="ie-name-${item.id}" type="text" placeholder="Item name" value="${item.name}" onclick="event.stopPropagation()" oninput="iePreview('${item.id}')"/>
+        </div>
         <div class="ie-wrap">
           <span class="ie-rupee">₹</span>
           <input class="ie-inp" id="ie-buy-${item.id}" type="number" inputmode="decimal" placeholder="Buy" value="${item.buy}" onclick="event.stopPropagation()" oninput="iePreview('${item.id}')"/>
@@ -2384,7 +2479,7 @@
         renderList();
         if (currentEditId) {
           setTimeout(() => {
-            const inp = document.getElementById("ie-buy-" + id);
+            const inp = document.getElementById("ie-name-" + id);
             if (inp) inp.focus();
           }, 50);
         }
@@ -2395,6 +2490,8 @@
       }
 
       function saveInlineEdit(id) {
+        const nameInp = document.getElementById("ie-name-" + id);
+        const newName = nameInp ? nameInp.value.trim() : "";
         const b =
           parseFloat(document.getElementById("ie-buy-" + id).value) || 0;
         const s =
@@ -2403,8 +2500,13 @@
           showToast("⚠️ Please enter both prices!");
           return;
         }
+        if (!newName) {
+          showToast("⚠️ Item name can't be empty!");
+          return;
+        }
         const item = items.find((i) => i.id === id);
         if (item) {
+          item.name = newName;
           item.buy = b;
           item.sell = s;
         }
@@ -2412,7 +2514,7 @@
         renderList();
         updateSummary();
         scheduleSave();
-        showToast("✅ Price updated!");
+        showToast("✅ Item updated!");
       }
 
       function deleteItem(id, e) {
@@ -2435,11 +2537,7 @@
         item.available = item.available === false ? true : false;
         renderList();
         scheduleSave();
-        showToast(
-          item.available
-            ? "✅ " + item.name + " — Available"
-            : "⛔ " + item.name + " — Unavailable",
-        );
+        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
       }
 
       // ══ SUMMARY ════════════════════════════════════════════
