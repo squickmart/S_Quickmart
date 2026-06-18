@@ -1563,40 +1563,26 @@
               </select>
             </div>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-end;">
-            <div style="flex-shrink:0;">
-              <div style="font-size:10px;font-weight:700;color:var(--g5);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;">No.</div>
-              <input
-                type="number"
-                id="inp-serial-lookup"
-                placeholder="#"
-                inputmode="numeric"
-                min="1"
-                style="width:56px;border:2px solid var(--g3);border-radius:11px;padding:12px 8px;font-size:15px;font-weight:800;font-family:inherit;color:var(--g9);background:#fff;outline:none;text-align:center;appearance:textfield;-moz-appearance:textfield;"
-                oninput="onSerialLookup(this)"
-                onkeydown="if(event.key==='Enter'){document.getElementById('inp-name').focus();}"
-              />
-            </div>
-            <div class="add-name-wrap" style="flex:1;margin-bottom:0;">
-              <input
-                type="text"
-                id="inp-name"
-                placeholder="Enter item name..."
-                autocomplete="off"
-                autocorrect="off"
-                spellcheck="false"
-                oninput="onNameInput(this)"
-                onkeydown="if (event.key === 'Enter') focusBuy();"
-              />
-              <button
-                class="clear-btn"
-                id="clear-btn"
-                onclick="clearForm()"
-                tabindex="-1"
-              >
-                ✕
-              </button>
-            </div>
+          <div class="add-name-wrap" style="position:relative;margin-bottom:8px;">
+            <input
+              type="text"
+              id="inp-name"
+              placeholder="Enter item name..."
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              oninput="onNameInput(this)"
+              onkeydown="onNameKeydown(event);"
+            />
+            <button
+              class="clear-btn"
+              id="clear-btn"
+              onclick="clearForm()"
+              tabindex="-1"
+            >
+              ✕
+            </button>
+            <div id="name-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--g3);border-top:none;border-radius:0 0 14px 14px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.10);"></div>
           </div>
           <!-- Qty -->
           <div class="qty-row">
@@ -1646,6 +1632,13 @@
                   onclick="setUnit('ML')"
                 >
                   ML
+                </button>
+                <button
+                  class="qty-unit-btn"
+                  id="unit-l"
+                  onclick="setUnit('L')"
+                >
+                  L
                 </button>
               </div>
             </div>
@@ -2044,7 +2037,7 @@ function renderBrowse() {
               const isEditing = browseEditId === item.id;
               return `<div class="browse-item-card ${!isAvailable ? 'browse-item-unavailable' : ''}" id="bic-${item.id}">
         <div class="browse-item-top">
-          <div class="browse-item-name" style="${!isAvailable ? 'text-decoration:line-through;color:var(--g5);' : ''}cursor:pointer;" onclick="browseEditToggle('${item.id}')"><span style="display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;background:var(--gd);color:#fff;border-radius:50%;font-size:10px;font-weight:800;margin-right:6px;">${allShopItems.indexOf(item)+1}</span>${item.name}</div>
+          <div class="browse-item-name" style="${!isAvailable ? 'text-decoration:line-through;color:var(--g5);' : ''}cursor:pointer;" onclick="browseEditToggle('${item.id}')">${item.name}</div>
           <div style="display:flex;align-items:center;gap:6px;">
             <button class="toggle-btn" onclick="browseEditToggle('${item.id}')" title="Edit name/price">${isEditing ? 'Close' : 'Edit'}</button>
             <button class="toggle-btn ${isAvailable ? 'on' : 'off'}" onclick="browseToggle('${item.id}')">${isAvailable ? 'ON' : 'OFF'}</button>
@@ -2288,27 +2281,38 @@ function renderBrowse() {
       }
 
       // ══ FORM LOGIC ══════════════════════════════════════════
-      function onSerialLookup(el) {
-        const num = parseInt(el.value);
-        if (!num || num < 1) return;
-        const item = items[num - 1];
-        if (item) {
-          const nameEl = document.getElementById('inp-name');
-          nameEl.value = item.name;
-          document.getElementById('clear-btn').style.display = 'block';
-          checkAddBtn();
-        }
+      function showNameSuggestions(query) {
+        const box = document.getElementById('name-suggestions');
+        if (!query || query.length < 1) { box.style.display = 'none'; return; }
+        const q = query.toLowerCase();
+        const matches = items.filter(it => it.name.toLowerCase().includes(q)).slice(0, 8);
+        if (!matches.length) { box.style.display = 'none'; return; }
+        box.innerHTML = matches.map((it, i) => 
+          `<div onclick="selectNameSuggestion('${it.name.replace(/'/g,"&#39;")}')" style="padding:11px 16px;cursor:pointer;font-size:14px;font-weight:600;color:var(--g9);border-bottom:1px solid var(--g2);transition:background 0.15s;" onmouseover="this.style.background='var(--g1)'" onmouseout="this.style.background=''">${it.name}</div>`
+        ).join('');
+        box.style.display = 'block';
+      }
+      function selectNameSuggestion(name) {
+        const el = document.getElementById('inp-name');
+        el.value = name;
+        document.getElementById('name-suggestions').style.display = 'none';
+        document.getElementById('clear-btn').style.display = 'block';
+        checkAddBtn();
+        focusBuy();
+      }
+      function onNameKeydown(e) {
+        if (e.key === 'Enter') { document.getElementById('name-suggestions').style.display = 'none'; focusBuy(); }
+        if (e.key === 'Escape') { document.getElementById('name-suggestions').style.display = 'none'; }
       }
       function onNameInput(el) {
-        document.getElementById("clear-btn").style.display = el.value
-          ? "block"
-          : "none";
+        document.getElementById("clear-btn").style.display = el.value ? "block" : "none";
+        showNameSuggestions(el.value);
         checkAddBtn();
       }
       function clearForm() {
-        const sl = document.getElementById("inp-serial-lookup");
-        if (sl) sl.value = "";
         document.getElementById("inp-name").value = "";
+        const sugBox = document.getElementById("name-suggestions");
+        if (sugBox) sugBox.style.display = "none";
         document.getElementById("inp-buy").value = "";
         document.getElementById("inp-sell").value = "";
         document.getElementById("inp-qty").value = "";
@@ -2451,11 +2455,10 @@ function renderBrowse() {
               ? `${item.area ? item.area + " · " : ""}${item.shop}`
               : item.area || "";
             const isAvailable = item.available !== false;
-            const serialNum = items.indexOf(item) + 1;
             return `
     <div class="item-card ${isEditing ? "editing" : ""} ${!isAvailable ? "unavailable" : ""}" id="card-${item.id}" onclick="handleCardClick('${item.id}', event)">
       <div class="item-left">
-        <div class="item-name"><span style="display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;background:var(--gd);color:#fff;border-radius:50%;font-size:10px;font-weight:800;margin-right:6px;">${serialNum}</span>${item.name}</div>
+        <div class="item-name">${item.name}</div>
         <div class="item-prices">
           <span class="price-tag buy-tag">₹${item.buy.toFixed(2)}</span>
           <span class="price-arrow">→</span>
