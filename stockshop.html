@@ -1,2601 +1,1166 @@
 <!doctype html>
-<html lang="hi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>StockFlow — Price Tracker</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
+
+    <title>
+      YourNeed Service — Custom Delivery & Pickup Drop | S_Quick Mart
+    </title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta
+   <meta name="description" content="Can't find it in stores? We'll get it for you! Custom item requests and Pickup & Drop service in Parbhani — S Quick Mart YourNeed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://squickmart.store/yourneed.html" />
+
+
+    <!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B6LRT1B4VM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-B6LRT1B4VM');
+</script>
+
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
       import {
         getFirestore,
+        collection,
+        addDoc,
         doc,
-        setDoc,
-        getDoc,
         onSnapshot,
+        serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-
-      const app = initializeApp(
-        {
-          apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
-          authDomain: "quickmart-b117e.firebaseapp.com",
-          projectId: "quickmart-b117e",
-          storageBucket: "quickmart-b117e.firebasestorage.app",
-          messagingSenderId: "128330058901",
-          appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
-        },
-        "stockflow-prices",
-      );
-
+      const firebaseConfig = {
+        apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+        authDomain: "quickmart-b117e.firebaseapp.com",
+        projectId: "quickmart-b117e",
+        storageBucket: "quickmart-b117e.firebasestorage.app",
+        messagingSenderId: "128330058901",
+        appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
+      };
+      const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
-      const REF = doc(db, "stockflow", "prices");
-      const SHOPS_REF = doc(db, "store", "delivery_areas");
 
-      window.sfSave = async (data) => {
+      // YourNeed request save
+      window.fbSaveYourNeed = async (data) => {
         try {
-          await setDoc(REF, { items: data, updatedAt: Date.now() });
-          return true;
+          const ref = await addDoc(collection(db, "yourneed_requests"), {
+            ...data,
+            status: "pending",
+            createdAt: serverTimestamp(),
+          });
+           // Telegram Notification
+          fetch("/api/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: data.name,
+              total: "YourNeed Request",
+              items: data.items || []
+            })
+          });
+          return ref.id;
         } catch (e) {
-          console.error(e);
-          return false;
+          console.error("YourNeed save error:", e);
+          return null;
         }
-      };
-      window.sfLoad = async () => {
-        try {
-          const s = await getDoc(REF);
-          return s.exists() ? s.data().items || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.sfSaveShops = async (data) => {
-        try {
-          await setDoc(SHOPS_REF, { list: data, updatedAt: Date.now() });
-          return true;
-        } catch (e) {
-          console.error(e);
-          return false;
-        }
-      };
-      window.sfLoadShops = async () => {
-        try {
-          const s = await getDoc(SHOPS_REF);
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.sfWatchShops = (cb) => {
-        return onSnapshot(SHOPS_REF, (snap) => {
-          cb(snap.exists() ? snap.data().list || [] : []);
-        });
       };
 
-      // Fire after all window functions are set
-      window.__sfReady = true;
-      window.dispatchEvent(new Event("sfReady"));
+      // Real-time areas listener — when admin saves areas, update here immediately
+      onSnapshot(doc(db, "store", "yourneed_areas"), (snap) => {
+        if (snap.exists()) {
+          const areas = snap.data().list || [];
+          if (areas.length > 0) {
+            window._latestYnAreas = areas;
+            // Direct call if regular script already loaded
+            if (typeof window.applyAreasToGrids === "function") {
+              window.applyAreasToGrids(areas);
+            } else {
+              // Fallback event for late-loading
+              document.dispatchEvent(
+                new CustomEvent("ynAreasUpdated", { detail: areas }),
+              );
+            }
+          }
+        }
+      });
     </script>
-
-    <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      :root {
-        --gd: #1b4332;
-        --gm: #2d6a4f;
-        --gl: #52b788;
-        --mint: #d8f3dc;
-        --ms: #f0faf2;
-        --amb: #f59e0b;
-        --ambd: #d97706;
-        --ambs: #fffbeb;
-        --ambm: #fef3c7;
-        --w: #ffffff;
-        --g1: #f9fafb;
-        --g2: #f3f4f6;
-        --g3: #e5e7eb;
-        --g5: #6b7280;
-        --g7: #374151;
-        --g9: #111827;
-        --red: #dc2626;
-        --reds: #fef2f2;
-        --redm: #fecaca;
-      }
-
-      html,
-      body {
-        height: 100%;
-        font-family: "Inter", sans-serif;
-        background: var(--ms);
-        color: var(--g9);
-        -webkit-font-smoothing: antialiased;
-      }
-
-      #app {
-        min-height: 100dvh;
-        max-width: 430px;
-        margin: 0 auto;
-        background: var(--w);
-        box-shadow: 0 0 60px rgba(0, 0, 0, 0.12);
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* ── HEADER ── */
-      .hdr {
-        background: var(--gd);
-        padding: 16px 16px 14px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 0;
-        z-index: 20;
-      }
-      .hdr-top {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-      .logo {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        display: block;
-        object-fit: cover;
-        flex-shrink: 0;
-        background: #fff;
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-      }
-      .hdr-text {
-        flex: 1;
-      }
-      .hdr-title {
-        font-size: 16px;
-        font-weight: 800;
-        color: #fff;
-        line-height: 1;
-      }
-      .hdr-sub {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.5);
-        margin-top: 2px;
-        font-weight: 500;
-      }
-      .sync-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #6b7280;
-        flex-shrink: 0;
-        transition: background 0.3s;
-      }
-      .sync-dot.live {
-        background: #4ade80;
-        box-shadow: 0 0 6px #4ade80;
-      }
-      .sync-dot.saving {
-        background: var(--amb);
-        animation: pulse 0.7s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.4;
-        }
-      }
-
-      /* SUMMARY STRIP */
-      .summary {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px;
-      }
-      .sum-box {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 9px 8px;
-        text-align: center;
-      }
-      .sum-box.highlight {
-        background: var(--amb);
-      }
-      .sum-val {
-        font-size: 18px;
-        font-weight: 900;
-        color: #fff;
-        line-height: 1;
-      }
-      .sum-box.highlight .sum-val {
-        color: var(--gd);
-      }
-      .sum-lbl {
-        font-size: 9px;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.55);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 2px;
-      }
-      .sum-box.highlight .sum-lbl {
-        color: rgba(27, 67, 50, 0.65);
-      }
-
-      /* ── ADD FORM ── */
-      .add-section {
-        padding: 16px 14px 12px;
-        border-bottom: 1.5px solid var(--g2);
-        background: var(--g1);
-      }
-      .add-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--g5);
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-      .add-name-wrap {
-        position: relative;
-        margin-bottom: 8px;
-      }
-      .add-name-wrap input {
-        width: 100%;
-        border: 2px solid var(--g3);
-        border-radius: 11px;
-        padding: 12px 44px 12px 14px;
-        font-size: 15px;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        font-weight: 600;
-      }
-      .add-name-wrap input:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
-      }
-      .add-name-wrap input::placeholder {
-        font-weight: 400;
-        color: #c4c9d4;
-      }
-      .clear-btn {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--g5);
-        font-size: 16px;
-        cursor: pointer;
-        display: none;
-        line-height: 1;
-        padding: 2px;
-      }
-      .prices-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .price-input-wrap {
-        position: relative;
-      }
-      .price-input-wrap label {
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .price-input-wrap input {
-        width: 100%;
-        border: 2px solid var(--g3);
-        border-radius: 10px;
-        padding: 11px 12px 11px 28px;
-        font-size: 16px;
-        font-weight: 800;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        appearance: textfield;
-        -moz-appearance: textfield;
-      }
-      .price-input-wrap input::-webkit-outer-spin-button,
-      .price-input-wrap input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-      }
-      .price-input-wrap input:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
-      }
-      .rupee {
-        position: absolute;
-        left: 10px;
-        bottom: 12px;
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--g5);
-        pointer-events: none;
-      }
-      .buy-wrap input:focus {
-        border-color: var(--gm);
-        box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.12);
-      }
-      .sell-wrap input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      }
-
-      /* PROFIT PREVIEW */
-      .profit-preview {
-        border-radius: 10px;
-        padding: 10px 13px;
-        margin-bottom: 8px;
-        display: none;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-      .profit-preview.pos {
-        background: var(--ambm);
-      }
-      .profit-preview.neg {
-        background: var(--reds);
-      }
-      .pp-label {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--g7);
-      }
-      .pp-value {
-        font-size: 22px;
-        font-weight: 900;
-      }
-      .pp-value.pos {
-        color: var(--ambd);
-      }
-      .pp-value.neg {
-        color: var(--red);
-      }
-      .pp-pct {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--g5);
-      }
-
-      .add-btn {
-        width: 100%;
-        background: var(--gd);
-        color: #fff;
-        border: none;
-        border-radius: 11px;
-        padding: 13px;
-        font-size: 15px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        transition:
-          background 0.15s,
-          transform 0.12s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-      }
-      .add-btn:active {
-        transform: scale(0.97);
-        background: var(--gm);
-      }
-      .add-btn:disabled {
-        background: var(--g3);
-        color: var(--g5);
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      /* ── SEARCH ── */
-      .search-bar {
-        padding: 10px 14px 6px;
-        position: sticky;
-        top: 0;
-        background: #fff;
-        z-index: 10;
-        border-bottom: 1px solid var(--g2);
-      }
-      .search-wrap {
-        position: relative;
-      }
-      .search-wrap input {
-        width: 100%;
-        border: 1.5px solid var(--g3);
-        border-radius: 10px;
-        padding: 9px 12px 9px 36px;
-        font-size: 14px;
-        font-family: inherit;
-        color: var(--g9);
-        background: var(--g1);
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .search-wrap input:focus {
-        border-color: var(--gl);
-        background: #fff;
-      }
-      .search-icon {
-        position: absolute;
-        left: 11px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 15px;
-        pointer-events: none;
-      }
-      .search-count {
-        font-size: 11px;
-        color: var(--g5);
-        font-weight: 600;
-        padding: 4px 0 0 2px;
-      }
-
-      /* ── LIST ── */
-      .list-wrap {
-        flex: 1;
-        overflow-y: auto;
-      }
-
-      .item-card {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 0;
-        border-bottom: 1px solid var(--g2);
-        padding: 12px 14px;
-        align-items: center;
-        transition: background 0.15s;
-        cursor: pointer;
-        position: relative;
-      }
-      .item-card:active {
-        background: var(--g1);
-      }
-      .item-card.editing {
-        background: var(--ms);
-      }
-
-      .item-left {
-        min-width: 0;
-      }
-      .item-name {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--g9);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 4px;
-      }
-      .item-prices {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .price-tag {
-        font-size: 12px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 6px;
-      }
-      .buy-tag {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .sell-tag {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .price-arrow {
-        font-size: 11px;
-        color: var(--g5);
-      }
-
-      .item-right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-      }
-      .profit-badge {
-        font-size: 13px;
-        font-weight: 900;
-        padding: 4px 10px;
-        border-radius: 20px;
-        white-space: nowrap;
-      }
-      .profit-badge.pos {
-        background: var(--ambm);
-        color: var(--ambd);
-      }
-      .profit-badge.neg {
-        background: var(--reds);
-        color: var(--red);
-      }
-      .profit-pct {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        text-align: right;
-      }
-      .del-btn,
-      .mini-del-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--g5);
-        font-size: 15px;
-        padding: 2px 4px;
-        border-radius: 6px;
-        transition: 0.15s;
-      }
-      .mini-del-btn {
-        font-size: 11px;
-        font-weight: 800;
-        color: var(--red);
-        background: var(--reds);
-        border: 1px solid var(--redm);
-        border-radius: 999px;
-        padding: 3px 7px;
-        line-height: 1;
-      }
-      .del-btn:active,
-      .mini-del-btn:active {
-        color: var(--red);
-        background: var(--reds);
-      }
-
-      /* inline edit row */
-      .item-edit-row {
-        display: none;
-        grid-column: 1/-1;
-        padding: 10px 0 4px;
-        gap: 8px;
-      }
-      .item-card.editing .item-edit-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-      }
-      .ie-inp {
-        border: 2px solid var(--g3);
-        border-radius: 9px;
-        padding: 9px 10px 9px 24px;
-        font-size: 14px;
-        font-weight: 800;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition: border-color 0.2s;
-        appearance: textfield;
-        -moz-appearance: textfield;
-      }
-      .ie-inp::-webkit-outer-spin-button,
-      .ie-inp::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-      }
-      .ie-inp:focus {
-        border-color: var(--gl);
-      }
-      .ie-wrap {
-        position: relative;
-      }
-      .ie-rupee {
-        position: absolute;
-        left: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--g5);
-        pointer-events: none;
-      }
-      .save-ie {
-        background: var(--gd);
-        color: #fff;
-        border: none;
-        border-radius: 9px;
-        padding: 9px 14px;
-        font-size: 13px;
-        font-weight: 700;
-        font-family: inherit;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-      .save-ie:active {
-        background: var(--gm);
-      }
-      .browse-edit-row {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin: 10px 0;
-        padding: 12px;
-        background: var(--g1);
-        border: 1.5px solid var(--g3);
-        border-radius: 12px;
-      }
-      .browse-edit-field {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        flex: 1;
-        min-width: 0;
-      }
-      .browse-edit-field-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .browse-edit-label {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-      .browse-edit-actions {
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      /* ── EMPTY ── */
-      .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 32px;
-        gap: 12px;
-        color: var(--g5);
-      }
-      .empty-state svg {
-        opacity: 0.2;
-      }
-      .empty-state p {
-        font-size: 14px;
-        font-weight: 500;
-        text-align: center;
-        line-height: 1.6;
-      }
-
-      /* ── TOAST ── */
-      .toast {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        background: var(--g9);
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 25px;
-        font-size: 13px;
-        font-weight: 700;
-        opacity: 0;
-        transition: all 0.28s;
-        pointer-events: none;
-        z-index: 999;
-        white-space: nowrap;
-        max-width: 90vw;
-      }
-      .toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-
-      ::-webkit-scrollbar {
-        width: 3px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: var(--mint);
-      }
-
-      /* ── TABS ── */
-      .tab-bar {
-        display: flex;
-        background: var(--gd);
-        padding: 0 16px 12px;
-        gap: 6px;
-      }
-      .tab-btn {
-        flex: 1;
-        background: rgba(255, 255, 255, 0.12);
-        border: none;
-        border-radius: 9px;
-        padding: 9px 8px;
-        font-size: 12px;
-        font-weight: 700;
-        color: rgba(255, 255, 255, 0.65);
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.18s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-      }
-      .tab-btn.active {
-        background: var(--amb);
-        color: var(--gd);
-      }
-      .tab-btn svg {
-        flex-shrink: 0;
-      }
-
-      /* ── SCREENS ── */
-      .screen {
-        display: none;
-        flex-direction: column;
-        flex: 1;
-        overflow: hidden;
-      }
-      .screen.active {
-        display: flex;
-      }
-
-      /* ── SHOPS SECTION ── */
-      .shops-section {
-        flex: 1;
-        overflow-y: auto;
-        padding: 14px;
-        background: var(--g1);
-      }
-      .shops-add-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 14px;
-        margin-bottom: 14px;
-        border: 1.5px solid var(--g3);
-      }
-      .shops-add-title {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--g5);
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-      }
-      .shop-input-row {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .shop-input-row input {
-        flex: 1;
-        border: 2px solid var(--g3);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
-        font-weight: 600;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-      }
-      .shop-input-row input:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
-      }
-      .shop-input-row input::placeholder {
-        font-weight: 400;
-        color: #c4c9d4;
-      }
-      .shop-add-btn {
-        background: var(--gd);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-size: 13px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        transition:
-          background 0.15s,
-          transform 0.12s;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .shop-add-btn:active {
-        transform: scale(0.97);
-        background: var(--gm);
-      }
-      .shop-add-btn:disabled {
-        background: var(--g3);
-        color: var(--g5);
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      /* Area select row for shop */
-      .shop-area-row {
-        margin-bottom: 8px;
-      }
-      .shop-area-row select {
-        width: 100%;
-        border: 2px solid var(--g3);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
-        font-weight: 600;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition: border-color 0.2s;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-      }
-      .shop-area-row select:focus {
-        border-color: var(--gl);
-      }
-
-      /* Areas list */
-      .area-block {
-        background: #fff;
-        border-radius: 14px;
-        margin-bottom: 10px;
-        border: 1.5px solid var(--g3);
-        overflow: hidden;
-      }
-      .area-header {
-        display: flex;
-        align-items: center;
-        padding: 11px 14px;
-        background: var(--ms);
-        border-bottom: 1px solid var(--g3);
-        gap: 8px;
-      }
-      .area-name-text {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 800;
-        color: var(--gd);
-        letter-spacing: 0.3px;
-      }
-      .area-count {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--g5);
-        background: var(--g2);
-        border-radius: 20px;
-        padding: 2px 8px;
-      }
-      .area-del-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--g5);
-        font-size: 14px;
-        border-radius: 6px;
-        padding: 2px 4px;
-        transition: 0.15s;
-      }
-      .area-del-btn:active {
-        color: var(--red);
-        background: var(--reds);
-      }
-      .shop-item-row {
-        display: flex;
-        align-items: center;
-        padding: 9px 14px;
-        border-bottom: 1px solid var(--g2);
-        gap: 8px;
-      }
-      .shop-item-row:last-child {
-        border-bottom: none;
-      }
-      .shop-item-name {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--g7);
-      }
-      .shop-item-del {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--g5);
-        font-size: 13px;
-        border-radius: 6px;
-        padding: 2px 4px;
-        transition: 0.15s;
-      }
-      .shop-item-del:active {
-        color: var(--red);
-        background: var(--reds);
-      }
-      .shops-empty {
-        text-align: center;
-        padding: 40px 20px;
-        color: var(--g5);
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.6;
-      }
-
-      /* ── ITEM FORM — shop selectors ── */
-      .item-shop-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .item-shop-row select {
-        width: 100%;
-        border: 2px solid var(--g3);
-        border-radius: 10px;
-        padding: 10px 30px 10px 12px;
-        font-size: 13px;
-        font-weight: 600;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-      }
-      .item-shop-row select:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
-      }
-      .item-shop-row label {
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .item-shop-select-wrap {
-        position: relative;
-      }
-
-      .home-shop-card {
-        background: linear-gradient(135deg, #fff 0%, #F6FFF8 100%);
-        border: 1px solid var(--g3);
-        border-radius: 14px;
-        padding: 10px;
-        margin-bottom: 10px;
-        box-shadow: 0 8px 18px rgba(27, 67, 50, 0.08);
-      }
-      .home-shop-head {
-        display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px;
-      }
-      .home-chip {
-        display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 8px;
-        background: var(--mint); color: var(--gm); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.55px;
-      }
-      .home-shop-title {
-        font-size: 12px; color: var(--g7); line-height: 1.35; margin-top: 4px;
-      }
-      .home-status-pill {
-        border-radius: 999px; padding: 4px 8px; background: var(--g1); border: 1px solid var(--g3);
-        font-size: 10px; font-weight: 800; color: var(--g5); text-transform: uppercase; letter-spacing: 0.5px;
-      }
-      .home-select-grid {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-      }
-      .home-select-wrap {
-        display: flex; flex-direction: column; gap: 4px;
-      }
-      .home-select-wrap span {
-        font-size: 10px; font-weight: 700; color: var(--g5); text-transform: uppercase; letter-spacing: 0.45px;
-      }
-      .home-select-wrap select {
-        width: 100%; border: 1px solid var(--g3); border-radius: 10px; padding: 9px 10px; background: #fff;
-        font: inherit; color: var(--g9); outline: none;
-      }
-      .home-select-wrap select:focus {
-        border-color: var(--gl); box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.12);
-      }
-      .home-help-text {
-        margin-top: 8px; font-size: 11px; color: var(--g5); line-height: 1.35;
-      }
-      .home-stock-card {
-        border: 1px solid var(--g3); border-radius: 14px; background: #fff; padding: 10px; margin-bottom: 12px;
-        box-shadow: 0 8px 18px rgba(17, 24, 39, 0.04);
-      }
-      .home-stock-title {
-        font-size: 12px; font-weight: 800; color: var(--g9); margin-bottom: 2px;
-      }
-      .home-stock-sub {
-        font-size: 11px; color: var(--g5); margin-bottom: 8px;
-      }
-      .home-stock-row {
-        display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--g2);
-      }
-      .home-stock-row:first-child { border-top: none; padding-top: 0; }
-      .home-stock-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--g9); }
-      .home-stock-meta { font-size: 10px; color: var(--g5); text-transform: uppercase; letter-spacing: 0.4px; }
-      .home-stock-chip {
-        border: 1px solid #BBF7D0; background: #ECFDF5; color: #166534; border-radius: 999px;
-        padding: 5px 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-      }
-      .home-stock-empty {
-        border-radius: 12px; background: var(--g1); color: var(--g7); padding: 10px; font-size: 12px; line-height: 1.4;
-      }
-
-      /* Qty row */
-      .qty-row {
-        margin-bottom: 8px;
-      }
-      .qty-row label {
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--g5);
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .qty-inp-wrap {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-      .qty-inp-wrap input {
-        width: 110px;
-        border: 2px solid var(--g3);
-        border-radius: 10px;
-        padding: 11px 12px;
-        font-size: 16px;
-        font-weight: 800;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        appearance: textfield;
-        -moz-appearance: textfield;
-        text-align: center;
-      }
-      .qty-inp-wrap input::-webkit-outer-spin-button,
-      .qty-inp-wrap input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-      }
-      .qty-inp-wrap input:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
-      }
-      .qty-unit-btns {
-        display: flex;
-        gap: 6px;
-      }
-      .qty-unit-btn {
-        border: 2px solid var(--g3);
-        background: #fff;
-        border-radius: 8px;
-        padding: 8px 11px;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--g5);
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.15s;
-      }
-      .qty-unit-btn.active {
-        border-color: var(--gm);
-        background: var(--ms);
-        color: var(--gd);
-      }
-
-      /* ── BROWSE SCREEN ── */
-      .browse-section {
-        flex: 1;
-        overflow-y: auto;
-        padding: 14px;
-        background: var(--g1);
-      }
-      .browse-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--g5);
-        margin-bottom: 14px;
-        padding: 8px 12px;
-        background: #fff;
-        border-radius: 10px;
-        border: 1.5px solid var(--g3);
-      }
-      .browse-crumb {
-        cursor: pointer;
-        color: var(--gm);
-        transition: color 0.15s;
-      }
-      .browse-crumb:hover {
-        color: var(--gd);
-      }
-      .browse-crumb.active {
-        color: var(--g7);
-        cursor: default;
-      }
-      .browse-crumb-sep {
-        color: var(--g3);
-        font-size: 14px;
-      }
-
-      .browse-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .browse-area-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 16px 14px;
-        border: 1.5px solid var(--g3);
-        cursor: pointer;
-        transition:
-          border-color 0.18s,
-          box-shadow 0.18s,
-          transform 0.12s;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .browse-area-card:active {
-        transform: scale(0.97);
-        border-color: var(--gl);
-      }
-      .browse-area-card:hover {
-        border-color: var(--gl);
-        box-shadow: 0 2px 12px rgba(82, 183, 136, 0.12);
-      }
-      .browse-area-icon {
-        font-size: 22px;
-        margin-bottom: 2px;
-      }
-      .browse-area-name {
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--g9);
-        line-height: 1.2;
-      }
-      .browse-area-meta {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--g5);
-      }
-      .browse-area-tag {
-        display: inline-block;
-        background: var(--ms);
-        color: var(--gd);
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 20px;
-        margin-top: 2px;
-      }
-
-      .browse-shop-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .browse-shop-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 14px 16px;
-        border: 1.5px solid var(--g3);
-        cursor: pointer;
-        transition:
-          border-color 0.18s,
-          box-shadow 0.18s,
-          transform 0.12s;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .browse-shop-card:active {
-        transform: scale(0.98);
-        border-color: var(--gl);
-      }
-      .browse-shop-card:hover {
-        border-color: var(--gl);
-        box-shadow: 0 2px 12px rgba(82, 183, 136, 0.12);
-      }
-      .browse-shop-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--ms);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        flex-shrink: 0;
-      }
-      .browse-shop-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .browse-shop-name {
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--g9);
-      }
-      .browse-shop-count {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--g5);
-        margin-top: 2px;
-      }
-      .browse-shop-arrow {
-        font-size: 18px;
-        color: var(--g3);
-      }
-
-      .browse-items-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .browse-item-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 14px;
-        border: 1.5px solid var(--g3);
-      }
-      .browse-item-top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .browse-item-name {
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--g9);
-        flex: 1;
-      }
-      .browse-item-prices {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        margin-bottom: 10px;
-        flex-wrap: wrap;
-      }
-      .browse-price-chip {
-        display: flex;
-        flex-direction: column;
-        background: var(--g1);
-        border-radius: 8px;
-        padding: 6px 10px;
-        min-width: 70px;
-      }
-      .browse-price-chip-lbl {
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--g5);
-        margin-bottom: 1px;
-      }
-      .browse-price-chip-val {
-        font-size: 15px;
-        font-weight: 900;
-      }
-      .browse-price-chip.buy .browse-price-chip-val {
-        color: #166534;
-      }
-      .browse-price-chip.sell .browse-price-chip-val {
-        color: #1e40af;
-      }
-      .browse-price-arrow {
-        font-size: 14px;
-        color: var(--g3);
-        align-self: center;
-      }
-
-      .browse-calc-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--g1);
-        border-radius: 10px;
-        padding: 10px 12px;
-        border: 1.5px solid var(--g3);
-      }
-      .browse-calc-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--g5);
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      .browse-qty-input {
-        width: 72px;
-        border: 2px solid var(--g3);
-        border-radius: 8px;
-        padding: 8px 8px;
-        font-size: 15px;
-        font-weight: 800;
-        font-family: inherit;
-        color: var(--g9);
-        background: #fff;
-        outline: none;
-        text-align: center;
-        appearance: textfield;
-        -moz-appearance: textfield;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-        flex-shrink: 0;
-      }
-      .browse-qty-input::-webkit-outer-spin-button,
-      .browse-qty-input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-      }
-      .browse-qty-input:focus {
-        border-color: var(--gl);
-        box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
-      }
-      .browse-profit-result {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 1px;
-      }
-      .browse-profit-val {
-        font-size: 18px;
-        font-weight: 900;
-        color: var(--ambd);
-        line-height: 1;
-      }
-      .browse-profit-val.neg {
-        color: var(--red);
-      }
-      .browse-profit-hint {
-        font-size: 10px;
-        font-weight: 600;
-        color: var(--g5);
-      }
-
-      .browse-empty {
-        text-align: center;
-        padding: 50px 20px;
-        color: var(--g5);
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.7;
-      }
-
-      /* Item card qty badge */
-      .item-qty-badge {
-        font-size: 10px;
-        font-weight: 700;
-        background: var(--g2);
-        color: var(--g5);
-        border-radius: 5px;
-        padding: 1px 6px;
-        display: inline-block;
-        margin-top: 2px;
-      }
-      .item-shop-badge {
-        font-size: 10px;
-        font-weight: 600;
-        color: var(--g5);
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        margin-top: 2px;
-      }
-      .toggle-btn {
-        font-size: 10px;
-        font-weight: 800;
-        border-radius: 999px;
-        padding: 3px 8px;
-        border: 1.5px solid;
-        cursor: pointer;
-        line-height: 1;
-        transition: all 0.15s;
-        font-family: inherit;
-        white-space: nowrap;
-      }
-      .toggle-btn.on {
-        background: #dcfce7;
-        color: #166534;
-        border-color: #bbf7d0;
-      }
-      .toggle-btn.off {
-        background: var(--g2);
-        color: var(--g5);
-        border-color: var(--g3);
-      }
-      .item-card.unavailable .item-name {
-        text-decoration: line-through;
-        color: var(--g5);
-      }
-      .item-card.unavailable {
-        opacity: 0.5;
-      }
-      .browse-item-unavailable {
-        opacity: 0.5;
-      }
-      .browse-search-bar {
-        padding: 10px 14px 6px;
-        background: var(--g1);
-        border-bottom: 1px solid var(--g2);
-        position: sticky;
-        top: 0;
-        z-index: 5;
-      }
-    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="yourneed.css" />
   </head>
   <body>
-    <div id="app">
-      <!-- HEADER -->
-      <div class="hdr">
-        <div class="hdr-top">
+    <!-- HEADER -->
+    <div class="header">
+      <a class="logo" href="#">
+        <div class="logo-mark">
           <img
-            class="logo"
             src="SLOGO.png"
-            alt="StockFlow logo"
+            alt="Logo"
+            onerror="
+              this.style.display = 'none';
+              this.parentNode.innerHTML = '🛒';
+            "
           />
-          <div class="hdr-text">
-            <div class="hdr-title">StockFlow</div>
-            <div class="hdr-sub">Price & Profit Tracker</div>
-          </div>
-          <div class="sync-dot" id="sdot" title="Firebase sync"></div>
         </div>
-        <div class="summary">
-          <div class="sum-box">
-            <div class="sum-val" id="s-items">0</div>
-            <div class="sum-lbl">Total Items</div>
-          </div>
-          <div class="sum-box">
-            <div class="sum-val" id="s-areas">0</div>
-            <div class="sum-lbl">Areas</div>
-          </div>
-          <div class="sum-box highlight">
-            <div class="sum-val" id="s-shops">0</div>
-            <div class="sum-lbl">Shops</div>
-          </div>
+        <div class="logo-text">
+          <div class="logo-brand">S_Quick Mart</div>
+          <div class="tagline">Parbhani's Trusted Local Service</div>
         </div>
-      </div>
-
-      <!-- TAB BAR -->
-      <div class="tab-bar">
-        <button
-          class="tab-btn active"
-          id="tab-home"
-          onclick="switchTab('home')"
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-          Home
-        </button>
-        <button class="tab-btn" id="tab-browse" onclick="switchTab('browse')">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          Browse
-        </button>
-      </div>
-
-      <!-- HOME SCREEN -->
-      <div class="screen active" id="screen-home">
-        <!-- ADD FORM -->
-        <div class="add-section">
-          <div class="add-label">Add New Item</div>
-          <div class="item-shop-row">
-            <div class="item-shop-select-wrap">
-              <label>Area</label>
-              <select id="inp-area" onchange="onAreaChange()">
-                <option value="">— Area —</option>
-              </select>
-            </div>
-            <div class="item-shop-select-wrap">
-              <label>Shop</label>
-              <select id="inp-shop">
-                <option value="">— Shop —</option>
-              </select>
-            </div>
-          </div>
-          <div class="add-name-wrap" style="position:relative;margin-bottom:8px;">
-            <input
-              type="text"
-              id="inp-name"
-              placeholder="Enter item name..."
-              autocomplete="off"
-              autocorrect="off"
-              spellcheck="false"
-              oninput="onNameInput(this)"
-              onkeydown="onNameKeydown(event);"
-            />
-            <button
-              class="clear-btn"
-              id="clear-btn"
-              onclick="clearForm()"
-              tabindex="-1"
-            >
-              ✕
-            </button>
-            <div id="name-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--g3);border-top:none;border-radius:0 0 14px 14px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.10);"></div>
-          </div>
-          <!-- Qty -->
-          <div class="qty-row">
-            <label>Quantity</label>
-            <div class="qty-inp-wrap">
-              <input
-                type="number"
-                id="inp-qty"
-                placeholder="0"
-                inputmode="decimal"
-                min="0"
-                step="1"
-                oninput="checkAddBtn()"
-              />
-              <div class="qty-unit-btns">
-                <button
-                  class="qty-unit-btn active"
-                  id="unit-pcs"
-                  onclick="setUnit('PCS')"
-                >
-                  PCS
-                </button>
-                <button
-                  class="qty-unit-btn"
-                  id="unit-kg"
-                  onclick="setUnit('KG')"
-                >
-                  KG
-                </button>
-                <button
-                  class="qty-unit-btn"
-                  id="unit-gm"
-                  onclick="setUnit('GM')"
-                >
-                  GM
-                </button>
-                <button
-                  class="qty-unit-btn"
-                  id="unit-box"
-                  onclick="setUnit('BOX')"
-                >
-                  BOX
-                </button>
-                <button
-                  class="qty-unit-btn"
-                  id="unit-ml"
-                  onclick="setUnit('ML')"
-                >
-                  ML
-                </button>
-                <button
-                  class="qty-unit-btn"
-                  id="unit-l"
-                  onclick="setUnit('L')"
-                >
-                  L
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="prices-row">
-            <div class="price-input-wrap buy-wrap">
-              <label>Buy Price</label>
-              <div style="position: relative">
-                <span class="rupee">₹</span>
-                <input
-                  type="number"
-                  id="inp-buy"
-                  placeholder="0"
-                  inputmode="decimal"
-                  min="0"
-                  step="0.01"
-                  oninput="calcPreview()"
-                  onkeydown="
-                    if (event.key === 'Enter')
-                      document.getElementById('inp-sell').focus();
-                  "
-                />
-              </div>
-            </div>
-            <div class="price-input-wrap sell-wrap">
-              <label>Sell Price</label>
-              <div style="position: relative">
-                <span class="rupee">₹</span>
-                <input
-                  type="number"
-                  id="inp-sell"
-                  placeholder="0"
-                  inputmode="decimal"
-                  min="0"
-                  step="0.01"
-                  oninput="calcPreview()"
-                  onkeydown="if (event.key === 'Enter') addItem();"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="profit-preview" id="pp">
-            <div>
-              <div class="pp-label">Profit per item</div>
-              <div class="pp-pct" id="pp-pct"></div>
-            </div>
-            <div class="pp-value" id="pp-val"></div>
-          </div>
-          <button class="add-btn" id="add-btn" onclick="addItem()" disabled>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Add Item
-          </button>
-        </div>
-      </div>
-      <!-- /screen-home -->
-
-      <!-- BROWSE SCREEN -->
-      <div class="screen" id="screen-browse">
-        <div class="browse-section" id="browse-section">
-          <!-- content rendered by JS -->
-        </div>
-      </div>
-      <!-- /screen-browse -->
+      </a>
+      <a class="back-btn" href="index.html">← Back</a>
     </div>
 
-    <div class="toast" id="toast"></div>
-
-    <script>
-      // ══ STATE ══════════════════════════════════════════════
-      // items: [{ id, name, buy, sell, qty, unit, area, shop }]
-      // areas: [{ id, name, shops: [{id, name}] }]
-      let items = [];
-      let areas = [];
-      let saveTimer = null;
-      let currentEditId = null;
-      let currentUnit = "PCS";
-
-      function uid() {
-        return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      }
-
-      function itemBelongsToShop(item, area, shop) {
-        if (item.areaId && item.shopId) {
-          return item.areaId === area.id && item.shopId === shop.id;
-        }
-        // legacy items without stable ids — fall back to name match
-        return item.area === area.name && item.shop === shop.name;
-      }
-      function itemBelongsToArea(item, area) {
-        if (item.areaId) return item.areaId === area.id;
-        return item.area === area.name;
-      }
-
-      function normalizePanelAreas(rawAreas) {
-        let idsAssigned = false;
-        const normalized = (rawAreas || []).map((area) => {
-          // Preserve existing stable id if present; otherwise generate one (name-based, first time only)
-          let areaId = area.id;
-          if (!areaId) {
-            areaId = "area-" + (area.name || "").replace(/\s+/g, "_").toLowerCase() + "-" + uid();
-            idsAssigned = true;
-          }
-          return {
-            id: areaId,
-            name: area.name || "",
-            shops: (area.shops || []).map((shop) => {
-              const shopName = typeof shop === "string" ? shop : (shop.name || "");
-              let shopId = typeof shop === "object" ? shop.id : null;
-              if (!shopId) {
-                shopId = "shop-" + shopName.replace(/\s+/g, "_").toLowerCase() + "-" + uid();
-                idsAssigned = true;
-              }
-              return {
-                id: shopId,
-                name: shopName,
-                phone: typeof shop === "object" ? (shop.phone || "") : "",
-                owner: typeof shop === "object" ? (shop.owner || "") : "",
-              };
-            }),
-          };
-        });
-
-        // If new stable ids were generated, persist them so they remain stable on future loads
-        if (idsAssigned && window.sfSaveShops) {
-          const toSave = normalized.map((a) => ({
-            id: a.id,
-            name: a.name,
-            shops: a.shops.map((s) => ({ id: s.id, name: s.name, phone: s.phone, owner: s.owner })),
-          }));
-          window.sfSaveShops(toSave);
-        }
-
-        // Sync renamed area/shop names onto existing items (matched by stable id)
-        if (items && items.length) {
-          let itemsChanged = false;
-          items.forEach((item) => {
-            if (item.areaId) {
-              const a = normalized.find((x) => x.id === item.areaId);
-              if (a && a.name !== item.area) {
-                item.area = a.name;
-                itemsChanged = true;
-              }
-              if (item.shopId) {
-                const sh = a ? a.shops.find((x) => x.id === item.shopId) : null;
-                if (sh && sh.name !== item.shop) {
-                  item.shop = sh.name;
-                  itemsChanged = true;
-                }
-              }
-            } else if (item.area) {
-              // Legacy item without stable ids — try to heal it.
-              const a = normalized.find((x) => x.name === item.area);
-              if (a) {
-                let sh = item.shop ? a.shops.find((x) => x.name === item.shop) : null;
-                // If the shop name no longer matches (e.g. shop was renamed),
-                // and this area has only one shop, assume it's the same shop.
-                if (!sh && a.shops.length === 1) {
-                  sh = a.shops[0];
-                }
-                if (sh) {
-                  item.areaId = a.id;
-                  item.shopId = sh.id;
-                  if (sh.name !== item.shop) item.shop = sh.name;
-                  itemsChanged = true;
-                } else if (item.area !== a.name) {
-                  item.areaId = a.id;
-                  itemsChanged = true;
-                }
-              }
-            }
-          });
-          if (itemsChanged) {
-            scheduleSave();
-            if (typeof renderList === "function") renderList();
-            if (typeof renderBrowse === "function") renderBrowse();
-          }
-        }
-
-        return normalized;
-      }
-
-      // ══ FIREBASE READY ══════════════════════════════════════
-      async function onSfReady() {
-        setSyncState("saving");
-        [items, areas] = await Promise.all([
-          window.sfLoad(),
-          window.sfLoadShops(),
-        ]);
-        areas = normalizePanelAreas(areas);
-        setSyncState("live");
-        renderBrowse();
-        updateSummary();
-        populateAreaDropdowns();
-        if (window.sfWatchShops) {
-          window.sfWatchShops((raw) => {
-            areas = normalizePanelAreas(raw);
-            renderBrowse();
-            updateSummary();
-            populateAreaDropdowns();
-          });
-        }
-      }
-
-      if (window.__sfReady) {
-        onSfReady();
-      } else {
-        window.addEventListener("sfReady", onSfReady);
-      }
-
-      // ══ SYNC ════════════════════════════════════════════════
-      function setSyncState(s) {
-        const d = document.getElementById("sdot");
-        d.className =
-          "sync-dot" +
-          (s === "live" ? " live" : s === "saving" ? " saving" : "");
-      }
-      function scheduleSave() {
-        setSyncState("saving");
-        if (saveTimer) clearTimeout(saveTimer);
-        saveTimer = setTimeout(async () => {
-          const ok = await window.sfSave(items);
-          setSyncState(ok ? "live" : "");
-          if (!ok) showToast("❌ Save failed — check internet");
-        }, 800);
-      }
-      // ══ BROWSE ════════════════════════════════════════════
-      let browseState = { view: "areas", areaId: null, shopId: null };
-      let browseItemSearch = "";
-      let browseEditId = null;
-
-      function switchTab(tab) {
-        document
-          .querySelectorAll(".screen")
-          .forEach((s) => s.classList.remove("active"));
-        document
-          .querySelectorAll(".tab-btn")
-          .forEach((b) => b.classList.remove("active"));
-        document.getElementById("screen-" + tab).classList.add("active");
-        document.getElementById("tab-" + tab).classList.add("active");
-        if (tab === "browse") renderBrowse();
-      }
-
-      function renderHomeAvailability() {
-  const areaEl = document.getElementById('inp-area');
-  const shopEl = document.getElementById('inp-shop');
-  const statusEl = document.getElementById('home-status-pill');
-  const cardEl = document.getElementById('home-stock-card');
-
-  if (!areaEl || !shopEl || !cardEl) return;
-
-  const areaId = areaEl.value;
-  const shopId = shopEl.value;
-  const area = areas.find(a => a.id === areaId);
-  const shop = area ? area.shops.find(s => s.id === shopId) : null;
-
-  if (!area || !shop) {
-    cardEl.innerHTML = `<div class="home-stock-title">Select an area and shop</div>
-      <div class="home-stock-sub">Choose a shop to view the items available there and the current status.</div>
-      <div class="home-stock-empty">NO — no shop is selected yet.</div>`;
-    if (statusEl) statusEl.textContent = 'Waiting';
-    return;
-  }
-
-  const shopItems = items.filter(i => itemBelongsToShop(i, area, shop));
-  const itemRows = shopItems.length
-    ? shopItems.map(item => `
-        <div class="home-stock-row">
-          <div>
-            <div class="home-stock-name">${item.name}</div>
-            <div class="home-stock-meta">${item.qty || 0} ${item.unit || 'PCS'} • ₹${(item.sell || 0).toFixed(2)}</div>
-          </div>
-          <button class="home-stock-chip" type="button">YES</button>
-        </div>`).join('')
-    : `<div class="home-stock-empty">NO — no items are available in <strong>${shop.name}</strong> yet.</div>`;
-
-  cardEl.innerHTML = `
-    <div class="home-stock-title">${area.name} • ${shop.name}</div>
-    <div class="home-stock-sub">${shopItems.length} item${shopItems.length !== 1 ? 's' : ''} found in this shop.</div>
-    ${itemRows}`;
-
-  if (statusEl) statusEl.textContent = shopItems.length ? 'Live' : 'No stock';
-}
-
-function renderBrowse() {
-        const el = document.getElementById("browse-section");
-        const { view, areaId, shopId } = browseState;
-
-        const selectedArea = areas.find((a) => a.id === areaId);
-        const selectedShop = selectedArea
-          ? selectedArea.shops.find((s) => s.id === shopId)
-          : null;
-
-        // Breadcrumb
-        let crumbs = `<span class="browse-crumb ${view === "areas" ? "active" : ""}" onclick="browseGoAreas()">All Areas</span>`;
-        if (selectedArea)
-          crumbs += `<span class="browse-crumb-sep">›</span><span class="browse-crumb ${view === "shops" ? "active" : ""}" onclick="browseGoShops('${areaId}')">${selectedArea.name}</span>`;
-        if (selectedShop)
-          crumbs += `<span class="browse-crumb-sep">›</span><span class="browse-crumb active">${selectedShop.name}</span>`;
-        const breadcrumbHtml = `<div class="browse-breadcrumb">${crumbs}</div>`;
-
-        if (view === "areas") {
-          if (!areas.length) {
-            el.innerHTML =
-              breadcrumbHtml +
-              `<div class="browse-empty">📍 No delivery areas are available yet.<br/>Add them from the main panel and they will appear here automatically.</div>`;
-            return;
-          }
-          const cards = areas
-            .map((a) => {
-              const itemCount = items.filter((i) => itemBelongsToArea(i, a)).length;
-              return `<div class="browse-area-card" onclick="browseGoShops('${a.id}')">
-        <div class="browse-area-icon">📍</div>
-        <div class="browse-area-name">${a.name}</div>
-        <div class="browse-area-meta">${a.shops.length} shop${a.shops.length !== 1 ? "s" : ""}</div>
-        <div class="browse-area-tag">${itemCount} item${itemCount !== 1 ? "s" : ""}</div>
-      </div>`;
-            })
-            .join("");
-          el.innerHTML =
-            breadcrumbHtml + `<div class="browse-grid">${cards}</div>`;
-        } else if (view === "shops") {
-          if (!selectedArea) {
-            browseGoAreas();
-            return;
-          }
-          if (!selectedArea.shops.length) {
-            el.innerHTML =
-              breadcrumbHtml +
-              `<div class="browse-empty">🏪 No shops are available in <strong>${selectedArea.name}</strong> yet.<br/>Add shops from the main panel and they will appear here automatically.</div>`;
-            return;
-          }
-          const cards = selectedArea.shops
-            .map((shop) => {
-              const count = items.filter(
-                (i) => itemBelongsToShop(i, selectedArea, shop),
-              ).length;
-              return `<div class="browse-shop-card" onclick="browseGoItems('${selectedArea.id}','${shop.id}')">
-        <div class="browse-shop-icon">🏪</div>
-        <div class="browse-shop-info">
-          <div class="browse-shop-name">${shop.name}</div>
-          <div class="browse-shop-count">${count} item${count !== 1 ? "s" : ""} tracked</div>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <span class="badge-dot"></span> Special Services — Parbhani Only
         </div>
-        <div class="browse-shop-arrow">›</div>
-      </div>`;
-            })
-            .join("");
-          el.innerHTML =
-            breadcrumbHtml + `<div class="browse-shop-list">${cards}</div>`;
-        } else if (view === "items") {
-          if (!selectedArea || !selectedShop) {
-            browseGoAreas();
-            return;
-          }
-          const allShopItems = items.filter(
-            (i) => itemBelongsToShop(i, selectedArea, selectedShop),
-          );
-          if (!allShopItems.length) {
-            el.innerHTML =
-              breadcrumbHtml +
-              `<div class="browse-empty">📦 No items found for <strong>${selectedShop.name}</strong>.<br/>Add items with this area and shop selected on the Home tab.</div>`;
-            return;
-          }
+        <h1>We Deliver<br /><span class="accent">Your Need</span></h1>
+        <p class="hero-desc">
+          Can't find it online? Need something picked up?
+          <strong>We've got you covered.</strong><br />
+          From rare groceries and medicines to tiffin pickups and important
+          documents — just tell us what you need, and we handle the rest.
+          <strong>Fast. Trusted. Local.</strong>
+        </p>
+        <div class="hero-stats">
+          <div class="stat-chip">⚡ 20–45 Min</div>
+          <div class="stat-chip">💵 Pay on Delivery</div>
+          <div class="stat-chip">📲 WhatsApp Confirmed</div>
+          <div class="stat-chip">📍 Parbhani Only</div>
+        </div>
+      </div>
+    </div>
 
-          const searchBarHtml = `
-            <div class="browse-search-bar">
-              <div class="search-wrap" style="position:relative;">
-                <span class="search-icon" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;">🔍</span>
-                <input type="text" id="browse-search-inp"
-                  style="width:100%;border:1.5px solid var(--g3);border-radius:10px;padding:9px 12px 9px 36px;font-size:14px;font-family:inherit;color:var(--g9);background:var(--g1);outline:none;"
-                  placeholder="Search items in this shop..."
-                  oninput="browseFilterItems()"
-                  value="${browseItemSearch || ''}"
+    <!-- SERVICE TABS -->
+    <div class="service-nav">
+      <div
+        class="sn-tab active"
+        onclick="switchService('custom')"
+        id="tab-custom"
+      >
+        🛍️ Custom Item Request
+      </div>
+      <div class="sn-tab" onclick="switchService('pickup')" id="tab-pickup">
+        🏍️ Pickup &amp; Drop
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- ══════════ CUSTOM ITEM ══════════ -->
+      <div class="section-panel active" id="panel-custom">
+        <div class="sec-head">
+          <div class="sec-head-title">Custom Item Request</div>
+          <div class="sec-head-sub">
+            Any item not in our store — we'll source it for you
+          </div>
+        </div>
+
+        <!-- Step 1: Category -->
+        <div class="step active" id="step-cr-1">
+          <div class="step-header" onclick="toggleStep('cr', 1)">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <div class="step-title">Select Item Category</div>
+              <div class="step-subtitle">What type of item do you need?</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="cat-grid" id="cr-cat-grid">
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Grocery')"
+                data-cat="Grocery"
+              >
+                <div class="cat-emoji">🛒</div>
+                <div class="cat-label">Grocery</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Medicine')"
+                data-cat="Medicine"
+              >
+                <div class="cat-emoji">💊</div>
+                <div class="cat-label">Medicine</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Stationery')"
+                data-cat="Stationery"
+              >
+                <div class="cat-emoji">📚</div>
+                <div class="cat-label">Stationery</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Electronics')"
+                data-cat="Electronics"
+              >
+                <div class="cat-emoji">🔌</div>
+                <div class="cat-label">Electronics</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Food & Snacks')"
+                data-cat="Food & Snacks"
+              >
+                <div class="cat-emoji">🍱</div>
+                <div class="cat-label">Food &amp; Snacks</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Clothing')"
+                data-cat="Clothing"
+              >
+                <div class="cat-emoji">👕</div>
+                <div class="cat-label">Clothing</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Hardware')"
+                data-cat="Hardware"
+              >
+                <div class="cat-emoji">🔧</div>
+                <div class="cat-label">Hardware</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('cr', 'Other')"
+                data-cat="Other"
+              >
+                <div class="cat-emoji">📦</div>
+                <div class="cat-label">Other</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Items -->
+        <div class="step" id="step-cr-2">
+          <div class="step-header" onclick="toggleStep('cr', 2)">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <div class="step-title">Add Your Items</div>
+              <div class="step-subtitle">Name and quantity of each item</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="items-wrap" id="cr-items-wrap"></div>
+            <button class="add-item-btn" onclick="addCrItem()">
+              ＋ Add Another Item
+            </button>
+            <div class="fg" style="margin-top: 14px">
+              <label class="fl"
+                >📝 Special Note
+                <span
+                  style="
+                    text-transform: none;
+                    font-weight: 400;
+                    letter-spacing: 0;
+                    font-size: 10px;
+                  "
+                  >(optional)</span
+                ></label
+              >
+              <textarea
+                class="fi"
+                id="cr_note"
+                placeholder="Brand preference, size, color, or any specific instruction..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Delivery Details -->
+        <div class="step" id="step-cr-3">
+          <div class="step-header" onclick="toggleStep('cr', 3)">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <div class="step-title">Your Details &amp; Address</div>
+              <div class="step-subtitle">Where and when to deliver?</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Your Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="cr_name"
+                  placeholder="Full name"
+                  autocomplete="name"
                 />
               </div>
-              <div id="browse-search-count" style="font-size:11px;color:var(--g5);font-weight:600;padding:4px 0 0 2px;"></div>
-            </div>`;
-
-          const q = (browseItemSearch || "").toLowerCase().trim();
-          const shopItems = q ? allShopItems.filter(i => i.name.toLowerCase().includes(q)) : allShopItems;
-
-          const cards = shopItems
-            .map((item) => {
-              const diff = item.sell - item.buy;
-              const pct = item.buy ? ((diff / item.buy) * 100).toFixed(1) : 0;
-              const isAvailable = item.available !== false;
-              const isEditing = browseEditId === item.id;
-              return `<div class="browse-item-card ${!isAvailable ? 'browse-item-unavailable' : ''}" id="bic-${item.id}">
-        <div class="browse-item-top">
-          <div class="browse-item-name" style="${!isAvailable ? 'text-decoration:line-through;color:var(--g5);' : ''}cursor:pointer;" onclick="browseEditToggle('${item.id}')">${item.name}</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <button class="toggle-btn" onclick="browseEditToggle('${item.id}')" title="Edit name/price">${isEditing ? 'Close' : 'Edit'}</button>
-            <button class="toggle-btn ${isAvailable ? 'on' : 'off'}" onclick="browseToggle('${item.id}')">${isAvailable ? 'ON' : 'OFF'}</button>
-            <button class="mini-del-btn" onclick="browseDel('${item.id}')">Del</button>
-          </div>
-        </div>
-        ${isEditing ? `
-        <div class="browse-edit-row">
-          <div class="browse-edit-field">
-            <span class="browse-edit-label">Item Name</span>
-            <input class="ie-inp" id="bie-name-${item.id}" type="text" placeholder="Item name" value="${item.name}" style="width:100%;padding-left:10px;"/>
-          </div>
-          <div class="browse-edit-field-row">
-            <div class="browse-edit-field">
-              <span class="browse-edit-label">Buy Price</span>
-              <div class="ie-wrap">
-                <span class="ie-rupee">₹</span>
-                <input class="ie-inp" id="bie-buy-${item.id}" type="number" inputmode="decimal" placeholder="Buy" value="${item.buy}" style="width:100%;"/>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Your Mobile <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="cr_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                />
               </div>
             </div>
-            <div class="browse-edit-field">
-              <span class="browse-edit-label">Sell Price</span>
-              <div class="ie-wrap">
-                <span class="ie-rupee">₹</span>
-                <input class="ie-inp" id="bie-sell-${item.id}" type="number" inputmode="decimal" placeholder="Sell" value="${item.sell}" style="width:100%;" onkeydown="if(event.key==='Enter')browseSaveEdit('${item.id}')"/>
+            <div class="fg">
+              <div class="area-label-row">
+                <label class="fl" style="margin: 0"
+                  >📍 Select Your Area <span class="req">*</span></label
+                >
+              </div>
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="cr-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'cr-area-grid',
+                      'cr-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
+              </div>
+              <div class="area-no-result" id="cr-area-no-result">
+                😕 No area found
+              </div>
+              <div class="area-grid" id="cr-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectArea('cr', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="cr_address"
+                placeholder="House no., street, landmark..."
+                autocomplete="street-address"
+              />
+            </div>
+            <div class="fg">
+              <label class="fl" style="margin-bottom: 8px"
+                >⏰ Preferred Delivery Time <span class="req">*</span></label
+              >
+              <div class="slot-row" id="cr-slot-grid">
+                <div
+                  class="slot-btn selected"
+                  onclick="selectSlot('cr', 'ASAP')"
+                  data-slot="ASAP"
+                >
+                  <div class="slot-time">⚡ ASAP</div>
+                  <div class="slot-label">Right away</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'Within 1 Hour')"
+                  data-slot="Within 1 Hour"
+                >
+                  <div class="slot-time">1 Hour</div>
+                  <div class="slot-label">Relaxed</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'Evening 5–8 PM')"
+                  data-slot="Evening 5–8 PM"
+                >
+                  <div class="slot-time">🌆 Evening</div>
+                  <div class="slot-label">5–8 PM</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('cr', 'custom')"
+                  data-slot="custom"
+                >
+                  <div class="slot-time">🕐 Custom</div>
+                  <div class="slot-label">Pick time</div>
+                </div>
+              </div>
+              <div class="custom-time-wrap" id="cr-custom-time">
+                <span class="custom-time-label">🕐 Select Time:</span>
+                <input type="time" class="fi-time" id="cr_custom_time" />
               </div>
             </div>
           </div>
-          <div class="browse-edit-actions">
-            <button class="save-ie" onclick="browseSaveEdit('${item.id}')">Save</button>
-          </div>
-        </div>` : ''}
-        <div class="browse-item-prices">
-          <div class="browse-price-chip buy">
-            <span class="browse-price-chip-lbl">Buy Price</span>
-            <span class="browse-price-chip-val">₹${item.buy.toFixed(2)}</span>
-          </div>
-          <div class="browse-price-arrow">→</div>
-          <div class="browse-price-chip sell">
-            <span class="browse-price-chip-lbl">Sell Price</span>
-            <span class="browse-price-chip-val">₹${item.sell.toFixed(2)}</span>
-          </div>
-          ${item.qty ? `
-          <div class="browse-price-arrow">·</div>
-          <div class="browse-price-chip">
-            <span class="browse-price-chip-lbl">Stock</span>
-            <span class="browse-price-chip-val" style="color:var(--gd);">${item.qty} ${item.unit || 'PCS'}</span>
-          </div>` : ''}
-          <div style="margin-left:auto;text-align:right;">
-            <div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.4px;">Margin</div>
-            <div style="font-size:13px;font-weight:800;color:var(--g5);">${pct}%</div>
-          </div>
         </div>
-        <div class="browse-calc-row">
-          <span class="browse-calc-label">Qty</span>
-          <input class="browse-qty-input" type="number" inputmode="decimal" min="0" placeholder="0"
-            oninput="browseCalcProfit('${item.id}', ${diff})" id="bqty-${item.id}"/>
-          <div class="browse-profit-result" id="bres-${item.id}">
-            <div class="browse-profit-val">—</div>
-            <div class="browse-profit-hint">Enter qty above</div>
+
+        <!-- Step 4: Review -->
+        <div class="step" id="step-cr-4">
+          <div class="step-header" onclick="reviewCR()">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <div class="step-title">Review &amp; Confirm</div>
+              <div class="step-subtitle">Tap to check your order summary</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
           </div>
-        </div>
-      </div>`;
-            })
-            .join("");
-
-          const noResultHtml = q && !shopItems.length
-            ? `<div class="browse-empty"><p>No items matched "${q}".</p></div>`
-            : '';
-
-          el.innerHTML = breadcrumbHtml + searchBarHtml +
-            (noResultHtml || `<div class="browse-items-list">${cards}</div>`);
-
-          // update count
-          const cnt = document.getElementById("browse-search-count");
-          if (cnt && q) cnt.textContent = `${shopItems.length} result${shopItems.length !== 1 ? 's' : ''}`;
-
-          // keep focus on search input
-          const si = document.getElementById("browse-search-inp");
-          if (si && q) { si.focus(); si.setSelectionRange(si.value.length, si.value.length); }
-        }
-      }
-
-      function browseCalcProfit(itemId, perUnitProfit) {
-        const inp = document.getElementById("bqty-" + itemId);
-        const res = document.getElementById("bres-" + itemId);
-        const qty = parseFloat(inp.value) || 0;
-        if (qty <= 0) {
-          res.innerHTML = `<div class="browse-profit-val">—</div><div class="browse-profit-hint">Enter qty above</div>`;
-          return;
-        }
-        const total = perUnitProfit * qty;
-        const cls = total >= 0 ? "" : " neg";
-        res.innerHTML = `<div class="browse-profit-val${cls}">${total >= 0 ? "+₹" : "₹"}${Math.abs(total).toFixed(2)}</div><div class="browse-profit-hint">on ${qty} unit${qty !== 1 ? "s" : ""}</div>`;
-      }
-
-      function browseEditToggle(id) {
-        browseEditId = browseEditId === id ? null : id;
-        renderBrowse();
-        if (browseEditId) {
-          setTimeout(() => {
-            const inp = document.getElementById("bie-name-" + id);
-            if (inp) inp.focus();
-          }, 50);
-        }
-      }
-
-      function browseSaveEdit(id) {
-        const nameInp = document.getElementById("bie-name-" + id);
-        const buyInp = document.getElementById("bie-buy-" + id);
-        const sellInp = document.getElementById("bie-sell-" + id);
-        const newName = nameInp ? nameInp.value.trim() : "";
-        const b = parseFloat(buyInp ? buyInp.value : "") || 0;
-        const s = parseFloat(sellInp ? sellInp.value : "") || 0;
-        if (!newName) {
-          showToast("⚠️ Item name can't be empty!");
-          return;
-        }
-        if (!b || !s) {
-          showToast("⚠️ Please enter both prices!");
-          return;
-        }
-        const item = items.find((i) => i.id === id);
-        if (item) {
-          item.name = newName;
-          item.buy = b;
-          item.sell = s;
-        }
-        browseEditId = null;
-        renderBrowse();
-        renderList();
-        updateSummary();
-        scheduleSave();
-        showToast("✅ Item updated!");
-      }
-
-      function browseToggle(id) {
-        const item = items.find((i) => i.id === id);
-        if (!item) return;
-        item.available = item.available === false ? true : false;
-        renderBrowse();
-        renderList();
-        scheduleSave();
-        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
-      }
-
-      function browseDel(id) {
-        const item = items.find((i) => i.id === id);
-        if (!item) return;
-        if (!confirm('"' + item.name + '" delete karein?')) return;
-        items = items.filter((i) => i.id !== id);
-        renderBrowse();
-        renderList();
-        updateSummary();
-        scheduleSave();
-        showToast("🗑 Deleted");
-      }
-
-      function browseFilterItems() {
-        const inp = document.getElementById("browse-search-inp");
-        browseItemSearch = inp ? inp.value : "";
-        renderBrowse();
-      }
-
-      function browseGoAreas() {
-        browseItemSearch = "";
-        browseState = { view: "areas", areaId: null, shopId: null };
-        renderBrowse();
-      }
-      function browseGoShops(areaId) {
-        browseItemSearch = "";
-        browseState = { view: "shops", areaId, shopId: null };
-        renderBrowse();
-      }
-      function browseGoItems(areaId, shopId) {
-        browseItemSearch = "";
-        browseState = { view: "items", areaId, shopId };
-        renderBrowse();
-      }
-
-      function populateAreaDropdowns() {
-        // item add form area dropdown
-        const areaEl = document.getElementById("inp-area");
-        if (!areaEl) return;
-        const prev = areaEl.value;
-        areaEl.innerHTML =
-          '<option value="">— Area —</option>' +
-          areas
-            .map(
-              (a) =>
-                `<option value="${a.id}"${a.id === prev ? " selected" : ""}>${a.name}</option>`,
-            )
-            .join("");
-
-        // shop add form area dropdown (only if the legacy field exists)
-        const shopAreaEl = document.getElementById("inp-shop-area");
-        if (shopAreaEl) {
-          const prev2 = shopAreaEl.value;
-          shopAreaEl.innerHTML =
-            '<option value="">— Select Area —</option>' +
-            areas
-              .map(
-                (a) =>
-                  `<option value="${a.id}"${a.id === prev2 ? " selected" : ""}>${a.name}</option>`,
-              )
-              .join("");
-        }
-
-        if (prev) onAreaChange();
-        else renderHomeAvailability();
-      }
-
-      function onAreaChange() {
-        const areaId = document.getElementById("inp-area").value;
-        const shopEl = document.getElementById("inp-shop");
-        if (!areaId) {
-          shopEl.innerHTML = '<option value="">— Shop —</option>';
-          renderHomeAvailability();
-          return;
-        }
-        const area = areas.find((a) => a.id === areaId);
-        shopEl.innerHTML =
-          '<option value="">— Shop —</option>' +
-          (area
-            ? area.shops
-                .map((s) => `<option value="${s.id}">${s.name}</option>`)
-                .join("")
-            : "");
-        renderHomeAvailability();
-      }
-
-      // ══ UNIT TOGGLE ════════════════════════════════════════
-      function setUnit(unit) {
-        currentUnit = unit;
-        document
-          .querySelectorAll(".qty-unit-btn")
-          .forEach((b) => b.classList.remove("active"));
-        document
-          .getElementById("unit-" + unit.toLowerCase())
-          .classList.add("active");
-      }
-
-      // ══ FORM LOGIC ══════════════════════════════════════════
-      function showNameSuggestions(query) {
-        const box = document.getElementById('name-suggestions');
-        if (!query || query.length < 1) { box.style.display = 'none'; return; }
-        const q = query.toLowerCase();
-        const matches = items.filter(it => it.name.toLowerCase().includes(q)).slice(0, 8);
-        if (!matches.length) { box.style.display = 'none'; return; }
-        box.innerHTML = matches.map((it, i) => 
-          `<div onclick="selectNameSuggestion('${it.name.replace(/'/g,"&#39;")}')" style="padding:11px 16px;cursor:pointer;font-size:14px;font-weight:600;color:var(--g9);border-bottom:1px solid var(--g2);transition:background 0.15s;" onmouseover="this.style.background='var(--g1)'" onmouseout="this.style.background=''">${it.name}</div>`
-        ).join('');
-        box.style.display = 'block';
-      }
-      function selectNameSuggestion(name) {
-        const el = document.getElementById('inp-name');
-        el.value = name;
-        document.getElementById('name-suggestions').style.display = 'none';
-        document.getElementById('clear-btn').style.display = 'block';
-        checkAddBtn();
-        focusBuy();
-      }
-      function onNameKeydown(e) {
-        if (e.key === 'Enter') { document.getElementById('name-suggestions').style.display = 'none'; focusBuy(); }
-        if (e.key === 'Escape') { document.getElementById('name-suggestions').style.display = 'none'; }
-      }
-      function onNameInput(el) {
-        document.getElementById("clear-btn").style.display = el.value ? "block" : "none";
-        showNameSuggestions(el.value);
-        checkAddBtn();
-      }
-      function clearForm() {
-        document.getElementById("inp-name").value = "";
-        const sugBox = document.getElementById("name-suggestions");
-        if (sugBox) sugBox.style.display = "none";
-        document.getElementById("inp-buy").value = "";
-        document.getElementById("inp-sell").value = "";
-        document.getElementById("inp-qty").value = "";
-        document.getElementById("clear-btn").style.display = "none";
-        document.getElementById("pp").style.display = "none";
-        document.getElementById("add-btn").disabled = true;
-        document.getElementById("inp-name").focus();
-        if (currentEditId) {
-          currentEditId = null;
-          renderList();
-        }
-      }
-      function focusBuy() {
-        document.getElementById("inp-buy").focus();
-      }
-
-      function calcPreview() {
-        const b = parseFloat(document.getElementById("inp-buy").value) || 0;
-        const s = parseFloat(document.getElementById("inp-sell").value) || 0;
-        const pp = document.getElementById("pp");
-        if (b > 0 && s > 0) {
-          const diff = s - b;
-          const pct = ((diff / b) * 100).toFixed(1);
-          pp.style.display = "flex";
-          pp.className = "profit-preview " + (diff >= 0 ? "pos" : "neg");
-          document.getElementById("pp-val").textContent =
-            (diff >= 0 ? "+₹" : "₹") + diff.toFixed(2);
-          document.getElementById("pp-val").className =
-            "pp-value " + (diff >= 0 ? "pos" : "neg");
-          document.getElementById("pp-pct").textContent =
-            (diff >= 0 ? "+" : "") + pct + "% margin";
-        } else {
-          pp.style.display = "none";
-        }
-        checkAddBtn();
-      }
-
-      function checkAddBtn() {
-        const n = document.getElementById("inp-name").value.trim();
-        const b = parseFloat(document.getElementById("inp-buy").value) || 0;
-        const s = parseFloat(document.getElementById("inp-sell").value) || 0;
-        document.getElementById("add-btn").disabled = !(n && b > 0 && s > 0);
-      }
-
-      function addItem() {
-        const name = document.getElementById("inp-name").value.trim();
-        const buy = parseFloat(document.getElementById("inp-buy").value) || 0;
-        const sell = parseFloat(document.getElementById("inp-sell").value) || 0;
-        const qty = parseFloat(document.getElementById("inp-qty").value) || 0;
-        const areaId = document.getElementById("inp-area").value;
-        const shopId = document.getElementById("inp-shop").value;
-        if (!name || !buy || !sell) return;
-
-        const areaObj = areas.find((a) => a.id === areaId);
-        const shopObj = areaObj
-          ? areaObj.shops.find((s) => s.id === shopId)
-          : null;
-        const areaName = areaObj ? areaObj.name : "";
-        const shopName = shopObj ? shopObj.name : "";
-
-        const existing = items.find(
-          (i) => i.name.toLowerCase() === name.toLowerCase(),
-        );
-        if (existing) {
-          existing.buy = buy;
-          existing.sell = sell;
-          existing.qty = qty;
-          existing.unit = currentUnit;
-          existing.area = areaName;
-          existing.shop = shopName;
-          existing.areaId = areaObj ? areaObj.id : null;
-          existing.shopId = shopObj ? shopObj.id : null;
-          showToast("✅ " + name + " updated!");
-        } else {
-          items.unshift({
-            id: uid(),
-            name,
-            buy,
-            sell,
-            qty,
-            unit: currentUnit,
-            area: areaName,
-            shop: shopName,
-            areaId: areaObj ? areaObj.id : null,
-            shopId: shopObj ? shopObj.id : null,
-            available: true,
-          });
-          showToast("✅ " + name + " added!");
-        }
-
-        clearForm();
-        renderList();
-        updateSummary();
-        renderHomeAvailability();
-        scheduleSave();
-      }
-
-      // ══ LIST ════════════════════════════════════════════════
-      function renderList() {
-        const searchEl = document.getElementById("search-inp");
-        const q = searchEl ? (searchEl.value || "").toLowerCase().trim() : "";
-        const filtered = q
-          ? items.filter((i) => i.name.toLowerCase().includes(q))
-          : items;
-        const el = document.getElementById("item-list");
-        const cnt = document.getElementById("search-count");
-
-        if (cnt)
-          cnt.textContent = q
-            ? `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`
-            : "";
-        if (!el) return;
-
-        renderHomeAvailability();
-
-        if (!items.length) {
-          el.innerHTML = `<div class="empty-state">
-      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
-        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-        <path d="M16 3h-8v4h8V3z"/>
-      </svg>
-      <p>No items added yet.<br/>Enter item name and prices above<br/>to get started.</p>
-    </div>`;
-          return;
-        }
-
-        if (filtered.length === 0) {
-          el.innerHTML = `<div class="empty-state"><p>No results for "${q}".</p></div>`;
-          return;
-        }
-
-        el.innerHTML = filtered
-          .map((item, idx) => {
-            const diff = item.sell - item.buy;
-            const pct = item.buy ? ((diff / item.buy) * 100).toFixed(1) : 0;
-            const cls = diff >= 0 ? "pos" : "neg";
-            const isEditing = currentEditId === item.id;
-            const qtyTxt = item.qty ? `${item.qty} ${item.unit || "PCS"}` : "";
-            const shopTxt = item.shop
-              ? `${item.area ? item.area + " · " : ""}${item.shop}`
-              : item.area || "";
-            const isAvailable = item.available !== false;
-            return `
-    <div class="item-card ${isEditing ? "editing" : ""} ${!isAvailable ? "unavailable" : ""}" id="card-${item.id}" onclick="handleCardClick('${item.id}', event)">
-      <div class="item-left">
-        <div class="item-name">${item.name}</div>
-        <div class="item-prices">
-          <span class="price-tag buy-tag">₹${item.buy.toFixed(2)}</span>
-          <span class="price-arrow">→</span>
-          <span class="price-tag sell-tag">₹${item.sell.toFixed(2)}</span>
-        </div>
-        ${item.qty ? `<div class="item-qty-badge">📦 ${item.qty}</div>` : ""}
-        ${shopTxt ? `<div class="item-shop-badge">🏪 ${shopTxt}</div>` : ""}
-      </div>
-      <div class="item-right">
-        <span class="profit-badge ${cls}">${diff >= 0 ? "+₹" : "₹"}${diff.toFixed(2)}</span>
-        <span class="profit-pct">${pct}% margin</span>
-        <div style="display:flex;gap:4px;margin-top:2px;">
-          <button class="toggle-btn ${isAvailable ? "on" : "off"}" onclick="toggleAvailable('${item.id}', event)" title="${isAvailable ? "Available - click to mark unavailable" : "Unavailable - click to mark available"}">${isAvailable ? "ON" : "OFF"}</button>
-          <button class="mini-del-btn" onclick="deleteItem('${item.id}', event)" title="Delete item">Del</button>
+          <div class="step-body">
+            <div class="order-preview" id="cr-preview"></div>
+            <div class="price-box">
+              <div class="price-box-title">💰 Estimated Charges</div>
+              <div class="pr">
+                <span class="pl">Item Price</span
+                ><span class="pv">Confirmed on WhatsApp</span>
+              </div>
+              <div class="pr">
+                <span class="pl">Delivery Charge</span
+                ><span class="pv" id="cr-delivery-charge">₹23</span>
+              </div>
+              <div class="pr total">
+                <span class="pl">Total</span
+                ><span class="pv" id="cr-total-text">Item Cost + ₹23</span>
+              </div>
+            </div>
+            <div class="info-box green">
+              <div class="info-icon">✅</div>
+              <div class="info-text">
+                We confirm
+                <strong>price &amp; availability on WhatsApp</strong> before
+                delivery. You pay only after receiving.
+                <strong>Zero advance. Zero hidden charges.</strong>
+              </div>
+            </div>
+            <button class="submit-btn orange" onclick="submitCR()">
+              ✅ Confirm & Send on WhatsApp
+            </button>
+          </div>
         </div>
       </div>
-      <div class="item-edit-row">
-        <div class="ie-wrap" style="flex:2;min-width:120px;">
-          <input class="ie-inp" id="ie-name-${item.id}" type="text" placeholder="Item name" value="${item.name}" onclick="event.stopPropagation()" oninput="iePreview('${item.id}')"/>
+      <!-- end custom panel -->
+
+      <!-- ══════════ PICKUP & DROP ══════════ -->
+      <div class="section-panel" id="panel-pickup">
+        <div class="sec-head">
+          <div class="sec-head-title">Pickup &amp; Drop</div>
+          <div class="sec-head-sub">
+            Tiffin, documents, parcels — we collect and deliver across Parbhani
+          </div>
         </div>
-        <div class="ie-wrap">
-          <span class="ie-rupee">₹</span>
-          <input class="ie-inp" id="ie-buy-${item.id}" type="number" inputmode="decimal" placeholder="Buy" value="${item.buy}" onclick="event.stopPropagation()" oninput="iePreview('${item.id}')"/>
+
+        <!-- Step 1: Item Type -->
+        <div class="step active" id="step-pd-1">
+          <div class="step-header" onclick="toggleStep('pd', 1)">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <div class="step-title">What Are We Picking Up?</div>
+              <div class="step-subtitle">Select item type and describe it</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="cat-grid" id="pd-cat-grid">
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Tiffin')"
+                data-cat="Tiffin"
+              >
+                <div class="cat-emoji">🍱</div>
+                <div class="cat-label">Tiffin</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Document')"
+                data-cat="Document"
+              >
+                <div class="cat-emoji">📄</div>
+                <div class="cat-label">Document</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Parcel')"
+                data-cat="Parcel"
+              >
+                <div class="cat-emoji">📦</div>
+                <div class="cat-label">Parcel</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Medicine')"
+                data-cat="Medicine"
+              >
+                <div class="cat-emoji">💊</div>
+                <div class="cat-label">Medicine</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Groceries')"
+                data-cat="Groceries"
+              >
+                <div class="cat-emoji">🛒</div>
+                <div class="cat-label">Groceries</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Keys / Items')"
+                data-cat="Keys / Items"
+              >
+                <div class="cat-emoji">🔑</div>
+                <div class="cat-label">Keys / Items</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Clothes')"
+                data-cat="Clothes"
+              >
+                <div class="cat-emoji">👕</div>
+                <div class="cat-label">Clothes</div>
+              </div>
+              <div
+                class="cat-btn"
+                onclick="selectCat('pd', 'Other')"
+                data-cat="Other"
+              >
+                <div class="cat-emoji">🗂️</div>
+                <div class="cat-label">Other</div>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl"
+                >📝 Describe the Item <span class="req">*</span></label
+              >
+              <textarea
+                class="fi"
+                id="pd_item"
+                rows="2"
+                placeholder="e.g. Tiffin from mom's house, legal documents from office, friend's parcel..."
+              ></textarea>
+            </div>
+          </div>
         </div>
-        <div class="ie-wrap">
-          <span class="ie-rupee">₹</span>
-          <input class="ie-inp" id="ie-sell-${item.id}" type="number" inputmode="decimal" placeholder="Sell" value="${item.sell}" onclick="event.stopPropagation()" oninput="iePreview('${item.id}')" onkeydown="if(event.key==='Enter')saveInlineEdit('${item.id}')"/>
+
+        <!-- Step 2: Route -->
+        <div class="step" id="step-pd-2">
+          <div class="step-header" onclick="toggleStep('pd', 2)">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <div class="step-title">Pickup &amp; Delivery Locations</div>
+              <div class="step-subtitle">
+                Where to collect from, and where to deliver
+              </div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <!-- PICKUP FROM -->
+            <div class="fg">
+              <label class="fl"
+                >📍 Pickup From — Area <span class="req">*</span></label
+              >
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="pd-from-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'pd-from-area-grid',
+                      'pd-from-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
+              </div>
+              <div class="area-no-result" id="pd-from-area-no-result">
+                😕 No area found
+              </div>
+              <div class="area-grid" id="pd-from-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('from', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="pd_from_addr"
+                placeholder="Full pickup address / person's name &amp; location"
+              />
+            </div>
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Pickup Person's Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="pd_from_name"
+                  placeholder="Who to collect from"
+                />
+              </div>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Their Mobile Number <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="pd_from_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                />
+              </div>
+            </div>
+
+            <!-- DELIVER TO -->
+            <div class="fg">
+              <label class="fl"
+                >🏁 Deliver To — Area <span class="req">*</span></label
+              >
+              <div class="area-search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  class="area-search-input"
+                  id="pd-to-area-search"
+                  placeholder="Search area..."
+                  oninput="
+                    filterAreaSearch(
+                      'pd-to-area-grid',
+                      'pd-to-area-no-result',
+                      this.value,
+                    )
+                  "
+                  autocomplete="off"
+                />
+              </div>
+              <div class="area-no-result" id="pd-to-area-no-result">
+                😕 No area found
+              </div>
+              <div class="area-grid" id="pd-to-area-grid">
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Parbhani Main')"
+                  data-area="Parbhani Main"
+                >
+                  <span class="area-dot"></span>Parbhani Main
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Ganesh Nagar')"
+                  data-area="Ganesh Nagar"
+                >
+                  <span class="area-dot"></span>Ganesh Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Shivaji Nagar')"
+                  data-area="Shivaji Nagar"
+                >
+                  <span class="area-dot"></span>Shivaji Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Padmapura')"
+                  data-area="Padmapura"
+                >
+                  <span class="area-dot"></span>Padmapura
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Bhagyanagar')"
+                  data-area="Bhagyanagar"
+                >
+                  <span class="area-dot"></span>Bhagyanagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Vasant Nagar')"
+                  data-area="Vasant Nagar"
+                >
+                  <span class="area-dot"></span>Vasant Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Sadar Bazar')"
+                  data-area="Sadar Bazar"
+                >
+                  <span class="area-dot"></span>Sadar Bazar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Railway Station')"
+                  data-area="Railway Station"
+                >
+                  <span class="area-dot"></span>Railway Station
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Anand Nagar')"
+                  data-area="Anand Nagar"
+                >
+                  <span class="area-dot"></span>Anand Nagar
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Camp Area')"
+                  data-area="Camp Area"
+                >
+                  <span class="area-dot"></span>Camp Area
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Jintur Road')"
+                  data-area="Jintur Road"
+                >
+                  <span class="area-dot"></span>Jintur Road
+                </div>
+                <div
+                  class="area-btn"
+                  onclick="selectAreaPD('to', 'Other')"
+                  data-area="Other"
+                >
+                  <span class="area-dot"></span>Other Area
+                </div>
+              </div>
+              <input
+                type="text"
+                class="fi"
+                id="pd_to_addr"
+                placeholder="Full delivery address"
+              />
+            </div>
+            <div class="fg">
+              <label class="fl"
+                >📝 Special Instructions
+                <span
+                  style="
+                    text-transform: none;
+                    font-weight: 400;
+                    letter-spacing: 0;
+                    font-size: 10px;
+                  "
+                  >(optional)</span
+                ></label
+              >
+              <input
+                type="text"
+                class="fi"
+                id="pd_note"
+                placeholder="e.g. Call before pickup, handle with care, ring bell..."
+              />
+            </div>
+          </div>
         </div>
-        <button class="save-ie" onclick="saveInlineEdit('${item.id}'); event.stopPropagation()">Save</button>
+
+        <!-- Step 3: Your Details + Time -->
+        <div class="step" id="step-pd-3">
+          <div class="step-header" onclick="toggleStep('pd', 3)">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <div class="step-title">Your Details &amp; Timing</div>
+              <div class="step-subtitle">
+                Your name, contact, and pickup time
+              </div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="form-row" style="margin-bottom: 13px">
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >👤 Your Name <span class="req">*</span></label
+                >
+                <input
+                  type="text"
+                  class="fi"
+                  id="pd_name"
+                  placeholder="Your full name"
+                  autocomplete="name"
+                />
+              </div>
+              <div class="fg" style="margin: 0">
+                <label class="fl"
+                  >📞 Your Mobile <span class="req">*</span></label
+                >
+                <input
+                  type="tel"
+                  class="fi"
+                  id="pd_phone"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl" style="margin-bottom: 8px"
+                >⏰ Pickup Time <span class="req">*</span></label
+              >
+              <div class="slot-row" id="pd-slot-grid">
+                <div
+                  class="slot-btn selected"
+                  onclick="selectSlot('pd', 'ASAP')"
+                  data-slot="ASAP"
+                >
+                  <div class="slot-time">⚡ ASAP</div>
+                  <div class="slot-label">Right now</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '8–9 AM')"
+                  data-slot="8–9 AM"
+                >
+                  <div class="slot-time">🌅 8–9 AM</div>
+                  <div class="slot-label">Morning</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '9–10 AM')"
+                  data-slot="9–10 AM"
+                >
+                  <div class="slot-time">☀️ 9–10 AM</div>
+                  <div class="slot-label">Office time</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '12–2 PM')"
+                  data-slot="12–2 PM"
+                >
+                  <div class="slot-time">🌤 12–2 PM</div>
+                  <div class="slot-label">Lunch break</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '5–7 PM')"
+                  data-slot="5–7 PM"
+                >
+                  <div class="slot-time">🌆 5–7 PM</div>
+                  <div class="slot-label">Evening</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', '7–9 PM')"
+                  data-slot="7–9 PM"
+                >
+                  <div class="slot-time">🌙 7–9 PM</div>
+                  <div class="slot-label">Night</div>
+                </div>
+                <div
+                  class="slot-btn"
+                  onclick="selectSlot('pd', 'custom')"
+                  data-slot="custom"
+                >
+                  <div class="slot-time">🕐 Custom</div>
+                  <div class="slot-label">Pick time</div>
+                </div>
+              </div>
+              <div class="custom-time-wrap" id="pd-custom-time">
+                <span class="custom-time-label">🕐 Select Time:</span>
+                <input type="time" class="fi-time" id="pd_custom_time" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Review -->
+        <div class="step" id="step-pd-4">
+          <div class="step-header" onclick="reviewPD()">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <div class="step-title">Review &amp; Confirm</div>
+              <div class="step-subtitle">Tap to check your request summary</div>
+            </div>
+            <span class="step-check">✅</span><span class="step-arrow">⌄</span>
+          </div>
+          <div class="step-body">
+            <div class="order-preview" id="pd-preview"></div>
+            <div class="price-box">
+              <div class="price-box-title">💰 Estimated Charges</div>
+              <div class="pr">
+                <span class="pl">Same area / Nearby</span
+                ><span class="pv">₹30</span>
+              </div>
+              <div class="pr">
+                <span class="pl">Different area / Far</span
+                ><span class="pv">₹50</span>
+              </div>
+              <div class="pr total">
+                <span class="pl">Exact charge</span
+                ><span class="pv">Confirmed on WhatsApp</span>
+              </div>
+            </div>
+            <div class="info-box blue">
+              <div class="info-icon">💡</div>
+              <div class="info-text">
+                <strong>Cash on delivery only.</strong> Exact charge and pickup
+                timing will be confirmed on WhatsApp. Available only within
+                Parbhani city.
+              </div>
+            </div>
+            <button class="submit-btn blue-btn" onclick="submitPD()">
+              ✅ Confirm & Send on WhatsApp
+            </button>
+          </div>
+        </div>
       </div>
-    </div>`;
-          })
-          .join("");
-      }
+      <!-- end pickup panel -->
+    </div>
+    <!-- .main -->
 
-      function handleCardClick(id, e) {
-        if (
-          e.target.classList.contains("del-btn") ||
-          e.target.classList.contains("mini-del-btn") ||
-          e.target.classList.contains("toggle-btn") ||
-          e.target.closest(".item-edit-row") ||
-          e.target.classList.contains("save-ie")
-        )
-          return;
-        if (currentEditId === id) {
-          currentEditId = null;
-        } else {
-          currentEditId = id;
-        }
-        renderList();
-        if (currentEditId) {
-          setTimeout(() => {
-            const inp = document.getElementById("ie-name-" + id);
-            if (inp) inp.focus();
-          }, 50);
-        }
-      }
+    <!-- TRUST SECTION -->
+    <div class="trust-section">
+      <div class="trust-inner">
+        <div class="trust-title">Why People Trust QuickMart 🤝</div>
+        <div class="trust-grid">
+          <div class="trust-card">
+            <div class="trust-card-icon">📍</div>
+            <div>
+              <div class="tc-title">100% Local</div>
+              <div class="tc-sub">Born and built in Parbhani</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">💵</div>
+            <div>
+              <div class="tc-title">Zero Advance</div>
+              <div class="tc-sub">Pay only after you receive</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">📲</div>
+            <div>
+              <div class="tc-title">Personal Confirmation</div>
+              <div class="tc-sub">Every order confirmed by us</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">🔒</div>
+            <div>
+              <div class="tc-title">Your Data is Safe</div>
+              <div class="tc-sub">Used only for your delivery</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">🚫</div>
+            <div>
+              <div class="tc-title">No Hidden Charges</div>
+              <div class="tc-sub">What we say is what you pay</div>
+            </div>
+          </div>
+          <div class="trust-card">
+            <div class="trust-card-icon">⚡</div>
+            <div>
+              <div class="tc-title">Fast &amp; Reliable</div>
+              <div class="tc-sub">20–45 min delivery promise</div>
+            </div>
+          </div>
+        </div>
+        <div class="trust-contact">
+          <strong>Welcome to S_Quick Mart</strong>
+        </div>
+      </div>
+    </div>
 
-      function iePreview(id) {
-        // just live validation — no visual needed here, save on Save
-      }
+    <!-- SUCCESS SHEET -->
+    <div class="suc-overlay" id="sucOverlay">
+      <div class="suc-box">
+        <span class="suc-anim">🎉</span>
+        <div class="suc-title">Request Sent!</div>
+        <div class="suc-msg" id="sucMsg">
+          Your request has been sent on WhatsApp. We will confirm the details
+          shortly.
+        </div>
+        <div class="suc-msg">📞 Contact: <strong>9545148205</strong></div>
+        <button class="suc-close" onclick="closeSuc()">
+          OK, Thank You! 😊
+        </button>
+      </div>
+    </div>
+    <div id="toast"></div>
 
-      function saveInlineEdit(id) {
-        const nameInp = document.getElementById("ie-name-" + id);
-        const newName = nameInp ? nameInp.value.trim() : "";
-        const b =
-          parseFloat(document.getElementById("ie-buy-" + id).value) || 0;
-        const s =
-          parseFloat(document.getElementById("ie-sell-" + id).value) || 0;
-        if (!b || !s) {
-          showToast("⚠️ Please enter both prices!");
-          return;
-        }
-        if (!newName) {
-          showToast("⚠️ Item name can't be empty!");
-          return;
-        }
-        const item = items.find((i) => i.id === id);
-        if (item) {
-          item.name = newName;
-          item.buy = b;
-          item.sell = s;
-        }
-        currentEditId = null;
-        renderList();
-        updateSummary();
-        scheduleSave();
-        showToast("✅ Item updated!");
-      }
-
-      function deleteItem(id, e) {
-        e.stopPropagation();
-        const item = items.find((i) => i.id === id);
-        if (!item) return;
-        if (!confirm('"' + item.name + '" will be deleted. Continue?')) return;
-        items = items.filter((i) => i.id !== id);
-        if (currentEditId === id) currentEditId = null;
-        renderList();
-        updateSummary();
-        scheduleSave();
-        showToast("🗑 Deleted");
-      }
-
-      function toggleAvailable(id, e) {
-        e.stopPropagation();
-        const item = items.find((i) => i.id === id);
-        if (!item) return;
-        item.available = item.available === false ? true : false;
-        renderList();
-        scheduleSave();
-        showToast(item.available ? "✅ " + item.name + " — Available" : "⛔ " + item.name + " — Unavailable");
-      }
-
-      // ══ SUMMARY ════════════════════════════════════════════
-      function updateSummary() {
-        const totalShops = areas.reduce((s, a) => s + a.shops.length, 0);
-        document.getElementById("s-items").textContent = items.length;
-        document.getElementById("s-areas").textContent = areas.length;
-        document.getElementById("s-shops").textContent = totalShops;
-      }
-
-      // ══ TOAST ══════════════════════════════════════════════
-      let _tt = null;
-      function showToast(msg) {
-        const t = document.getElementById("toast");
-        if (_tt) {
-          clearTimeout(_tt);
-          t.classList.remove("show");
-        }
-        t.textContent = msg;
-        void t.offsetWidth;
-        t.classList.add("show");
-        _tt = setTimeout(() => {
-          t.classList.remove("show");
-          _tt = null;
-        }, 2200);
-      }
-    </script>
+    <script src="yourneed.js"></script>
   </body>
 </html>

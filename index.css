@@ -1,0 +1,2828 @@
+    :root {
+      --primary: #246a73;
+      --pd: #87c38f;
+      --green: #1a9e5c;
+      --dark: #1a1a2e;
+      --text: #1e1e1e;
+      --muted: #777;
+      --bg: #fbfbf2;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+      --r: 14px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      /* overflow-x: hidden; */
+    }
+
+    .timing-bar {
+      background: var(--dark);
+      color: #fff;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .open-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2ecc71;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    .closed-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e74c3c;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    .timing-status {
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .timing-status.open {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+
+    .timing-status.closed {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      background: #fff;
+      box-shadow: 0 1px 12px rgba(0, 0, 0, 0.1);
+      padding: 10px 16px;
+    }
+
+    .hdr-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: none;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-text {
+      font-family: "Baloo 2", cursive;
+      font-weight: 800;
+      font-size: 20px;
+      color: #0f0f1a;
+      font-family: Algerian, sans-serif;
+      line-height: 1;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .hdr-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: var(--bg);
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text);
+      white-space: nowrap;
+      font-family: "Baloo 2", cursive;
+    }
+
+    .icon-btn:hover {
+      background: #fff;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .cart-btn {
+      position: relative;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: "Baloo 2", cursive;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(255, 107, 0, 0.3);
+    }
+
+    .cart-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4);
+    }
+
+    .cart-btn:active {
+      transform: translateY(0);
+    }
+
+    .hcb-icon {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .hcb-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.2;
+    }
+
+    .hcb-text .hcb-count {
+      font-size: 10.5px;
+      font-weight: 600;
+      opacity: 0.85;
+      letter-spacing: 0.2px;
+    }
+
+    .hcb-text .hcb-price {
+      font-family: "Baloo 2", cursive;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .s-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 36px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      outline: none;
+      transition: 0.2s;
+      color: var(--text);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .search-drop {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      max-height: 340px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .search-drop.show {
+      display: block;
+    }
+
+    .sr-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--bg);
+      transition: 0.15s;
+    }
+
+    .sr-item:hover {
+      background: #fff3ec;
+    }
+
+    .sr-img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .sr-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--bg);
+    }
+
+    .ci-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--bg);
+    }
+
+    .sr-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sr-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .sr-price {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 14px;
+      margin-right: 6px;
+    }
+
+    .sr-add {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .no-res {
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .banner {
+      background: var(--green);
+      color: #fff;
+      text-align: center;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg,
+          #ff6b00 0%,
+          #ff8c42 60%,
+          #ffb347 100%);
+      padding: 32px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-feats {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .hero-feat {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .hero-btn {
+      background: #fff;
+      color: var(--primary);
+      font-family: "Baloo 2", cursive;
+      font-weight: 800;
+      font-size: 17px;
+      padding: 12px 28px;
+      border-radius: 50px;
+      border: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .cat-sec {
+      padding: 20px 16px 4px;
+    }
+
+    .sec-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 14px;
+    }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 480px) {
+      .cat-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .cat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: var(--shadow);
+      transition: 0.2s;
+    }
+
+    .cat-card:hover,
+    .cat-card.active {
+      border-color: var(--primary);
+      background: #fff3ec;
+    }
+
+    .cat-emoji {
+      font-size: 26px;
+      margin-bottom: 5px;
+    }
+
+    .cat-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .cat-card.active .cat-lbl {
+      color: var(--primary);
+    }
+
+    .prod-sec {
+      padding: 16px 16px 0;
+    }
+
+    .cat-group {
+      margin-bottom: 32px;
+    }
+
+    .cat-heading {
+      font-family: "Baloo 2", cursive;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 2.5px solid #e0e0e0;
+    }
+
+    /* Subcategory filter pills row */
+    .subcat-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 4px 0 12px 0;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .subcat-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .subcat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1.5px solid #e8e8e8;
+      background: #fafafa;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      font-family: "Inter", sans-serif;
+    }
+
+    .subcat-pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #fff;
+    }
+
+    .subcat-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(36, 106, 115, 0.25);
+    }
+
+    /* Subcategory section inside a category */
+    .subcat-section {
+      margin-bottom: 22px;
+    }
+
+    .subcat-heading {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      background: #f4f4f4;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .subcat-heading span.sc-emoji {
+      font-size: 15px;
+    }
+
+    /* ── ALL-VIEW horizontal scroll row ── */
+    .prod-hscroll-wrap {
+      position: relative;
+    }
+
+    .prod-hscroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 6px;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+
+    .prod-hscroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .prod-hscroll .prod-card {
+      flex: 0 0 148px;
+      width: 148px;
+      scroll-snap-align: start;
+    }
+
+    @media (min-width: 420px) {
+      .prod-hscroll .prod-card {
+        flex: 0 0 160px;
+        width: 160px;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .prod-hscroll .prod-card {
+        flex: 0 0 176px;
+        width: 176px;
+      }
+    }
+
+    /* Scroll arrow buttons — visible only on non-touch / desktop */
+    .hscroll-arrow {
+      display: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid #e0e0e0;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.13);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      transition: background 0.15s, box-shadow 0.15s;
+      line-height: 1;
+    }
+
+    .hscroll-arrow:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(36, 106, 115, 0.25);
+    }
+
+    .hscroll-arrow.left {
+      left: -14px;
+    }
+
+    .hscroll-arrow.right {
+      right: -14px;
+    }
+
+    .hscroll-arrow.hidden-arr {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .hscroll-arrow {
+        display: flex;
+      }
+    }
+
+    .prod-hscroll-wrap::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 6px;
+      width: 40px;
+      background: linear-gradient(to right, transparent, var(--bg));
+      pointer-events: none;
+      border-radius: 0 14px 14px 0;
+    }
+
+    .allview-subcat-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0 10px 0;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid #f0f0f0;
+    }
+
+    .allview-subcat-label:first-of-type {
+      margin-top: 4px;
+    }
+
+    .allview-subcat-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: "Baloo 2", cursive;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .allview-subcat-emoji {
+      width: 28px;
+      height: 28px;
+      background: #f0f8f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .allview-see-all {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: none;
+      border: 1.5px solid var(--primary);
+      border-radius: 20px;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-family: "Inter", sans-serif;
+      transition: 0.15s;
+      white-space: nowrap;
+    }
+
+    .allview-see-all:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .prod-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 420px) {
+      .prod-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 600px) {
+      .prod-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 800px) {
+      .prod-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .prod-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    /* ── PRODUCT CARD — Clean Blinkit style ── */
+    .prod-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #efefef;
+      transition: box-shadow 0.18s, transform 0.18s;
+      cursor: pointer;
+      position: relative;
+      height: 260px;
+      overflow: hidden;
+    }
+
+    .prod-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.11);
+      transform: translateY(-2px);
+      border-color: #d0d0d0;
+    }
+
+    .prod-card.out-of-stock {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .oos-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      z-index: 2;
+      letter-spacing: 0.5px;
+    }
+
+    .disc-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #1c5fb0;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 5px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      z-index: 2;
+      line-height: 1.2;
+      text-align: center;
+      min-width: 34px;
+      letter-spacing: 0px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+      font-family: "Baloo 2", cursive;
+    }
+
+    /* Image area — tall, light bg */
+    .pc-img-wrap {
+      width: 100%;
+      height: 120px;
+      flex-shrink: 0;
+      background: #f7f8f5;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pc-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    /* Delivery time — small grey */
+    .pc-time {
+      font-size: 10.5px;
+      color: #999;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Product name — bold, 2 lines max */
+    .pc-name {
+      font-weight: 700;
+      font-size: 12.5px;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      -webkit-box-pack: end;
+      flex-shrink: 0;
+      height: 32px;
+    }
+
+    .pc-unit {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 0;
+      flex-shrink: 0;
+      height: 18px;
+      overflow: hidden;
+    }
+
+    /* Unit — grey small */
+
+    /* Price + ADD row — always pinned to bottom */
+    .pc-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 6px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .pc-price {
+      font-family: "Baloo 2", cursive;
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a1a1a;
+      flex-shrink: 0;
+    }
+
+    .pc-price-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+
+    .pc-mrp {
+      font-size: 11px;
+      color: #999;
+      text-decoration: line-through;
+      font-weight: 600;
+    }
+
+    .pc-off {
+      font-size: 10.5px;
+      color: #1aa260;
+      font-weight: 700;
+    }
+
+    .pc-btns {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pc-options-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    /* VARIANT MODAL */
+    .variant-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .variant-overlay.open {
+      display: flex;
+    }
+
+    .variant-modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .vm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+    }
+
+    .vm-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+
+    .vm-close {
+      background: #f2f2f2;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .vm-body {
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .vm-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f3f3f3;
+    }
+
+    .vm-row:last-child {
+      border-bottom: none;
+    }
+
+    .vm-row-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: #f7f8f5;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .vm-row-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .vm-row-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .vm-row-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+
+    .vm-row-price-line {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .vm-row-price {
+      font-family: "Baloo 2", cursive;
+      font-size: 14px;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+
+    .vm-row-mrp {
+      font-size: 11.5px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .vm-row-off {
+      font-size: 11px;
+      color: #1aa260;
+      font-weight: 700;
+    }
+
+    .vm-row-action {
+      flex-shrink: 0;
+    }
+
+    .btn-add {
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: "Baloo 2", cursive;
+      letter-spacing: 0.3px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .oos-btn {
+      background: #f5f5f5;
+      color: #bbb;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: not-allowed;
+      white-space: nowrap;
+    }
+
+    /* Qty control */
+    .btn-order {
+      display: none;
+    }
+
+    .qty-ctrl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary);
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    .qty-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 5px 12px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .qty-num {
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .oos-btn {
+      width: 100%;
+      background: #f0f0f0;
+      color: #aaa;
+      border: none;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: not-allowed;
+      font-family: "Baloo 2", cursive;
+    }
+
+    /* DETAIL MODAL */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 3000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .detail-overlay.open {
+      display: flex;
+    }
+
+    @media (min-width: 600px) {
+      .detail-overlay {
+        align-items: center;
+        padding: 20px;
+      }
+      .detail-modal {
+        border-radius: 20px !important;
+        height: 88vh;
+        max-height: 88vh;
+        min-height: unset;
+        max-width: 680px;
+      }
+    }
+
+    .detail-modal {
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 100%;
+      height: 88vh;
+      max-height: 88vh;
+      min-height: unset;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dm-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    .dm-topbar-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .dm-close {
+      background: var(--bg);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .dm-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .dm-left {
+      width: 88px;
+      flex-shrink: 0;
+      background: #f8f8f8;
+      overflow-y: auto;
+      border-right: 1px solid #efefef;
+    }
+
+    .dm-sub-item {
+      padding: 12px 6px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #efefef;
+      transition: 0.15s;
+      position: relative;
+    }
+
+    .dm-sub-item.active {
+      background: #fff;
+    }
+
+    .dm-sub-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--primary);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .dm-sub-emoji {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .dm-sub-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+
+    .dm-sub-item.active .dm-sub-lbl {
+      color: var(--primary);
+    }
+
+    .dm-right {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: var(--bg);
+    }
+
+    .dm-section-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid #e8e8e8;
+    }
+
+    .dm-prod-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 400px) {
+      .dm-prod-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 600px) {
+      .dm-prod-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 800px) {
+      .dm-prod-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .dm-prod-row {
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #efefef;
+      position: relative;
+      height: 100%;
+    }
+
+    .dm-prod-img {
+      width: 100%;
+      height: 110px;
+      flex-shrink: 0;
+      background: #f7f8f5;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .dm-prod-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    .dm-prod-info {
+      flex: 1;
+    }
+
+    .dm-prod-name {
+      font-weight: 700;
+      font-size: 12.5px;
+      color: var(--dark);
+      margin-bottom: 2px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 34px;
+    }
+
+    .dm-prod-unit {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      height: 16px;
+      overflow: hidden;
+    }
+
+    .dm-prod-price {
+      font-family: "Baloo 2", cursive;
+      font-size: 15px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+
+    .dm-prod-action {
+      margin-top: auto;
+      padding-top: 8px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .dm-add-btn {
+      width: 100%;
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      padding: 7px 6px;
+      font-family: "Baloo 2", cursive;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dm-add-btn:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .dm-oos-btn {
+      width: 100%;
+      background: #f0f0f0;
+      color: #aaa;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: not-allowed;
+      font-family: "Baloo 2", cursive;
+    }
+
+    .dm-qty-ctrl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary);
+      border-radius: 10px;
+      padding: 2px;
+      width: 100%;
+    }
+
+    .dm-qty-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .dm-qty-num {
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    /* CART */
+
+    .c-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+    }
+
+    .c-overlay.open {
+      display: block;
+    }
+
+    .c-sidebar {
+      position: fixed;
+      right: -100%;
+      top: 0;
+      height: 100%;
+      width: min(400px, 100%);
+      background: #fff;
+      z-index: 2001;
+      transition: right 0.3s;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .c-sidebar.open {
+      right: 0;
+    }
+
+    .c-header {
+      padding: 18px 20px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .c-header h2 {
+      font-family: "Baloo 2", cursive;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .c-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .c-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+    }
+
+    .c-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .c-empty-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+    }
+
+    .c-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--bg);
+    }
+
+    .ci-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--bg);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ci-info {
+      flex: 1;
+    }
+
+    .ci-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .ci-price {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .ci-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ci-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      border: 1.5px solid #ddd;
+      background: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .ci-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .ci-qty {
+      font-weight: 700;
+      min-width: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .c-foot {
+      padding: 14px 16px;
+      border-top: 2px solid var(--bg);
+    }
+
+    .del-info {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .c-bill-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .c-bill-row.total {
+      font-family: "Baloo 2", cursive;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark);
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+    }
+
+    .chk-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* CHECKOUT */
+    .ck-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 4000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .ck-overlay.open {
+      display: flex;
+    }
+
+    @media (min-width: 600px) {
+      .ck-overlay {
+        align-items: center;
+        padding: 20px;
+      }
+    }
+
+    .ck-modal {
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 500px;
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 600px) {
+      .ck-modal {
+        border-radius: 24px;
+      }
+    }
+
+    .ck-hdr {
+      padding: 18px 20px 14px;
+      border-bottom: 1.5px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .ck-hdr h2 {
+      font-family: "Baloo 2", cursive;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .ck-close {
+      background: var(--bg);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ck-body {
+      padding: 16px 20px 24px;
+    }
+
+    .ord-sum {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .ord-sum-title {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: var(--dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: var(--muted);
+    }
+
+    .sum-div {
+      border: none;
+      border-top: 1px dashed #ccc;
+      margin: 8px 0;
+    }
+
+    .sum-total {
+      display: flex;
+      justify-content: space-between;
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .fg {
+      margin-bottom: 14px;
+    }
+
+    .fl {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .fi {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+      color: var(--text);
+    }
+
+    .fi:focus {
+      border-color: var(--primary);
+    }
+
+    .fi.valid {
+      border-color: var(--green);
+    }
+
+    .fi.invalid {
+      border-color: #e74c3c;
+    }
+
+    .area-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .area-search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .area-search-wrap .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .area-search-input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.18s;
+    }
+
+    .area-search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .area-no-result {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 14px 0;
+      display: none;
+    }
+
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: 400px) {
+      .area-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 560px) {
+      .area-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .area-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: 0.18s;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #000000;
+      min-height: 40px;
+    }
+
+    .area-btn:active {
+      transform: scale(0.96);
+    }
+
+    .area-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .area-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: 0.18s;
+    }
+
+    .area-btn.selected .area-dot {
+      background: var(--primary);
+    }
+
+    .pin-hint {
+      font-size: 12px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .pin-hint.valid {
+      color: var(--green);
+      display: block;
+    }
+
+    .pin-hint.invalid {
+      color: #e74c3c;
+      display: block;
+    }
+
+    .pay-box {
+      background: #fff8f0;
+      border: 1.5px solid #ffe0c2;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cancel-pol {
+      background: #fff8f0;
+      border: 1.5px solid #ffe0c2;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .cp-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    .cp-text {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .place-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* USER PROFILE DRAWER */
+    .profile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+    }
+
+    .profile-overlay.open {
+      display: block;
+    }
+
+    .profile-sidebar {
+      position: fixed;
+      right: -100%;
+      top: 0;
+      height: 100%;
+      width: min(400px, 100%);
+      background: #fff;
+      z-index: 2001;
+      transition: right 0.3s;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-sidebar.open {
+      right: 0;
+    }
+
+    .profile-header {
+      position: relative;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--dark), #16213e);
+      color: #fff;
+    }
+
+    .profile-back {
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .profile-back:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(2px);
+    }
+
+    .profile-avatar {
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+
+    .profile-name {
+      font-family: "Baloo 2", cursive;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .profile-phone {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .profile-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .profile-section {
+      margin-bottom: 20px;
+    }
+
+    .profile-section-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-input-group {
+      margin-bottom: 10px;
+    }
+
+    .profile-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .profile-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: "Inter", sans-serif;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .profile-input:focus {
+      border-color: var(--primary);
+    }
+
+    .save-profile-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: "Baloo 2", cursive;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .profile-area-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .profile-area-selected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light, #fff3e8);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .profile-area-selected-badge .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .profile-area-change-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      margin-left: 6px;
+    }
+
+    .profile-area-picker {
+      display: none;
+    }
+
+    .profile-area-picker.open {
+      display: block;
+    }
+
+    .profile-area-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .profile-area-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 9px;
+      border-radius: 9px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #000;
+      transition: 0.16s;
+    }
+
+    .profile-area-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light, #fff3e8);
+      color: var(--primary);
+    }
+
+    .profile-area-btn .area-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: 0.16s;
+    }
+
+    .profile-area-btn.selected .area-dot {
+      background: var(--primary);
+    }
+
+    /* ORDER HISTORY */
+    .order-card {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1.5px solid #eee;
+    }
+
+    .order-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .order-id {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .order-date {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .order-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-confirmed {
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+
+    .status-out_for_delivery {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .status-delivered {
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+
+    .status-cancelled {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .order-items {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .order-total {
+      font-family: "Baloo 2", cursive;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .no-orders {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .no-orders-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    /* PHONE LOGIN MODAL */
+    .phone-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .phone-modal-overlay.open {
+      display: flex;
+    }
+
+    /* body.overlay-open footer {
+        display: none !important;
+      } */
+    .phone-modal {
+      position: relative;
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+    }
+
+    .phone-modal-back {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: #fff;
+      color: var(--dark);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .phone-modal-back:hover {
+      background: #f7f7f7;
+      transform: translateX(-2px);
+    }
+
+    .phone-modal-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .phone-modal-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+
+    .phone-modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .phone-modal-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: "Inter", sans-serif;
+      outline: none;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .phone-modal-input:focus {
+      border-color: var(--primary);
+    }
+
+    .phone-modal-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-family: "Baloo 2", cursive;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .phone-modal-skip {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      width: 100%;
+    }
+
+    /* SUCCESS */
+    .suc-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 6000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .suc-overlay.open {
+      display: flex;
+    }
+
+    .suc-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .suc-icon {
+      font-size: 64px;
+      margin-bottom: 14px;
+    }
+
+    .suc-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .suc-msg {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .suc-time {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 14px 0;
+    }
+
+    .suc-close {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    /* CLOSED */
+    .closed-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 15, 26, 0.92);
+      z-index: 8000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .closed-overlay.show {
+      display: flex;
+    }
+
+    .closed-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .closed-icon {
+      font-size: 60px;
+      margin-bottom: 14px;
+    }
+
+    .closed-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .closed-msg {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .closed-time {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 14px 0;
+    }
+
+    footer {
+      background: #1a1a2e;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+    }
+
+    footer strong {
+      color: #fff;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 640px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      .footer-brand-col {
+        grid-column: 1 / -1;
+      }
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 110px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.9);
+      background: #222;
+      color: #fff;
+      padding: 11px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 13px;
+      z-index: 99999;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition:
+        opacity 0.25s,
+        transform 0.25s;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .announce-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: linear-gradient(90deg, #fff4df, #ffe8be);
+      border-top: 2px solid rgba(255, 156, 45, 0.3);
+      border-bottom: 2px solid rgba(255, 156, 45, 0.3);
+      color: #1a1a1a;
+      padding: 0 18px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .announce-bar.hidden {
+      display: none;
+    }
+
+    .announce-label {
+      flex-shrink: 0;
+      font-weight: 700;
+      font-size: 16px;
+      color: #d35400;
+      white-space: nowrap;
+    }
+
+    .announce-wrap {
+      position: relative;
+      overflow: hidden;
+      min-height: 32px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .announce-track {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      font-weight: 600;
+      font-size: 16px;
+      color: #1a1a1a;
+      animation: announce-scroll 18s linear infinite;
+    }
+
+    @keyframes announce-scroll {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-120vw);
+      }
+    }
+
+    .yn-promo {
+      margin: 16px 16px 0;
+      background: linear-gradient(135deg,
+          #0f0f1a 0%,
+          #1a1a2e 60%,
+          #16213e 100%);
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 107, 0, 0.2);
+      transition: 0.2s;
+    }
+
+    .yn-promo:hover {
+      transform: translateY(-2px);
+    }
+
+    .yn-promo-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .yn-promo-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .yn-promo-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .yn-promo-right {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: "Baloo 2", cursive;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* MY ORDERS PANEL */
+    .orders-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+    }
+
+    .orders-overlay.open {
+      display: block;
+    }
+
+    .orders-panel {
+      position: fixed;
+      right: -100%;
+      top: 0;
+      height: 100%;
+      width: min(400px, 100%);
+      background: #fff;
+      z-index: 2001;
+      transition: right 0.3s;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .orders-panel.open {
+      right: 0;
+    }
+
+    .orders-panel-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .orders-panel-title {
+      font-family: "Baloo 2", cursive;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .orders-panel-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    .orders-panel-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .orders-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #f7f7f7;
+    }
+
+    .order-card {
+      background: #fff !important;
+      border-radius: 14px !important;
+      border: 1.5px solid #e8e8e8 !important;
+      border-left: 4px solid #246a73 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-card.yn-card {
+      border-left: 4px solid #7c3aed !important;
+    }
+
+    /* ── SUBCATEGORY STRIP ── */
+    .scs-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+      cursor: pointer;
+      width: 76px;
+    }
+    .scs-img {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: #f4f6f5;
+      border: 1.5px solid #ebebeb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+    }
+    .scs-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .scs-card:hover .scs-img {
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(36,106,115,0.13);
+      transform: translateY(-2px);
+    }
+    .scs-name {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #2a2a2a;
+      text-align: center;
+      line-height: 1.3;
+      width: 76px;
+      word-break: break-word;
+    }
