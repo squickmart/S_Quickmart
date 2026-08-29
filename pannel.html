@@ -791,14 +791,14 @@
           <!-- STORE OPEN OVERRIDE CARD -->
           <div class="admin-card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span id="storeOpenIcon" style="font-size:20px;">🏪</span>
+              <span id="storeOpenIcon" style="font-size:20px;">⏰</span>
               <div>
                 <div style="font-size:14px;font-weight:700;color:var(--dark);">Store Open Override</div>
-                <div id="storeOpenSub" style="font-size:12px;color:var(--muted);margin-top:1px;">Auto — Store follows 7AM–10PM timing</div>
+                <div id="storeOpenSub" style="font-size:12px;color:var(--muted);margin-top:1px;">OFF — Follows normal timing (7AM–10PM)</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <button id="storeOpenButton" class="btn-primary" onclick="toggleStoreOpen()" style="background:#1bdf3e;">ON</button>
+              <button id="storeOpenButton" class="btn-primary" onclick="toggleStoreOpen()" style="background:#888;">OFF</button>
             </div>
           </div>
 
@@ -1111,7 +1111,7 @@
 
             <div
               id="areasList"
-              style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"
+              style="display: grid; gap: 10px"
             >
               <div
                 style="

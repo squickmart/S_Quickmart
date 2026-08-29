@@ -337,7 +337,7 @@
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${list.map(({c,i}) => {
                 const avatar = (c.name||'?')[0].toUpperCase();
-                const oc = (allOrders||[]).filter(o=>o.phone===c.phone).length;
+                const oc = (allOrders||[]).filter(o=>o.phone===c.phone).length + (allYourNeed||[]).filter(r=>r.phone===c.phone).length;
                 return '<div onclick="custSelectUser(' + i + ');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchstart="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" ontouchend="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'" onmouseover="this.style.borderColor=\'var(--pr)\'" onmouseout="this.style.borderColor=\'#eee\'">'
                   + '<div style="display:flex;align-items:center;gap:12px;">'
                   + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--pr),#ff9a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:\'Baloo 2\',cursive;font-size:17px;font-weight:800;flex-shrink:0;">' + avatar + '</div>'
@@ -353,8 +353,18 @@
           const c = allCustomers[_custState.custIdx];
           if (!c) { custGoHome(); return; }
           const orders = (allOrders||[]).filter(o=>o.phone===c.phone);
+          const ynOrders = (allYourNeed||[]).filter(r=>r.phone===c.phone);
           const deliveredOrders = orders.filter(o=>o.status==='delivered');
           const totalSpend = deliveredOrders.reduce((s,o)=>s+(o.total||0),0);
+          const totalOrderCount = orders.length + ynOrders.length;
+          const combinedHistory = [
+            ...orders.map(o=>({ ...o, _kind:'order' })),
+            ...ynOrders.map(r=>({ ...r, _kind:'yourneed' })),
+          ].sort((a,b)=>{
+            const ta = a.createdAt ? (a.createdAt.seconds||a.createdAt._seconds||0) : 0;
+            const tb = b.createdAt ? (b.createdAt.seconds||b.createdAt._seconds||0) : 0;
+            return tb - ta;
+          });
           const fmt = (ts,time) => {
             if (!ts) return '—';
             const ms = (ts.seconds||ts._seconds) ? (ts.seconds||ts._seconds)*1000 : ts;
@@ -381,7 +391,7 @@
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
               <div style="background:#fff3ec;border-radius:12px;padding:14px;text-align:center;">
-                <div style="font-family:'Baloo 2',cursive;font-size:28px;font-weight:800;color:var(--pr);line-height:1;">${orders.length}</div>
+                <div style="font-family:'Baloo 2',cursive;font-size:28px;font-weight:800;color:var(--pr);line-height:1;">${totalOrderCount}</div>
                 <div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;">Total Orders</div>
               </div>
               <div style="background:#e8f7f0;border-radius:12px;padding:14px;text-align:center;">
@@ -402,18 +412,45 @@
                 </div>`).join('')}
             </div>
 
-            ${orders.length ? `
+            ${combinedHistory.length ? `
             <div style="font-weight:700;font-size:14px;color:var(--dark);margin-bottom:10px;">🛒 Order History</div>
             <div style="display:flex;flex-direction:column;gap:8px;" id="custOrderList">
-              ${orders.slice(0,15).map((o,oi)=>{
+              ${combinedHistory.slice(0,15).map((o,oi)=>{
                 const d=o.createdAt?new Date((o.createdAt.seconds||o.createdAt._seconds)*1000).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):'—';
+                if (o._kind === 'yourneed') {
+                  const ynSc={delivered:'#1a9e5c',rejected:'#e74c3c',confirmed:'var(--pr)',out_for_delivery:'#2980b9',pending:'#e8a000'}[o.status||'pending']||'#888';
+                  const ynStatusLabel={delivered:'🎉 Done',rejected:'❌ Rejected',confirmed:'✅ Confirmed',out_for_delivery:'🛵 Sent',pending:'⏳ Pending'}[o.status||'pending']||(o.status||'—');
+                  const isCustom = o.type === 'custom_item';
+                  const ynTypeLabel = isCustom ? '🛍️ Custom Item Request' : '🏍️ Pickup & Drop';
+                  const ynItemsList = isCustom ? (o.items||[]).map(it=>`${it.name||'Item'} × ${it.qty||1}`).join(', ') : '';
+                  return `<div class="cod-card" onclick="(function(el){var d=el.querySelector('.cod-det');var open=d.classList.toggle('open');el.classList.toggle('expanded',open);})(this)">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:8px;flex-wrap:wrap;">
+                      <div>
+                        <div style="font-size:13px;font-weight:700;color:var(--dark);">${ynTypeLabel}</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${d}</div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:11px;font-weight:700;color:${ynSc};background:${ynSc}18;border-radius:6px;padding:3px 8px;">${ynStatusLabel}</span>
+                        <span class="cod-chevron">›</span>
+                      </div>
+                    </div>
+                    <div class="cod-det" style="background:#fafafa;">
+                      <div class="cod-det-inner">
+                        ${isCustom ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><span style="font-weight:700;color:var(--dark);">📂 Category:</span> ${o.category||'-'}</div>${ynItemsList?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><span style="font-weight:700;color:var(--dark);">🛍️ Items:</span> ${ynItemsList}</div>`:''}` : `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><span style="font-weight:700;color:var(--dark);">📦 Item:</span> ${o.itemDesc||'-'}</div>`}
+                        ${o.note ? `<div style="font-size:12px;color:var(--muted);"><span style="font-weight:700;color:var(--dark);">📝 Note:</span> ${o.note}</div>` : ''}
+                        ${o.address ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;"><span style="font-weight:700;color:var(--dark);">📍 Address:</span> ${o.address}</div>` : ''}
+                      </div>
+                    </div>
+                  </div>`;
+                }
+                const oi2 = oi;
                 const sc={delivered:'#1a9e5c',cancelled:'#e74c3c',confirmed:'var(--pr)',out_for_delivery:'#2980b9',pending:'#e8a000'}[o.status]||'#888';
                 const statusLabel={delivered:'✅ Delivered',cancelled:'❌ Cancelled',confirmed:'✔ Confirmed',out_for_delivery:'🛵 Out for Delivery',pending:'⏳ Pending'}[o.status]||(o.status||'—');
                 const deliveryBoyName = o.deliveredBy
                   ? ((deliveryBoys||[]).find(b=>b.phone===o.deliveredBy)||{}).name || o.deliveredBy
                   : null;
                 const itemsList = (o.items||[]).map(it=>`${it.name||it.n||'Item'} × ${it.qty||it.q||1}`).join(', ');
-                const detailId = 'cust-ord-det-'+oi;
+                const detailId = 'cust-ord-det-'+oi2;
                 return `<div class="cod-card" onclick="(function(el){var d=el.querySelector('.cod-det');var open=d.classList.toggle('open');el.classList.toggle('expanded',open);})(this)">
                   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:8px;flex-wrap:wrap;">
                     <div>
@@ -435,7 +472,7 @@
                   </div>
                 </div>`;
               }).join('')}
-              ${orders.length>15?`<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px;">+${orders.length-15} more orders</div>`:''}
+              ${combinedHistory.length>15?`<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px;">+${combinedHistory.length-15} more orders</div>`:''}
             </div>` : `
             <div style="text-align:center;background:#f7f8fc;border-radius:12px;padding:24px 16px;">
               <div style="font-size:32px;margin-bottom:8px;">🛒</div>
@@ -820,7 +857,7 @@ ${items}
           msgs[status] ||
           `Hello ${name}! Your order update: ${status}. — S_Quick Mart${locationNote}`;
         window.open(
-          `https://wa.me/919545148205?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
           "_blank",
         );
       }
@@ -1584,7 +1621,7 @@ ${items}
         const msgs = {
           confirmed: `Hello ${name}! ✅ Your request has been confirmed! We will contact you shortly to finalise details. — S_Quick Mart \n\n📍 Please share your live location on WhatsApp`,
           out_for_delivery: `Hello ${name}! 🛵 Your request has been sent/assigned. We'll update once completed. — S_Quick Mart`,
-          delivered: `Hello ${name}! 🎉 Your request is completed. Thank you! — S_Quick Mart`,
+          delivered: `Hello ${name}! 🎉 Your request has been completed successfully. Thank you for choosing S_Quick Mart — we look forward to serving you again soon!`,
           rejected: `Hello ${name}! ❌ Sorry, we could not fulfil your request at this time. For help, call: 9545148205 — S_Quick Mart`,
           pending: `Hello ${name}! 🎯 We received your request and are reviewing it. We'll update you shortly! — S_Quick Mart\n\n📍 Please share your live location on WhatsApp`,
         };
@@ -1592,7 +1629,7 @@ ${items}
           msgs[status] ||
           `Hello ${name}! Update on your request: ${status}. — S_Quick Mart`;
         window.open(
-          `https://wa.me/919545148205?text=${encodeURIComponent(msg)}`,
+          `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`,
           "_blank",
         );
       }
@@ -2639,14 +2676,14 @@ ${items}
 
       // ── STORE OPEN OVERRIDE ──────────────────────────────────────────────
       async function toggleStoreOpen() {
-        const currentOpen = window._storeStatus?.open !== false;
-        const newOpen = !currentOpen;
+        const currentlyForced = window._storeStatus?.open === true;
+        const newOpen = !currentlyForced;
         const existing = window._storeStatus || {};
         const newStatus = Object.assign({}, existing, { open: newOpen });
         applyStoreOpenUI(newStatus);
         const ok = await window.fbSaveStoreStatus(newStatus);
         if (ok && window._storeStatus) window._storeStatus.open = newOpen;
-        showToast(ok ? (newOpen ? "✅ Store forcefully opened!" : "🔒 Store closed manually!") : "❌ Save failed!");
+        showToast(ok ? (newOpen ? "✅ Store force-opened! Customers can order now." : "↩️ Back to normal timing (7AM–10PM).") : "❌ Save failed!");
       }
 
       function applyStoreOpenUI(data) {
@@ -2654,11 +2691,11 @@ ${items}
         const sub = document.getElementById("storeOpenSub");
         const icon = document.getElementById("storeOpenIcon");
         if (!button) return;
-        const isManualClosed = data && data.open === false;
-        if (sub) sub.textContent = isManualClosed ? "OFF — Store is manually closed" : "ON — Store is open (or follows timing)";
-        if (icon) icon.textContent = isManualClosed ? "🔒" : "🏪";
-        button.textContent = isManualClosed ? "OFF" : "ON";
-        button.style.background = isManualClosed ? "var(--danger)" : "#1bdf3e";
+        const isForceOpen = data && data.open === true;
+        if (sub) sub.textContent = isForceOpen ? "ON — Store force-opened (ignoring timing)" : "OFF — Follows normal timing (7AM–10PM)";
+        if (icon) icon.textContent = isForceOpen ? "🏪" : "⏰";
+        button.textContent = isForceOpen ? "ON" : "OFF";
+        button.style.background = isForceOpen ? "#1bdf3e" : "#888";
       }
 
 

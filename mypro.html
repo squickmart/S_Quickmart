@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S_Quick Mart — Business Dashboard</title>
+  <link rel="icon" type="image/png" href="S2.PNG" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- ══ FIREBASE ══ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import {
+      getFirestore, collection, doc, getDoc, onSnapshot, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
+      authDomain: "quickmart-b117e.firebaseapp.com",
+      projectId: "quickmart-b117e",
+      storageBucket: "quickmart-b117e.firebasestorage.app",
+      messagingSenderId: "128330058901",
+      appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.fbWatchOrders = (cb) => {
+      const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+      return onSnapshot(q, (snap) => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+    };
+    window.fbLoadStockflow = async () => {
+      try {
+        const s = await getDoc(doc(db, "stockflow", "prices"));
+        return s.exists() ? s.data().items || [] : [];
+      } catch(e) { return []; }
+    };
+    window.fbLoadBoys = async () => {
+      try {
+        const s = await getDoc(doc(db, "store", "delivery_boys"));
+        return s.exists() ? s.data().list || [] : [];
+      } catch(e) { return []; }
+    };
+    window.__fbReady = true;
+    window.dispatchEvent(new Event("fbReady"));
+  </script>
+
+  <style>
+    :root {
+      --pr: #ff6b00; --pr-dark: #e05800; --pr-glow: rgba(255,107,0,0.18);
+      --green: #10b981; --green-s: #ecfdf5;
+      --blue: #3b82f6; --blue-s: #eff6ff;
+      --red: #ef4444; --red-s: #fef2f2;
+      --yellow: #f59e0b; --yellow-s: #fffbeb;
+      --purple: #8b5cf6; --purple-s: #f5f3ff;
+      --dark: #0f172a; --card: #ffffff;
+      --bg: #f1f5f9; --border: #e2e8f0;
+      --text: #0f172a; --muted: #64748b; --muted2: #94a3b8;
+      --radius: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    button { font: inherit; cursor: pointer; }
+    input { font: inherit; }
+
+    /* LOGIN */
+    #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); padding: 20px; }
+    .login-box { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 44px 36px 36px; width: 100%; max-width: 380px; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+    .login-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+    .login-logo img { width: 52px; height: 52px; border-radius: 16px; background: #fff; object-fit: contain; }
+    .login-logo .t1 { font-family: 'Baloo 2', cursive; font-size: 20px; font-weight: 800; color: #fff; }
+    .login-logo .t2 { font-size: 12px; color: #94a3b8; margin-top: 1px; }
+    .login-title { font-size: 14px; color: #94a3b8; margin-bottom: 28px; line-height: 1.5; }
+    .pin-dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 22px; }
+    .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); background: transparent; transition: 0.2s; }
+    .pin-dot.filled { background: var(--pr); border-color: var(--pr); box-shadow: 0 0 10px var(--pr-glow); }
+    .pin-dot.err { background: var(--red); border-color: var(--red); }
+    .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .pin-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px 10px; font-size: 22px; font-weight: 700; color: #fff; transition: 0.15s; -webkit-tap-highlight-color: transparent; }
+    .pin-btn:active { transform: scale(0.9); background: rgba(255,107,0,0.2); border-color: var(--pr); }
+    .login-err { color: var(--red); font-size: 13px; text-align: center; margin-top: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); display: none; }
+    .login-hint { font-size: 11px; color: #475569; text-align: center; margin-top: 16px; }
+
+    /* APP */
+    #app { display: none; min-height: 100vh; }
+
+    /* HEADER */
+    .hdr { background: #0f172a; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; box-shadow: 0 1px 0 rgba(255,255,255,0.05); }
+    .hdr-left { display: flex; align-items: center; gap: 12px; }
+    .hdr-logo { width: 34px; height: 34px; border-radius: 10px; background: #fff; object-fit: contain; }
+    .hdr-title { font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 800; color: #fff; }
+    .hdr-title span { color: var(--pr); }
+    .hdr-right { display: flex; align-items: center; gap: 10px; }
+    .live-pill { display: flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); border-radius: 99px; padding: 5px 11px; font-size: 11px; font-weight: 700; color: var(--green); }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: blink 1.4s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .logout-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; border-radius: 8px; padding: 6px 13px; font-size: 12px; transition: 0.15s; }
+    .logout-btn:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+    /* PERIOD TABS */
+    .period-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+    .period-bar::-webkit-scrollbar { display: none; }
+    .period-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--muted); background: transparent; border: none; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.18s; }
+    .period-btn.active { color: var(--pr); border-bottom-color: var(--pr); }
+
+    /* CONTENT */
+    .content { padding: 20px; max-width: 1100px; margin: 0 auto; }
+
+    /* DATE NAV */
+    .date-nav { display: none; align-items: center; justify-content: space-between; background: var(--card); border-radius: 14px; padding: 12px 18px; margin-bottom: 18px; border: 1px solid var(--border); }
+    .date-nav.show { display: flex; }
+    .date-nav-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; color: var(--text); transition: 0.15s; }
+    .date-nav-btn:hover:not(:disabled) { background: var(--pr); color: #fff; border-color: var(--pr); }
+    .date-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .date-nav-label { font-size: 15px; font-weight: 700; color: var(--text); }
+    .date-nav-label.today { color: var(--pr); }
+
+    /* SUMMARY CARDS */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 22px; }
+    .sum-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 18px 16px; transition: box-shadow 0.18s; }
+    .sum-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .sum-card-icon { font-size: 22px; margin-bottom: 10px; }
+    .sum-card-val { font-family: 'Baloo 2', cursive; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .sum-card-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sum-card-sub { font-size: 11px; color: var(--muted2); margin-top: 6px; }
+    .c-orange .sum-card-val { color: var(--pr); }
+    .c-green .sum-card-val { color: var(--green); }
+    .c-blue .sum-card-val { color: var(--blue); }
+    .c-red .sum-card-val { color: var(--red); }
+    .c-purple .sum-card-val { color: var(--purple); }
+    .c-yellow .sum-card-val { color: var(--yellow); }
+
+    /* PROFIT BREAKDOWN */
+    .breakdown-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 22px; }
+    .section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* FORMULA VISUAL */
+    .formula-visual { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; padding: 14px 16px; background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border); font-size: 13px; font-weight: 600; }
+    .fv-block { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .fv-val { font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 800; line-height: 1; }
+    .fv-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+    .fv-op { font-size: 20px; font-weight: 800; color: var(--muted2); align-self: center; }
+    .fv-block.result { background: var(--green-s); border-radius: 10px; padding: 8px 14px; }
+    .fv-block.result .fv-val { color: var(--green); }
+    .fv-block.result.loss { background: var(--red-s); }
+    .fv-block.result.loss .fv-val { color: var(--red); }
+
+    .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .bd-item { border-radius: 12px; padding: 16px; }
+    .bd-item.revenue { background: #f0f9ff; border: 1px solid #bae6fd; }
+    .bd-item.shop { background: var(--blue-s); border: 1px solid #bfdbfe; }
+    .bd-item.boy { background: var(--yellow-s); border: 1px solid #fde68a; }
+    .bd-item.delivery-income { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .bd-item.profit { background: var(--green-s); border: 1px solid #a7f3d0; }
+    .bd-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .bd-item.revenue .bd-label { color: #0369a1; }
+    .bd-item.shop .bd-label { color: var(--blue); }
+    .bd-item.boy .bd-label { color: #b45309; }
+    .bd-item.delivery-income .bd-label { color: #16a34a; }
+    .bd-item.profit .bd-label { color: var(--green); }
+    .bd-val { font-family: 'Baloo 2', cursive; font-size: 24px; font-weight: 800; line-height: 1; }
+    .bd-item.revenue .bd-val { color: #0369a1; }
+    .bd-item.shop .bd-val { color: var(--blue); }
+    .bd-item.boy .bd-val { color: #b45309; }
+    .bd-item.delivery-income .bd-val { color: #16a34a; }
+    .bd-item.profit .bd-val { color: var(--green); }
+    .bd-sub { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+
+    /* WEEKLY CHART */
+    .week-chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 22px; }
+    .week-bars { display: flex; align-items: flex-end; gap: 10px; height: 130px; margin-top: 16px; }
+    .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+    .week-bar-val { font-size: 9px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .week-bar { width: 100%; border-radius: 6px 6px 0 0; background: var(--pr); min-height: 4px; transition: height 0.4s ease; }
+    .week-bar.today { background: var(--green); }
+    .week-bar.future { background: var(--border); opacity: 0.4; }
+    .week-bar-day { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; }
+    .week-bar-day.today { color: var(--green); font-weight: 800; }
+
+    /* BOYS */
+    .boys-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .boy-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .boy-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .boy-phone { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+    .boy-stat { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .boy-stat-label { font-size: 11px; color: var(--muted); }
+    .boy-stat-val { font-size: 13px; font-weight: 700; color: var(--text); }
+    .boy-earning { background: var(--yellow-s); border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .boy-earning-label { font-size: 11px; font-weight: 600; color: #b45309; }
+    .boy-earning-val { font-family: 'Baloo 2', cursive; font-size: 18px; font-weight: 800; color: #b45309; }
+
+    /* ORDERS */
+    .orders-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 22px; }
+    .orders-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .orders-header-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .orders-count { font-size: 12px; font-weight: 600; color: var(--muted2); }
+    .order-row { padding: 14px 20px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 36px 1fr auto auto; gap: 12px; align-items: start; transition: background 0.12s; }
+    .order-row:last-child { border-bottom: none; }
+    .order-row:hover { background: #f8fafc; }
+    .order-num { font-size: 11px; font-weight: 800; color: var(--muted2); padding-top: 2px; }
+    .order-id { font-size: 11px; font-weight: 700; color: var(--pr); font-family: monospace; }
+    .order-name { font-size: 13px; font-weight: 600; color: var(--text); margin: 2px 0; }
+    .order-meta { font-size: 11px; color: var(--muted); }
+    .order-items-list { font-size: 11px; color: var(--muted2); margin-top: 3px; line-height: 1.4; }
+    .order-financials { text-align: right; }
+    .order-total { font-family: 'Baloo 2', cursive; font-size: 16px; font-weight: 800; color: var(--text); }
+    .order-breakdown { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+    .order-profit-line { font-size: 12px; font-weight: 700; color: var(--green); }
+    .order-profit-line.loss { color: var(--red); }
+    .status-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+    .s-delivered { background: var(--green-s); color: var(--green); }
+    .s-pending { background: var(--yellow-s); color: var(--yellow); }
+    .s-cancelled { background: var(--red-s); color: var(--red); }
+    .s-confirmed { background: var(--blue-s); color: var(--blue); }
+    .s-out_for_delivery { background: #fff7ed; color: var(--pr); }
+
+    /* STATES */
+    .empty-state { padding: 48px 20px; text-align: center; color: var(--muted2); }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+    .loading-state { padding: 48px 20px; text-align: center; color: var(--muted); }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--pr); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .note-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 12px 16px; font-size: 12px; color: #92400e; margin-bottom: 18px; line-height: 1.6; }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 600px) {
+      .content { padding: 14px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .breakdown-grid { grid-template-columns: repeat(2, 1fr); }
+      .order-row { grid-template-columns: 28px 1fr auto; }
+      .order-row .status-badge { display: none; }
+      .hdr { padding: 0 14px; }
+      .formula-visual { font-size: 11px; }
+      .fv-val { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="S2.PNG" alt="logo" onerror="this.style.display='none'" />
+      <div>
+        <div class="t1">S_Quick Mart</div>
+        <div class="t2">Business Dashboard</div>
+      </div>
+    </div>
+    <div class="login-title">Enter your 4-digit Dashboard PIN to continue.</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinPress('1')">1</button>
+      <button class="pin-btn" onclick="pinPress('2')">2</button>
+      <button class="pin-btn" onclick="pinPress('3')">3</button>
+      <button class="pin-btn" onclick="pinPress('4')">4</button>
+      <button class="pin-btn" onclick="pinPress('5')">5</button>
+      <button class="pin-btn" onclick="pinPress('6')">6</button>
+      <button class="pin-btn" onclick="pinPress('7')">7</button>
+      <button class="pin-btn" onclick="pinPress('8')">8</button>
+      <button class="pin-btn" onclick="pinPress('9')">9</button>
+      <button class="pin-btn" onclick="pinPress('C')" style="font-size:14px;">CLR</button>
+      <button class="pin-btn" onclick="pinPress('0')">0</button>
+      <button class="pin-btn" onclick="pinPress('⌫')" style="font-size:18px;">⌫</button>
+    </div>
+    <div class="login-err" id="loginErr">❌ Wrong PIN! Try again.</div>
+    <div class="login-hint">Change <code>DASHBOARD_PIN</code> in the file to set your PIN.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-left">
+      <img src="S2.PNG" alt="logo" class="hdr-logo" onerror="this.style.display='none'" />
+      <div class="hdr-title">S<span>_Quick</span> Mart &nbsp;·&nbsp; Dashboard</div>
+    </div>
+    <div class="hdr-right">
+      <div class="live-pill"><div class="live-dot"></div> LIVE</div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="period-bar">
+    <button class="period-btn active" onclick="setPeriod('day', this)">📅 Today</button>
+    <button class="period-btn" onclick="setPeriod('week', this)">🗓 This Week</button>
+    <button class="period-btn" onclick="setPeriod('month', this)">📆 This Month</button>
+    <button class="period-btn" onclick="setPeriod('total', this)">♾ All Time</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DATE NAV -->
+    <div class="date-nav show" id="dateNav">
+      <button class="date-nav-btn" onclick="changeDay(-1)">← Previous</button>
+      <div class="date-nav-label today" id="dateNavLabel">Today</div>
+      <button class="date-nav-btn" onclick="changeDay(1)" id="nextDayBtn" disabled>Next →</button>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loadingState" class="orders-section" style="border-radius:16px;">
+      <div class="loading-state"><div class="spinner"></div><div>Loading orders from Firebase...</div></div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div id="summaryGrid" class="summary-grid" style="display:none;"></div>
+
+    <!-- PROFIT BREAKDOWN -->
+    <div id="breakdownSection" class="breakdown-section" style="display:none;">
+      <div class="section-title">💰 Money Breakdown</div>
+      <div id="formulaVisual" class="formula-visual"></div>
+      <div class="breakdown-grid" id="breakdownGrid"></div>
+    </div>
+
+    <!-- WEEKLY CHART -->
+    <div id="weekChartSection" class="week-chart" style="display:none;">
+      <div class="section-title">📊 This Week — Daily Revenue</div>
+      <div class="week-bars" id="weekBars"></div>
+    </div>
+
+    <!-- BOYS -->
+    <div id="boysSection" style="display:none;">
+      <div class="section-title" style="margin-bottom:12px;">🛵 Delivery Boys — Earnings</div>
+      <div class="boys-grid" id="boysGrid"></div>
+    </div>
+
+    <!-- STOCKFLOW WARNING -->
+    <div class="note-box" id="stockflowNote" style="display:none;">
+      ⚠️ <strong>StockFlow data not found!</strong> Buy price (shop cost) cannot be calculated. Please add item buy prices in StockFlow first — profit will then be accurate.
+    </div>
+
+    <!-- ORDERS LIST -->
+    <div class="orders-section" id="ordersSection" style="display:none;">
+      <div class="orders-header">
+        <div class="orders-header-title">📦 Orders List</div>
+        <div class="orders-count" id="ordersCount"></div>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ══ CONFIG ══
+  const DASHBOARD_PIN     = "1234"; // ← Change this to your PIN
+  const DELIVERY_RATE_NORMAL = 15;  // ₹15 per parcel (within 30 min)
+  const DELIVERY_RATE_LATE   = 10;  // ₹10 per parcel (after 30 min)
+
+  // ══ PIN LOGIN ══
+  let pinVal = "";
+  function pinPress(k) {
+    if (k === 'C') pinVal = "";
+    else if (k === '⌫') pinVal = pinVal.slice(0, -1);
+    else if (pinVal.length < 4) pinVal += k;
+    updateDots(false);
+    if (pinVal.length === 4) checkPin();
+  }
+  function updateDots(err) {
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById("d" + i);
+      d.className = "pin-dot" + (i < pinVal.length ? (err ? " err" : " filled") : "");
+    }
+  }
+  function checkPin() {
+    if (pinVal === DASHBOARD_PIN) {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      initApp();
+    } else {
+      updateDots(true);
+      document.getElementById("loginErr").style.display = "block";
+      setTimeout(() => { pinVal = ""; updateDots(false); document.getElementById("loginErr").style.display = "none"; }, 1200);
+    }
+  }
+  function doLogout() {
+    pinVal = ""; updateDots(false);
+    document.getElementById("app").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+  }
+
+  // ══ STATE ══
+  let allOrders = [], stockflowItems = [], deliveryBoys = [];
+  let currentPeriod = "day";
+  let viewDate = new Date(); viewDate.setHours(0, 0, 0, 0);
+
+  function initApp() {
+    const go = async () => {
+      const [sf, boys] = await Promise.all([window.fbLoadStockflow(), window.fbLoadBoys()]);
+      stockflowItems = sf || [];
+      deliveryBoys = boys || [];
+      document.getElementById("stockflowNote").style.display = stockflowItems.length ? "none" : "block";
+      window.fbWatchOrders(orders => { allOrders = orders; render(); });
+    };
+    if (window.__fbReady) go();
+    else window.addEventListener("fbReady", go, { once: true });
+  }
+
+  // ══ PERIOD ══
+  function setPeriod(p, btn) {
+    currentPeriod = p;
+    document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("dateNav").classList.toggle("show", p === "day");
+    render();
+  }
+
+  function changeDay(dir) {
+    const d = new Date(viewDate); d.setDate(d.getDate() + dir);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    if (d > today) return;
+    viewDate = d; render();
+  }
+
+  // ══ FILTER ══
+  function filterOrders(period) {
+    const now = new Date();
+    const today = new Date(now); today.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(today); todayEnd.setHours(23, 59, 59, 999);
+    return allOrders.filter(o => {
+      const ts = o.createdAt; if (!ts) return false;
+      const d = new Date((ts.seconds || ts._seconds || 0) * 1000);
+      if (period === "day") {
+        const s = new Date(viewDate); const e = new Date(viewDate); e.setHours(23,59,59,999);
+        return d >= s && d <= e;
+      }
+      if (period === "week") {
+        const mon = new Date(today);
+        mon.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+        mon.setHours(0,0,0,0);
+        return d >= mon && d <= todayEnd;
+      }
+      if (period === "month") {
+        return d >= new Date(now.getFullYear(), now.getMonth(), 1) && d <= todayEnd;
+      }
+      return true;
+    });
+  }
+
+  // ══ STOCKFLOW LOOKUP ══
+  function getBuyPrice(itemName) {
+    if (!stockflowItems.length) return null;
+    const n = itemName.toLowerCase().trim();
+    const exact = stockflowItems.find(s => s.name && s.name.toLowerCase().trim() === n);
+    if (exact) return exact.buy || 0;
+    const partial = stockflowItems.find(s => s.name && (s.name.toLowerCase().includes(n) || n.includes(s.name.toLowerCase())));
+    return partial ? (partial.buy || 0) : null;
+  }
+
+  function calcOrderShopCost(order) {
+    if (!order.items || !order.items.length) return null;
+    let total = 0;
+    for (const item of order.items) {
+      const buy = getBuyPrice(item.name);
+      // If not in StockFlow, estimate 75% of sell as buy cost
+      total += (buy !== null ? buy : (item.price || 0) * 0.75) * (item.qty || 1);
+    }
+    return total;
+  }
+
+  function deliveryRateForOrder(order) {
+    const created = order.createdAt ? (order.createdAt.seconds || order.createdAt._seconds) * 1000 : null;
+    const delivered = order.deliveredAt ? (order.deliveredAt.seconds || order.deliveredAt._seconds) * 1000 : null;
+    if (!created || !delivered) return DELIVERY_RATE_NORMAL;
+    return ((delivered - created) / 60000) <= 30 ? DELIVERY_RATE_NORMAL : DELIVERY_RATE_LATE;
+  }
+
+  // ══ MAIN RENDER ══
+  function render() {
+    const orders = filterOrders(currentPeriod);
+    document.getElementById("loadingState").style.display = "none";
+    ["summaryGrid","breakdownSection","ordersSection"].forEach(id => document.getElementById(id).style.display = "");
+
+    // Date nav
+    if (currentPeriod === "day") {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const diff = Math.round((viewDate - today) / 86400000);
+      const lbl = document.getElementById("dateNavLabel");
+      if (diff === 0) { lbl.textContent = "Today"; lbl.className = "date-nav-label today"; }
+      else if (diff === -1) { lbl.textContent = "Yesterday"; lbl.className = "date-nav-label"; }
+      else { lbl.textContent = viewDate.toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"}); lbl.className = "date-nav-label"; }
+      document.getElementById("nextDayBtn").disabled = diff >= 0;
+    }
+
+    const delivered   = orders.filter(o => o.status === "delivered");
+    const pending     = orders.filter(o => o.status === "pending" || o.status === "confirmed");
+    const ofd         = orders.filter(o => o.status === "out_for_delivery");
+    const cancelled   = orders.filter(o => o.status === "cancelled");
+    const active      = orders.filter(o => o.status !== "cancelled");
+
+    // Revenue = sell price + delivery charge (what customer paid)
+    const totalRevenue    = active.reduce((s, o) => s + (o.total || 0), 0);
+    const deliveredRev    = delivered.reduce((s, o) => s + (o.total || 0), 0);
+    const deliveryIncome  = active.reduce((s, o) => s + (o.delivery || 0), 0);
+
+    // Shop cost from StockFlow buy prices
+    let totalShopCost = 0, shopCostEstimated = false;
+    for (const o of delivered) {
+      const cost = calcOrderShopCost(o);
+      if (cost === null) { shopCostEstimated = true; }
+      else totalShopCost += cost;
+    }
+
+    // Boy earnings
+    let totalBoyEarnings = 0, normalCount = 0, lateCount = 0;
+    for (const o of delivered) {
+      const rate = deliveryRateForOrder(o);
+      totalBoyEarnings += rate;
+      rate === DELIVERY_RATE_NORMAL ? normalCount++ : lateCount++;
+    }
+
+    // Net profit = Revenue − Shop Cost − Boy Earnings
+    // Correctly: Item sell total = deliveredRev - deliveryIncome (for delivered orders)
+    const deliveredItemRev = delivered.reduce((s, o) => s + ((o.total || 0) - (o.delivery || 0)), 0);
+    const myProfit = deliveredItemRev - totalShopCost - totalBoyEarnings + deliveryIncome;
+
+    // SUMMARY CARDS
+    document.getElementById("summaryGrid").innerHTML = `
+      <div class="sum-card c-orange">
+        <div class="sum-card-icon">📦</div>
+        <div class="sum-card-val">${orders.length}</div>
+        <div class="sum-card-label">Total Orders</div>
+        <div class="sum-card-sub">${active.length} active · ${cancelled.length} cancelled</div>
+      </div>
+      <div class="sum-card c-green">
+        <div class="sum-card-icon">✅</div>
+        <div class="sum-card-val">${delivered.length}</div>
+        <div class="sum-card-label">Delivered</div>
+        <div class="sum-card-sub">₹${fmtNum(deliveredRev)} collected</div>
+      </div>
+      <div class="sum-card c-yellow">
+        <div class="sum-card-icon">⏳</div>
+        <div class="sum-card-val">${pending.length + ofd.length}</div>
+        <div class="sum-card-label">Pending / On Way</div>
+        <div class="sum-card-sub">${pending.length} pending · ${ofd.length} out for delivery</div>
+      </div>
+      <div class="sum-card c-red">
+        <div class="sum-card-icon">❌</div>
+        <div class="sum-card-val">${cancelled.length}</div>
+        <div class="sum-card-label">Cancelled</div>
+        <div class="sum-card-sub">${orders.length > 0 ? ((cancelled.length / orders.length * 100).toFixed(0) + "% cancel rate") : "No orders yet"}</div>
+      </div>
+      <div class="sum-card c-blue">
+        <div class="sum-card-icon">💵</div>
+        <div class="sum-card-val">₹${fmtNum(totalRevenue)}</div>
+        <div class="sum-card-label">Total Revenue</div>
+        <div class="sum-card-sub">Incl. ₹${fmtNum(deliveryIncome)} delivery charge</div>
+      </div>
+      <div class="sum-card" style="background:var(--green-s); border:1px solid #a7f3d0;">
+        <div class="sum-card-icon">🏆</div>
+        <div class="sum-card-val" style="color:var(--green);">₹${fmtNum(myProfit)}</div>
+        <div class="sum-card-label" style="color:var(--green);">My Net Profit</div>
+        <div class="sum-card-sub">${myProfit >= 0 ? "After shop cost + boy pay" : "⚠️ Running at a loss!"}</div>
+      </div>
+    `;
+
+    // FORMULA VISUAL
+    // Example: Item ₹100 + Delivery ₹23 = ₹123 − Shop ₹90 − Boy ₹15 = Profit ₹18
+    document.getElementById("formulaVisual").innerHTML = `
+      <div class="fv-block">
+        <div class="fv-val" style="color:var(--blue);">₹${fmtNum(deliveredItemRev)}</div>
+        <div class="fv-lbl">Items Sold</div>
+      </div>
+      <div class="fv-op">+</div>
+      <div class="fv-block">
+        <div class="fv-val" style="color:#16a34a;">₹${fmtNum(deliveryIncome)}</div>
+        <div class="fv-lbl">Delivery Charge</div>
+      </div>
+      <div class="fv-op">−</div>
+      <div class="fv-block">
+        <div class="fv-val" style="color:var(--blue);">₹${fmtNum(totalShopCost)}</div>
+        <div class="fv-lbl">Shop Cost</div>
+      </div>
+      <div class="fv-op">−</div>
+      <div class="fv-block">
+        <div class="fv-val" style="color:#b45309;">₹${fmtNum(totalBoyEarnings)}</div>
+        <div class="fv-lbl">Boy Pay</div>
+      </div>
+      <div class="fv-op">=</div>
+      <div class="fv-block result ${myProfit < 0 ? 'loss' : ''}">
+        <div class="fv-val">₹${fmtNum(myProfit)}</div>
+        <div class="fv-lbl">My Profit</div>
+      </div>
+    `;
+
+    // BREAKDOWN CARDS
+    document.getElementById("breakdownGrid").innerHTML = `
+      <div class="bd-item revenue">
+        <div class="bd-label">💵 Total Revenue (Customer Paid)</div>
+        <div class="bd-val">₹${fmtNum(deliveredRev)}</div>
+        <div class="bd-sub">Items (₹${fmtNum(deliveredItemRev)}) + Delivery (₹${fmtNum(deliveryIncome)})</div>
+      </div>
+      <div class="bd-item shop">
+        <div class="bd-label">🏪 Shop Cost (Buy Price)</div>
+        <div class="bd-val">₹${fmtNum(totalShopCost)}</div>
+        <div class="bd-sub">${shopCostEstimated ? "⚠️ Some items not in StockFlow — estimated" : "From StockFlow buy prices"}</div>
+      </div>
+      <div class="bd-item boy">
+        <div class="bd-label">🛵 Delivery Boy Pay</div>
+        <div class="bd-val">₹${fmtNum(totalBoyEarnings)}</div>
+        <div class="bd-sub">${normalCount} × ₹${DELIVERY_RATE_NORMAL}${lateCount > 0 ? ` + ${lateCount} × ₹${DELIVERY_RATE_LATE} (late)` : ""}</div>
+      </div>
+      <div class="bd-item profit">
+        <div class="bd-label">🏆 My Net Profit</div>
+        <div class="bd-val" ${myProfit < 0 ? 'style="color:var(--red)"' : ''}>₹${fmtNum(myProfit)}</div>
+        <div class="bd-sub">Revenue − Shop Cost − Boy Pay<br>${myProfit < 0 ? "⚠️ Loss!" : "✅ Profit"}</div>
+      </div>
+    `;
+
+    renderWeekChart();
+    renderBoys(delivered);
+    renderOrdersList(orders);
+  }
+
+  function renderWeekChart() {
+    const section = document.getElementById("weekChartSection");
+    if (currentPeriod === "total" || currentPeriod === "month") { section.style.display = "none"; return; }
+    section.style.display = "block";
+    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const now = new Date();
+    const dayOfWeek = now.getDay() === 0 ? 6 : now.getDay() - 1;
+    const monday = new Date(now); monday.setDate(now.getDate() - dayOfWeek); monday.setHours(0,0,0,0);
+    const todayMs = new Date(); todayMs.setHours(23,59,59,999);
+
+    const weekData = days.map((label, i) => {
+      const start = new Date(monday); start.setDate(monday.getDate() + i); start.setHours(0,0,0,0);
+      const end = new Date(start); end.setHours(23,59,59,999);
+      if (start > todayMs) return { label, val: 0, future: true, today: false };
+      const rev = allOrders.filter(o => {
+        if (o.status === "cancelled") return false;
+        const ms = (o.createdAt?.seconds || o.createdAt?._seconds || 0) * 1000;
+        return ms >= start && ms <= end;
+      }).reduce((s, o) => s + (o.total || 0), 0);
+      return { label, val: rev, today: i === dayOfWeek, future: false };
+    });
+
+    const maxVal = Math.max(...weekData.map(d => d.val), 1);
+    document.getElementById("weekBars").innerHTML = weekData.map(d => `
+      <div class="week-bar-wrap">
+        <div class="week-bar-val">${d.val > 0 ? "₹" + fmtNum(d.val) : ""}</div>
+        <div class="week-bar ${d.today ? "today" : ""} ${d.future ? "future" : ""}" style="height:${d.future ? 8 : Math.max((d.val / maxVal) * 100, d.val > 0 ? 8 : 2)}px;"></div>
+        <div class="week-bar-day ${d.today ? "today" : ""}">${d.label}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderBoys(deliveredOrders) {
+    const section = document.getElementById("boysSection");
+    if (!deliveryBoys.length) { section.style.display = "none"; return; }
+    section.style.display = "block";
+    document.getElementById("boysGrid").innerHTML = deliveryBoys.filter(b => b.active !== false).map(boy => {
+      const boyOrders = deliveredOrders.filter(o => o.deliveredBy === boy.phone);
+      const normalOrds = boyOrders.filter(o => deliveryRateForOrder(o) === DELIVERY_RATE_NORMAL);
+      const lateOrds   = boyOrders.filter(o => deliveryRateForOrder(o) === DELIVERY_RATE_LATE);
+      const earning = normalOrds.length * DELIVERY_RATE_NORMAL + lateOrds.length * DELIVERY_RATE_LATE;
+      return `
+        <div class="boy-card">
+          <div class="boy-name">🛵 ${boy.name}</div>
+          <div class="boy-phone">📞 ${boy.phone}</div>
+          <div class="boy-stat"><div class="boy-stat-label">Parcels Delivered</div><div class="boy-stat-val">${boyOrders.length}</div></div>
+          <div class="boy-stat"><div class="boy-stat-label">On Time (₹${DELIVERY_RATE_NORMAL})</div><div class="boy-stat-val">${normalOrds.length}</div></div>
+          <div class="boy-stat"><div class="boy-stat-label">Late (₹${DELIVERY_RATE_LATE})</div><div class="boy-stat-val" style="color:var(--red)">${lateOrds.length}</div></div>
+          <div class="boy-earning">
+            <div class="boy-earning-label">Total Earnings</div>
+            <div class="boy-earning-val">₹${fmtNum(earning)}</div>
+          </div>
+        </div>`;
+    }).join("") || `<div style="color:var(--muted);font-size:13px;">No delivery boys found.</div>`;
+  }
+
+  function renderOrdersList(orders) {
+    document.getElementById("ordersCount").textContent = `${orders.length} order${orders.length !== 1 ? "s" : ""}`;
+    const el = document.getElementById("ordersList");
+    if (!orders.length) {
+      el.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>No orders in this period.</p></div>`;
+      return;
+    }
+    el.innerHTML = orders.map((o, idx) => {
+      const shopCost = o.status === "delivered" ? calcOrderShopCost(o) : null;
+      const boyPay   = o.status === "delivered" ? deliveryRateForOrder(o) : 0;
+      const itemRev  = (o.total || 0) - (o.delivery || 0);
+      const profit   = shopCost !== null && o.status === "delivered"
+        ? itemRev - shopCost - boyPay + (o.delivery || 0)
+        : null;
+      const dateStr = o.createdAt
+        ? new Date((o.createdAt.seconds || o.createdAt._seconds) * 1000)
+            .toLocaleString("en-IN", {day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})
+        : "—";
+      const itemsStr = (o.items || []).map(i => `${i.name} ×${i.qty}`).join(", ") || "—";
+      const statusLabel = {
+        pending:"⏳ Pending", confirmed:"✅ Confirmed",
+        out_for_delivery:"🏍️ Out for Delivery", delivered:"✅ Delivered", cancelled:"❌ Cancelled"
+      }[o.status] || o.status;
+
+      return `
+        <div class="order-row">
+          <div class="order-num">#${orders.length - idx}</div>
+          <div>
+            <div class="order-id">${o.id ? o.id.slice(-6).toUpperCase() : "——"}</div>
+            <div class="order-name">${o.name || "—"} · ${o.phone || ""}</div>
+            <div class="order-meta">${dateStr} · ${o.address ? o.address.split(",")[0] : ""}</div>
+            <div class="order-items-list">${itemsStr.length > 90 ? itemsStr.slice(0,90)+"…" : itemsStr}</div>
+          </div>
+          <div class="order-financials">
+            <div class="order-total">₹${fmtNum(o.total || 0)}</div>
+            ${o.status === "delivered" && profit !== null
+              ? `<div class="order-profit-line ${profit < 0 ? "loss" : ""}">Profit: ₹${fmtNum(profit)}</div>
+                 <div class="order-breakdown">Shop: ₹${fmtNum(shopCost)} · Boy: ₹${boyPay} · Del: ₹${fmtNum(o.delivery||0)}</div>`
+              : o.status === "delivered"
+                ? `<div class="order-breakdown">Buy price not in StockFlow</div>`
+                : `<div class="order-breakdown" style="color:var(--muted2)">—</div>`
+            }
+          </div>
+          <div><span class="status-badge s-${o.status || "pending"}">${statusLabel}</span></div>
+        </div>`;
+    }).join("");
+  }
+
+  function fmtNum(n) {
+    if (n === null || n === undefined) return "—";
+    return Math.round(n).toLocaleString("en-IN");
+  }
+
+  let _tt = null;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    if (_tt) { clearTimeout(_tt); t.classList.remove("show"); }
+    t.textContent = msg; void t.offsetWidth; t.classList.add("show");
+    _tt = setTimeout(() => { t.classList.remove("show"); _tt = null; }, 2500);
+  }
+</script>
+</body>
+</html>

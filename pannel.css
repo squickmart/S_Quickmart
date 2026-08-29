@@ -16,6 +16,10 @@
         padding: 0;
         box-sizing: border-box;
       }
+      html, body {
+        overflow-x: hidden;
+        max-width: 100%;
+      }
       body {
         font-family: "Inter", sans-serif;
         background: var(--bg);
@@ -456,6 +460,7 @@
       /* PRODUCT TABLE */
       .product-table {
         width: 100%;
+        min-width: 680px;
         border-collapse: collapse;
       }
       .product-table th {
@@ -1167,5 +1172,26 @@
         .boy-detail-body { padding: 12px 14px; }
         .boy-amount-card { padding: 12px 14px; }
         .boy-clear-btn { font-size: 15px; padding: 13px; }
+      }
+      /* Areas list: 1 column on phones, 2 columns on wider screens */
+      #areasList {
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 560px) {
+        #areasList {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      /* Search bar (Products tab etc.): stack search box + category
+         dropdown on narrow screens instead of squeezing/cutting off
+         the dropdown next to the search box. */
+      @media (max-width: 480px) {
+        .search-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .search-bar > select {
+          width: 100% !important;
+        }
       }
   
