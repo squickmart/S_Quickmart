@@ -850,7 +850,7 @@ ${items}
         const msgs = {
           confirmed: `Hello ${name}! 🎉 Your order has been confirmed! We will deliver it soon. — S_Quick Mart`,
           out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart${locationNote}`,
-          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart`,
+          delivered: `Hello {name}! ✅ Your order has been delivered. Thank you for shopping with S_Quick Mart — see you again soon!`,
           cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 9545148205 — S_Quick Mart`,
         };
         const msg =

@@ -1431,7 +1431,7 @@
         const items = Object.values(cart);
         const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
         const cnt = items.reduce((s, i) => s + i.qty, 0);
-        const isFreeDel = sub >= 399 || items.length >= 5;
+        const isFreeDel = sub >= 399;
         const baseDel = selectedCheckoutArea ? getAreaDeliveryCharge() : 23;
         const del = sub > 0 ? (isFreeDel ? 0 : baseDel) : 23;
         const grand = sub + del;
@@ -1451,7 +1451,7 @@
           di.innerHTML =
             '🎉 <strong style="color:#1a9e5c">Free Delivery!</strong>';
         else
-          di.innerHTML = `🚚 Delivery: <strong>₹${baseDel}</strong> | ₹${399 - sub} more or ${5 - items.length} more product${5 - items.length === 1 ? "" : "s"} for free!`;
+          di.innerHTML = `🚚 Delivery: <strong>₹${baseDel}</strong> | ₹${399 - sub} more for free delivery!`;
         renderCartItems();
       };
 
