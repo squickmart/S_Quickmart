@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" href="S2.PNG" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login — S_Quick Mart</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="logo"><span class="mark"><img src="SLOGO.png" onerror="this.style.display='none';this.parentNode.textContent='🛒'"></span><div>S_Quick Mart</div></div>
+    <p class="auth-sub">Login with your mobile number to track orders and save your delivery details.</p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginPhone">Mobile number</label>
+        <input type="tel" id="loginPhone" placeholder="98765 43210" maxlength="10">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Continue</button>
+    </form>
+
+    <p class="auth-switch">Just browsing? <a href="index.html">Continue as guest</a></p>
+  </div>
+</div>
+
+<script src="js/firebase.js"></script>
+<script src="js/core.js"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const phoneField = document.getElementById('loginPhone');
+    const ph = phoneField.value.trim();
+    if (ph.length !== 10 || !/^[0-9]{10}$/.test(ph)) {
+      sqmFieldError(phoneField, 'Please enter a valid 10-digit number');
+      return;
+    }
+    sqmFieldError(phoneField, '');
+
+    const btn = document.querySelector('#loginForm button[type="submit"]');
+    btn.classList.add('is-loading');
+    setTimeout(() => {
+      btn.classList.remove('is-loading');
+      const existing = UserStore.get() || {};
+      const user = { ...existing, phone: ph };
+      UserStore.save(user);
+      window.saveCustomerProfile && window.saveCustomerProfile(user);
+      sqmToast('✅ Number saved!', 'success');
+      setTimeout(() => location.href = 'profile.html', 500);
+    }, 500);
+  });
+
+  function sqmFieldError(inputEl, msg) {
+    const wrap = inputEl.closest('.field');
+    let err = wrap.querySelector('.field-error');
+    if (!msg) { if (err) err.remove(); inputEl.classList.remove('invalid'); return; }
+    inputEl.classList.add('invalid');
+    if (!err) { err = document.createElement('span'); err.className = 'field-error'; wrap.appendChild(err); }
+    err.textContent = msg;
+  }
+
+  // if already logged in, skip straight to profile
+  document.addEventListener('DOMContentLoaded', () => {
+    if (UserStore.isLoggedIn()) location.href = 'profile.html';
+  });
+</script>
+</body>
+</html>

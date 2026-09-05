@@ -1,32 +1,32 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>S_Quick Mart — Grocery Delivery in Parbhani | 20-30 Min</title>
-  <link rel="icon" type="image/png" href="S2.PNG" />
-  
-  <link rel="stylesheet" href="index.css" />
-  <!-- Primary SEO -->
-  <meta name="description"
-    content="S_Quick Mart — Fast grocery delivery in Parbhani. Groceries and daily essentials delivered to your doorstep in 20–30 minutes. Cash on Delivery available. Order now!" />
-  <meta name="keywords"
-    content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart, Quick Mart, fast delivery Parbhani, home grocery delivery Parbhani, 431401 grocery" />
-  <meta name="author" content="S_Quick Mart, Parbhani" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://squickmart.store/" />
-
-  <!-- Open Graph (WhatsApp, Facebook preview) -->
-  <meta property="og:title" content="S_Quick Mart — Grocery Delivery in Parbhani" />
-  <meta property="og:description"
-    content="Fast grocery delivery in Parbhani. Doorstep delivery in 20–30 minutes. Cash on Delivery." />
-  <meta property="og:url" content="https://squickmart.store/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="en_IN" />
-
-  <!-- Local Business Schema -->
-  <script type="application/ld+json">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S_Quick Mart — Grocery Delivery in Parbhani | 20-30 Min</title>
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta
+      name="description"
+      content="S_Quick Mart — Fast grocery delivery in Parbhani. Groceries and daily essentials delivered to your doorstep in 20–30 minutes. Cash on Delivery available. Order now!"
+    />
+    <meta
+      name="keywords"
+      content="grocery delivery Parbhani, online grocery Parbhani, S Quick Mart, Quick Mart, fast delivery Parbhani, home grocery delivery Parbhani, 431401 grocery"
+    />
+    <meta name="author" content="S_Quick Mart, Parbhani" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://squickmart.store/" />
+    <meta
+      property="og:title"
+      content="S_Quick Mart — Grocery Delivery in Parbhani"
+    />
+    <meta
+      property="og:description"
+      content="Fast grocery delivery in Parbhani. Doorstep delivery in 20–30 minutes. Cash on Delivery."/>
+    <meta property="og:url" content="https://squickmart.store/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_IN" />
+    <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
@@ -46,665 +46,478 @@
         "priceRange": "₹"
       }
     </script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="timing-bar" id="timingBar"></div>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <!-- Local Business Schema -->
-  <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "S_Quick Mart",
-        "description": "Parbhani's fastest grocery delivery service",
-        "url": "https://squickmart.store",
-        "telephone": "+917058204462",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Parbhani",
-          "addressRegion": "Maharashtra",
-          "postalCode": "431401",
-          "addressCountry": "IN"
-        },
-        "openingHours": "Mo-Su 07:00-22:00",
-        "servesCuisine": "Grocery",
-        "priceRange": "₹"
-      }
-    </script>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="./index.css" />
-</head>
-
-<body>
-  <div class="timing-bar" id="timingBar"></div>
-  <header>
-    <div class="hdr-top">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="SLOGO.png" alt="Logo" onerror="
+    <!-- ============ HEADER ============ -->
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <span class="mark"
+            ><img
+              src="SLOGO.png"
+              alt="Logo"
+              onerror="
                 this.style.display = 'none';
-                this.parentNode.innerHTML = '🛒';
-              " />
+                this.parentNode.textContent = '🛒';
+              "
+          /></span>
+          <div>
+            <div>Quick Mart</div>
+            <div class="logo-sub">Parbhani's Own Store</div>
+          </div>
+        </a>
+
+        <a href="profile.html?tab=addresses" class="location-pill">
+          <span class="loc-ic">📍</span>
+          <div class="loc-text">
+            <div class="loc-line1" id="locLine1">Select delivery area</div>
+            <div class="loc-line2">Parbhani, Maharashtra</div>
+          </div>
+        </a>
+
+        <div class="search-shell" id="searchShell">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.3-4.3" />
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder='Search "milk", "grocery", "soap"...'
+            autocomplete="off"
+          />
+          <div class="search-suggest" id="searchDrop"></div>
+        </div>
+
+        <div class="header-actions">
+          <a href="products.html" class="icon-btn" aria-label="Categories">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </a>
+          <a
+            href="profile.html?tab=wishlist"
+            class="icon-btn"
+            aria-label="Wishlist"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 21s-7.5-4.9-10-9.3C.4 8 2 4.5 5.6 4c2-.3 3.8.7 4.9 2.3C11.6 4.7 13.4 3.7 15.4 4c3.6.5 5.2 4 3.6 7.7C19 16.1 12 21 12 21z"
+              />
+            </svg>
+            <span
+              class="badge"
+              data-wish-badge
+              style="position: absolute; top: 0; right: 0"
+              >0</span
+            >
+          </a>
+          <a href="login.html" class="icon-btn" aria-label="Account">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="7" r="3.5" />
+              <path d="M5 21c.8-4 3.1-6 7-6s6.2 2 7 6" />
+            </svg>
+            <span class="txt" data-user-label>Login</span>
+          </a>
+          <a href="cart.html" class="header-cart">
+            <span style="position: relative"
+              >🛒<span
+                class="badge"
+                data-cart-badge
+                style="position: absolute; top: -10px; right: -12px"
+                >0</span
+              ></span
+            >
+            <span class="label">Cart</span>
+            <span class="amt" data-cart-amount>₹0</span>
+          </a>
+        </div>
+      </div>
+      <nav class="nav-row">
+        <div class="container" id="navRow">
+          <a href="orders.html">Track Order</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="announce-bar hidden" id="announceBar">
+      <div class="announce-label">📢 Note</div>
+      <div class="announce-wrap">
+        <div class="announce-track" id="announceTrack"></div>
+      </div>
+    </div>
+
+    <div class="delivery-status">
+      <span class="dot"></span>Delivering across Parbhani, daily
+    </div>
+
+    <!-- ============ HERO (image, not a card) ============ -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <h1>
+            Groceries that reach you in <em>20–30 minutes</em>, not hours.
+          </h1>
+          <p>
+            From daily staples to household essentials — order in a minute, get
+            it delivered fast, right to your doorstep in Parbhani. Cash on
+            Delivery available.
+          </p>
+          <div class="hero-feats">
+            <div class="hero-feat">⚡ 20–35 Min Delivery</div>
+            <div class="hero-feat">🏠 Doorstep Service</div>
+            <div class="hero-feat">💰 Best Prices</div>
+            <div class="hero-feat">✅ Trusted Quality</div>
+          </div>
+          <div class="hero-cta">
+            <a href="products.html" class="btn btn-primary">Shop Now</a>
+            <a href="#shopSec" class="btn btn-ghost">Browse Categories</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-price-float">Free delivery<b>Above ₹399</b></div>
+          <div class="hero-img-card">
+            <img
+               src="https://ritikart.com/cdn/shop/articles/Blog_2.jpg?v=1595430501" 
+              alt="Fresh groceries delivered"
+            />
+            <div class="hero-img-caption">
+              <span class="tag">Parbhani's Fastest Delivery Store</span>
+              <div class="big">Fresh & fast, every day</div>
+              <a
+                href="products.html"
+                class="btn btn-amber"
+                style="width: fit-content"
+                >Start Shopping</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <a href="yourneed.html" class="promo-strip promo-strip-top">
+      <div>
+        <div class="tag">✨ Special Service</div>
+        <div class="title">Can't find what you need?</div>
+        <div class="sub">Custom order &amp; Pickup Drop available</div>
+      </div>
+      <div class="arrow">Explore →</div>
+    </a>
+
+    <!-- ============ CATEGORIES ============ -->
+    <section class="section" id="shopSec" style="padding-top: 40px">
+      <div class="container">
+        <div class="section-head reveal">
+          <div>
+            <h2>Shop by category</h2>
+            <p>Everything for your kitchen and home, sorted.</p>
+          </div>
+        </div>
+        <div class="cat-grid reveal" id="catGrid">
+          <p class="text-muted" style="grid-column: 1/-1">
+            Loading categories…
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRODUCTS BY CATEGORY ============ -->
+    <section
+      class="section"
+      style="background: var(--paper-raised); padding-top: 20px"
+    >
+      <div class="container" id="prodContainer">
+        <p class="text-muted" style="text-align: center; padding: 40px">
+          Loading products… ⏳
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <!-- ============ SUBCATEGORIES ============ -->
+    <section
+      class="section"
+      id="subcatSec"
+      style="padding-top: 0; padding-bottom: 30px"
+    >
+      <div class="container">
+        <div class="section-head reveal">
+          <div><h2>Shop by subcategory</h2></div>
+        </div>
+        <div class="subcat-grid reveal" id="subcatGrid">
+          <p class="text-muted">Loading…</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container foot-top">
+        <div class="foot-brand">
+          <div class="logo">
+            <span class="mark"
+              ><img
+                src="SLOGO.png"
+                onerror="
+                  this.style.display = 'none';
+                  this.parentNode.textContent = '🛒';
+                "
+            /></span>
+            <div>
+              Quick Mart
+              <div class="logo-sub">Parbhani's Own Store</div>
+            </div>
+          </div>
+          <p>
+            Groceries &amp; daily essentials delivered to your doorstep in just
+            20–30 minutes.
+          </p>
+          <div class="foot-status">
+            <span class="dot"></span>Open 7AM – 10PM
+          </div>
         </div>
         <div>
-          <div class="logo-text">S_Quick Mart</div>
-          <div class="logo-sub">Parbhani's Own Store</div>
+          <h5>Categories</h5>
+          <ul id="footCatList">
+            <li><a href="products.html">All Categories</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Quick Links</h5>
+          <ul>
+            <li><a href="help.html">About Us</a></li>
+            <li><a href="help.html#how-it-works">How it Works</a></li>
+            <li><a href="help.html#delivery">Delivery Info</a></li>
+            <li><a href="help.html#faq">FAQ</a></li>
+            <li><a href="yourneed.html">YourNeed</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Contact</h5>
+          <ul>
+            <li><a href="help.html#contact">Contact Us</a></li>
+            <li><a href="help.html#policy">Privacy Policy</a></li>
+            <li><a href="tel:9545148205">📞 9545148205</a></li>
+          </ul>
         </div>
       </div>
-      <div class="hdr-actions">
-        <button class="icon-btn" onclick="openProfile()">
-          👤 <span id="hdrUserLabel">Login</span>
-        </button>
-        <button class="cart-btn" id="hdrCartBtn" onclick="openCart()">
-          <span class="hcb-icon">🛒</span><span class="hcb-text" id="hdrCartText">Cart</span>
-        </button>
+      <div class="container foot-bottom">
+        <span>© 2026 S_Quick Mart, Parbhani. All rights reserved.</span>
+        <span>Made with ❤️ in Parbhani</span>
       </div>
-    </div>
-    <div class="search-wrap">
-      <span class="s-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder='Search "milk", "grocery", "soap"...'
-        oninput="onSearch(this.value)" autocomplete="off" />
-      <div class="search-drop" id="searchDrop"></div>
-    </div>
-  </header>
-  <div class="banner">
-    🚚 Order above ₹399 — FREE Delivery! &nbsp;|&nbsp; Just ₹23 delivery
-    charge
-  </div>
-  <div class="announce-bar hidden" id="announceBar">
-    <div class="announce-label">📢 Note</div>
-    <div class="announce-wrap">
-      <div class="announce-track" id="announceTrack"></div>
-    </div>
-  </div>
-  <section class="hero">
-    <div class="hero-badge">⚡ Parbhani's Fastest Delivery Store</div>
-    <div class="hero-feats">
-      <div class="hero-feat">⚡ 20–35 Min Delivery</div>
-      <div class="hero-feat">🏠 Doorstep Service</div>
-      <div class="hero-feat">💰 Best Prices</div>
-      <div class="hero-feat">✅ Trusted Quality</div>
-    </div>
-    <button class="hero-btn" onclick="
-          document
-            .getElementById('shopSec')
-            .scrollIntoView({ behavior: 'smooth' })
-        ">
-      Start Shopping ↓
-    </button>
-  </section>
-
-  <a href="yourneed.html" class="yn-promo">
-    <div class="yn-promo-left">
-      <div class="yn-promo-tag">✨ Special Service</div>
-      <div class="yn-promo-title">Can't find what you need?</div>
-      <div class="yn-promo-sub">Custom order & Pickup Drop available</div>
-    </div>
-    <div class="yn-promo-right">Explore →</div>
-  </a>
-
-  <section class="cat-sec" id="shopSec">
-    <div class="sec-title">🏪 Shop by Category</div>
-    <div class="cat-grid">
-      <div class="cat-card active" onclick="selCat('all', this)">
-        <div class="cat-emoji">🏪</div>
-        <div class="cat-lbl">All Items</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('grocery', this)">
-        <div class="cat-emoji">🌾</div>
-        <div class="cat-lbl">Grocery</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('dairy', this)">
-        <div class="cat-emoji">🥛</div>
-        <div class="cat-lbl">Dairy</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('snacks', this)">
-        <div class="cat-emoji">🍪</div>
-        <div class="cat-lbl">Snacks</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('personal', this)">
-        <div class="cat-emoji">🧴</div>
-        <div class="cat-lbl">Personal Care</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('home', this)">
-        <div class="cat-emoji">🧹</div>
-        <div class="cat-lbl">Home Needs</div>
-      </div>
-      <div class="cat-card" onclick="selCatScroll('stationery', this)">
-        <div class="cat-emoji">📝</div>
-        <div class="cat-lbl">Stationery</div>
-      </div>
-        <div class="cat-card" onclick="selCatScroll('health', this)">
-        <div class="cat-emoji">💊</div>
-        <div class="cat-lbl">Health & Safety</div>
-      </div>
-    </div>
-  </section>
-  <section class="prod-sec" id="prodSec">
-    <div id="prodContainer">
-      <p style="text-align: center; padding: 40px; color: #aaa">
-        Loading... ⏳
-      </p>
-    </div>
-    <!-- SUBCATEGORY STRIP -->
-    <div id="subcatStrip" style="display:none; margin:20px -16px 0; background:#fff; border-top:1px solid #efefef; border-bottom:1px solid #efefef; padding:18px 0;">
-      <div id="subcatStripInner" style="display:flex; flex-wrap:wrap; gap:10px 10px; padding:0 16px;"></div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer
-      style="background:#1a1a2e; color:#fff; font-family:'Inter',sans-serif; margin-top:0; padding:0; margin-left:-16px; margin-right:-16px;">
-
-      <!-- Top wave divider -->
-      <div style="line-height:0; background:#f5f5f0;">
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          style="display:block;width:100%;height:60px;">
-          <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" fill="#1a1a2e" />
-          <path d="M0,40 C360,70 1080,10 1440,40 L1440,0 L0,0 Z" fill="#246a73" opacity="0.18" />
-        </svg>
-      </div>
-
-      <div style="width:100%; padding:36px 32px 0;">
-
-        <!-- Top section: Brand + 3 columns -->
-        <div class="footer-grid">
-
-          <!-- Brand column -->
-          <div class="footer-brand-col">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <div
-                style="width:40px;height:40px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;">
-                <img src="SLOGO.png" alt="Quick Mart Logo" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>
-              <div>
-                <div style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:#fff;line-height:1.1;">
-                  S_Quick Mart</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.8px;text-transform:uppercase;">
-                  Parbhani's Own Store</div>
-              </div>
-            </div>
-            <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.7;margin:0 0 16px;">Groceries & Daily
-              Essentials delivered to your doorstep in just 20–30 minutes.</p>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:8px;height:8px;background:#4ecdc4;border-radius:50%;animation:pulse 2s infinite;"></div>
-              <span style="font-size:11px;color:#4ecdc4;font-weight:600;">Open 7AM – 10PM</span>
-            </div>
-          </div>
-
-          <!-- Categories column -->
-          <div>
-            <div
-              style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-              Categories</div>
-            <div style="display:flex;flex-direction:column;gap:9px;">
-              <a href="#" onclick="selCat('grocery',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;transition:color 0.2s;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">🌾
-                Grocery</a>
-              <a href="#" onclick="selCat('dairy',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">🥛
-                Dairy</a>
-              <a href="#" onclick="selCat('snacks',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">🍪
-                Snacks</a>
-              <a href="#" onclick="selCat('personal',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">🧴
-                Personal Care</a>
-              <a href="#" onclick="selCat('home',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">🧹 Home
-                Needs</a>
-                 <a href="#" onclick="selCat('stationery',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">📝 Stationery's
-                </a>
-                 <a href="#" onclick="selCat('Health',null);return false;"
-                style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">💊 Health & Safety
-                </a>
-            </div>
-          </div>
-
-          <!-- Quick Links column -->
-          <div>
-            <div
-              style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-              Quick Links</div>
-            <div style="display:flex;flex-direction:column;gap:9px;">
-              <a href="help.html" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">About
-                Us</a>
-              <a href="help.html#how-it-works" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">How it
-                Works</a>
-              <a href="help.html#delivery" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Delivery
-                Info</a>
-              <a href="help.html#faq" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">FAQ</a>
-              <a href="yourneed.html" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'"
-                onmouseout="this.style.color='rgba(255,255,255,0.55)'">YourNeed</a>
-            </div>
-          </div>
-
-          <!-- Contact column -->
-          <div>
-            <div
-              style="font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-              Contact</div>
-            <div style="display:flex;flex-direction:column;gap:9px;">
-              <a href="help.html#contact" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Contact
-                Us</a>
-              <a href="help.html#policy" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:12px;"
-                onmouseover="this.style.color='#4ecdc4'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Privacy
-                Policy</a>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Bottom bar -->
-      <div
-        style="border-top:1px solid rgba(255,255,255,0.08);padding:14px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;width:100%;background:rgba(0,0,0,0.2);">
-        <div style="font-size:11px;color:rgba(255,255,255,0.25);">© 2026 S_Quick Mart, Parbhani. All rights reserved.
-        </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.25);">Made with ❤️ in Parbhani</div>
-      </div>
-
-      <!-- Bottom wave divider (mirror of top) -->
-      <div style="line-height:0;">
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          style="display:block;width:100%;height:60px;transform:scaleY(-1);">
-          <path d="M0,30 C360,60 1080,0 1440,30 L1440,0 L0,0 Z" fill="#f5f5f0" />
-          <path d="M0,40 C360,70 1080,10 1440,40 L1440,0 L0,0 Z" fill="#246a73" opacity="0.18" />
-        </svg>
-      </div>
-
     </footer>
-  </section>
 
-  <!-- DETAIL MODAL -->
-  <div class="detail-overlay" id="detailOverlay" onclick="closeDetailIfBg(event)">
-    <div class="detail-modal" id="detailModal">
-      <div class="dm-topbar">
-        <div class="dm-topbar-title" id="dmTitle"></div>
-        <button class="dm-close" onclick="closeDetail()">✕</button>
-      </div>
-      <div class="dm-body">
-        <div class="dm-left" id="dmLeft"></div>
-        <div class="dm-right" id="dmRight"></div>
-      </div>
-    </div>
-  </div>
+    <!-- ============ MOBILE BOTTOM NAV ============ -->
+    <nav class="mobile-nav">
+      <a href="index.html" class="active"
+        ><svg viewBox="0 0 24 24">
+          <path d="M3 11l9-8 9 8" />
+          <path d="M5 10v10h14V10" /></svg
+        >Home</a
+      >
+      <a href="products.html"
+        ><svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+        >Categories</a
+      >
+      <a href="cart.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          /></svg
+        >Cart</a
+      >
+      <a href="orders.html"
+        ><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18" /></svg
+        >Orders</a
+      >
+      <a href="login.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" /></svg
+        >Account</a
+      >
+    </nav>
 
-  <!-- VARIANT SELECT MODAL -->
-  <div class="variant-overlay" id="variantOverlay" onclick="closeVariantIfBg(event)">
-    <div class="variant-modal" id="variantModal">
-      <div class="vm-header">
-        <div class="vm-title" id="vmTitle"></div>
-        <button class="vm-close" onclick="closeVariantModal()">✕</button>
-      </div>
-      <div class="vm-body" id="vmBody"></div>
-    </div>
-  </div>
-
-  <!-- CART SIDEBAR -->
-  <div class="c-overlay" id="cOverlay" onclick="closeCart()"></div>
-  <div class="c-sidebar" id="cSidebar">
-    <div class="c-header">
-      <h2>🛒 Your Cart</h2>
-
-      <button class="c-close" onclick="closeCart()">✕</button>
-    </div>
-    <div class="c-items" id="cItems"></div>
-    <div class="c-foot">
-      <div class="del-info" id="delInfo">
-        🚚 Delivery: <strong>₹23</strong>
-      </div>
-      <div class="c-bill">
-        <div class="c-bill-row">
-          <span>Items Total</span><span id="cSub">₹0</span>
-        </div>
-        <div class="c-bill-row">
-          <span>Delivery</span><span id="cDel">₹23</span>
-        </div>
-        <div class="c-bill-row total">
-          <span>Grand Total</span><span id="cTotal">₹0</span>
-        </div>
-      </div>
-      <button onclick="openMyOrders()" style="
-            width: 100%;
-            background: none;
-            border: 1.5px solid var(--primary);
-            color: var(--primary);
-            border-radius: 14px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 10px;
-            font-family: &quot;Baloo 2&quot;, cursive;
-          ">
-        📦 My Orders
-      </button>
-      <button class="chk-btn" onclick="openCheckout()">
-        Proceed to Checkout →
-      </button>
-    </div>
-  </div>
-
-  <!-- CHECKOUT MODAL -->
-  <div class="ck-overlay" id="ckOverlay">
-    <div class="ck-modal">
-      <div class="ck-hdr">
-        <h2>📋 Order Details</h2>
-        <button class="ck-close" onclick="closeCheckout()">✕</button>
-      </div>
-      <div class="ck-body">
-        <div class="ord-sum" id="ordSum"></div>
-        <div class="fg">
-          <label class="fl">Your Name *</label><input type="text" class="fi" id="cName"
-            placeholder="Enter your full name" />
-        </div>
-        <div class="fg">
-          <label class="fl">Mobile Number *</label><input type="tel" class="fi" id="cPhone"
-            placeholder="10 digit mobile number" maxlength="10" />
-        </div>
-        <div class="fg">
-          <label class="fl" style="margin-bottom: 8px">📍 Your Area <span style="color: red">*</span></label>
-          <div id="chkAreaBadgeWrap" style="display: none; margin-bottom: 8px">
-            <span class="profile-area-selected-badge">
-              <span class="badge-dot"></span>
-              <span id="chkAreaBadgeText"></span>
-            </span>
-            <button class="profile-area-change-btn" onclick="openChkAreaPicker()">
-              Change
-            </button>
-          </div>
-          <div id="chkAreaPicker">
-            <div class="area-search-wrap">
-              <span class="search-icon">🔍</span>
-              <input type="text" class="area-search-input" id="chk-area-search" placeholder="Search area..." oninput="
-                    filterAreaSearch(
-                      'chk-area-grid',
-                      'chk-area-no-result',
-                      this.value,
-                    )
-                  " autocomplete="off" />
-            </div>
-            <div class="area-no-result" id="chk-area-no-result">
-              😕 No area found
-            </div>
-            <div class="area-grid" id="chk-area-grid"></div>
-          </div>
-          <label class="fl">Delivery Address *</label><textarea class="fi" id="cAddr" rows="3"
-            placeholder="House no., street, landmark..."></textarea>
-        </div>
-        <div class="fg">
-          <label class="fl">Pincode *</label><input type="text" class="fi" id="cPin" placeholder="431401" maxlength="6"
-            oninput="checkPin(this.value)" />
-          <div class="pin-hint" id="pinHint"></div>
-        </div>
-        <div class="fg">
-          <label class="fl">Payment</label>
-          <div class="pay-box">💵 Cash on Delivery</div>
-        </div>
-        <div class="cancel-pol">
-          <div class="cp-title">⚠️ Cancellation Policy</div>
-          <div class="cp-text">
-            Orders cannot be cancelled once placed. For any issue contact us
-            on WhatsApp immediately.
-          </div>
-        </div>
-        <div id="checkoutClosedNotice" style="display:none; background:#fff4e5; border:1px solid #f5c26b; color:#8a5a00; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; text-align:center; margin-bottom:12px;">
-          ⏰ We’re closed right now. Orders open again at 7:00 AM — thank you for your patience!
-        </div>
-        <button class="place-btn" onclick="placeOrder()">
-          ✅ Place Order
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PHONE LOGIN MODAL -->
-  <div class="phone-modal-overlay" id="phoneModal">
-    <div class="phone-modal">
-      <button class="phone-modal-back" onclick="skipPhoneLogin()" aria-label="Close">
-        ✕
-      </button>
-      <div class="phone-modal-icon">📱</div>
-      <div class="phone-modal-title">Enter Your Phone Number</div>
-      <div class="phone-modal-sub">
-        Save your number once — you won't need to enter details repeatedly!
-      </div>
-      <input type="tel" class="phone-modal-input" id="phoneModalInput" placeholder="10 digit number" maxlength="10" />
-      <button class="phone-modal-btn" onclick="savePhoneLogin()">
-        ✅ Save
-      </button>
-      <button class="phone-modal-skip" onclick="skipPhoneLogin()">
-        Not now, maybe later
-      </button>
-    </div>
-  </div>
-
-  <!-- PROFILE SIDEBAR -->
-  <div class="profile-overlay" id="profileOverlay" onclick="closeProfile()"></div>
-
-  <div class="profile-sidebar" id="profileSidebar">
-    <div class="profile-header">
-
-      <button id="logoutBtn" onclick="logoutUser()" style="
-             
-              position: absolute;
-              right: 65px;
-              top: 20px;
-              background: none;
-              border: 2px solid #246a73;
-              color: #fff;
-              border-radius: 8px;
-              padding: 7px 12px;
-              font-size: 12px;
-              font-weight: 700;
-              cursor: pointer;
-               transition:0.2s;
-              font-family: &quot;Inter&quot;, sans-serif;
-            
-          ">
-        🚪 Logout
-      </button>
-
-      <button class="profile-back" onclick="closeProfile()" aria-label="Close profile">
-        ✕
-      </button>
-      <div class="profile-avatar" id="profileAvatar">👤</div>
-      <div class="profile-name" id="profileName">Guest User</div>
-      <div class="profile-phone" id="profilePhoneLabel">
-        Login to save your details
-      </div>
-    </div>
-    <div class="profile-body">
-      <div class="profile-section">
-        <div class="-title">📝 My Details</div>
-        <div class="profile-input-group">
-          <label class="profile-label">Phone Number</label><input type="tel" class="profile-input" id="pPhone"
-            placeholder="10 digit number" maxlength="10" />
-        </div>
-        <div class="profile-input-group">
-          <label class="profile-label">Full Name</label><input type="text" class="profile-input" id="pName"
-            placeholder="Enter your name" />
-        </div>
-        <div class="profile-input-group">
-          <label class="profile-label">Address</label><textarea class="profile-input" id="pAddr" rows="3"
-            placeholder="Enter your address..."></textarea>
-        </div>
-        <div class="profile-input-group">
-          <span class="profile-area-label">📍 Your Area</span>
-          <div id="pAreaBadgeWrap" style="display: none; margin-bottom: 8px">
-            <span class="profile-area-selected-badge">
-              <span class="badge-dot"></span>
-              <span id="pAreaBadgeText"></span>
-            </span>
-            <button class="profile-area-change-btn" onclick="openProfileAreaPicker()">
-              Change
-            </button>
-          </div>
-          <div class="profile-area-picker open" id="pAreaPicker">
-            <div class="area-search-wrap">
-              <span class="search-icon">🔍</span>
-              <input type="text" class="area-search-input" id="p-area-search" placeholder="Search area..."
-                oninput="filterAreaSearch('pAreaGrid','p-area-no-result',this.value)" autocomplete="off" />
-            </div>
-            <div class="area-no-result" id="p-area-no-result">😕 No area found</div>
-            <div class="profile-area-grid" id="pAreaGrid"></div>
-          </div>
-          <button class="save-profile-btn" onclick="saveProfile()">
-            💾 Save
-          </button>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- MY ORDERS PANEL -->
-    <div class="orders-overlay" id="ordersOverlay" onclick="closeMyOrders()"></div>
-    <div class="orders-panel" id="ordersPanel">
-      <div class="orders-panel-header">
-        <div class="orders-panel-title">📦 My Orders</div>
-        <button class="orders-panel-close" onclick="closeMyOrders()">✕</button>
-      </div>
-      <div class="orders-panel-body">
-        <div id="orderHistoryList">
-          <div class="no-orders">
-            <div class="no-orders-icon">📭</div>
-            <p>No orders yet</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- SUCCESS -->
-    <div class="suc-overlay" id="sucOverlay">
-      <div class="suc-box">
-        <div class="suc-icon">🎉</div>
-        <div class="suc-title">Order Placed!</div>
-        <div class="suc-msg">
-          Your order has been received! We will confirm it shortly and deliver
-          within 20–30 minutes.
-        </div>
-        <div class="suc-time">⏱️ Expected: 20–30 Minutes</div>
-        <div class="suc-msg">📞 Support: <strong>9545148205</strong></div>
-        <button class="suc-close" onclick="closeSuc()">
-          OK, Thank You! 😊
-        </button>
-      </div>
-    </div>
-
-    <!-- STORE BLOCKER -->
-    <div id="storeBlocker" style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 700;
-        cursor: not-allowed;
-      "></div>
-
-    <!-- CLOSED -->
-    <div class="closed-overlay" id="closedOverlay">
+    <!-- ============ STORE CLOSED OVERLAY ============ -->
+    <div class="closed-overlay-full" id="closedOverlay">
       <div class="closed-box">
-        <div class="closed-icon">🌙</div>
-        <div class="closed-title">Store Closed</div>
-        <div class="closed-msg" id="closedCustomMsg">
+        <div class="ic">🌙</div>
+        <h3>Store Closed</h3>
+        <p id="closedCustomMsg">
           We are currently closed. Please visit again tomorrow! 🙏
-        </div>
-        <div class="closed-time">⏰ Open: 7:00 AM – 10:00 PM</div>
-        <div class="closed-msg" style="font-size: 13px">
+        </p>
+        <p class="text-muted" style="font-size: 12.5px">
+          ⏰ Open: 7:00 AM – 10:00 PM
+        </p>
+        <p class="text-muted" style="font-size: 12.5px">
           📞 Urgent: <strong>7249148205</strong>
-        </div>
-        <button onclick="
-            document.getElementById('closedOverlay').classList.remove('show')
-          " style="
-            margin-top: 14px;
-            background: none;
-            border: 1.5px solid #ddd;
-            border-radius: 10px;
-            padding: 8px 20px;
-            font-size: 13px;
-            cursor: pointer;
-            color: #666;
-          ">
+        </p>
+        <button
+          class="btn btn-ghost mt-16"
+          onclick="
+            window._closedDismissed = true;
+            document.getElementById('closedOverlay').classList.remove('show');
+          "
+        >
           Browse Products 👀
         </button>
       </div>
     </div>
+
     <div id="toast"></div>
 
+    <script src="js/firebase.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+      document.addEventListener("sqm:data-ready", renderHome);
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.categories && window.categories.length) renderHome();
+      });
 
-    <script src="./index.js"></script>
+      function subcatTileHTML(catId, sub, products) {
+        const item = products.find(
+          (p) =>
+            p.cat === catId &&
+            p.sub === sub &&
+            (p.img || p.image || p.photo || p.thumbnail || p.imageUrl),
+        );
+        const src = item
+          ? item.img ||
+            item.image ||
+            item.photo ||
+            item.thumbnail ||
+            item.imageUrl ||
+            ""
+          : "";
+        return `
+      <a class="subcat-tile" href="products.html?cat=${catId}&sub=${encodeURIComponent(sub)}">
+        <div class="subcat-tile-img">${src ? `<img src="${src}" alt="${sub}" loading="lazy">` : "🛒"}</div>
+        <div class="subcat-tile-label">${sub}</div>
+      </a>`;
+      }
 
-    <!-- PRODUCTS CLOSED POPUP -->
-    <div id="productsClosedOverlay" style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.55);
-        z-index: 800;
-        align-items: center;
-        justify-content: center;
-      ">
-      <div style="
-          background: #fff;
-          border-radius: 20px;
-          padding: 36px 28px;
-          max-width: 320px;
-          width: 90%;
-          text-align: center;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-        ">
-        <div style="font-size: 52px; margin-bottom: 10px">🔒</div>
-        <div style="
-            font-family: &quot;Baloo 2&quot;, cursive;
-            font-size: 22px;
-            font-weight: 800;
-            color: #c0392b;
-            margin-bottom: 8px;
-          ">
-          Website Closed
-        </div>
-        <div style="
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
-          ">
-          We are temporarily closed right now.<br />Please check back soon! 🙏
-        </div>
-        <button onclick="
-            document.getElementById('productsClosedOverlay').style.display =
-              'none'
-          " style="
-            background: #c0392b;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 28px;
-            font-family: &quot;Baloo 2&quot;, cursive;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-          ">
-          OK, Got It!
-        </button>
-      </div>
-    </div>
+      function renderHome() {
+        // ---- categories grid + nav row ----
+        const catGrid = document.getElementById("catGrid");
+        const navRow = document.getElementById("navRow");
+        catGrid.innerHTML =
+          `<a class="cat-card active" href="products.html"><span class="emoji">🏪</span><span>All Items</span></a>` +
+          (window.categories || [])
+            .map(
+              (c) =>
+                `<a class="cat-card" href="products.html?cat=${c.id}"><span class="emoji">${c.emoji}</span><span>${c.label}</span></a>`,
+            )
+            .join("");
 
-  <script src="index.js"></script>
-</body>
+        navRow.innerHTML =
+          (window.categories || [])
+            .map((c) => `<a href="products.html?cat=${c.id}">${c.label}</a>`)
+            .join("") +
+          `<a href="yourneed.html">YourNeed</a><a href="orders.html">Track Order</a>`;
+
+        document.getElementById("footCatList").innerHTML = (
+          window.categories || []
+        )
+          .map(
+            (c) =>
+              `<li><a href="products.html?cat=${c.id}">${c.emoji} ${c.label}</a></li>`,
+          )
+          .join("");
+
+        const subcatProducts = (window.products || []).filter(
+          (p) => p.visible !== false,
+        );
+
+        // Show only subcategories that contain visible products.
+        let subLinks = [];
+        (window.categories || []).forEach((c) =>
+          (c.subs || []).forEach((s) => {
+            if (subcatProducts.some((p) => p.cat === c.id && p.sub === s))
+              subLinks.push({ cat: c.id, sub: s });
+          }),
+        );
+        // ---- subcategory strip (single image each), placed just before the footer ----
+        const subcatGrid = document.getElementById("subcatGrid");
+        if (subcatGrid) {
+          subcatGrid.innerHTML =
+            subLinks
+              .map((x) => subcatTileHTML(x.cat, x.sub, subcatProducts))
+              .join("") || '<p class="text-muted">No subcategories yet.</p>';
+        }
+
+        // ---- product sections grouped by category (mirrors original single-page grouping) ----
+        const con = document.getElementById("prodContainer");
+        const products = (window.products || []).filter(
+          (p) => p.visible !== false,
+        );
+        if (!products.length) {
+          con.innerHTML = `<p class="text-muted" style="text-align:center;padding:40px;">No products yet — check back soon!</p>`;
+          return;
+        }
+
+        let html = "";
+        (window.categories || []).forEach((cat) => {
+          const items = products.filter((p) => p.cat === cat.id).slice(0, 10);
+          if (!items.length) return;
+          html += `
+        <div class="cat-group" id="cg-${cat.id}">
+          <h3 class="cat-heading">${cat.emoji} ${cat.label}</h3>
+          <div class="prod-hwrap">
+            <div class="prod-hscroll" id="hscroll-${cat.id}">${items.map(sqmProductCardHTML).join("")}</div>
+          </div>
+          <div style="text-align:right;margin-top:10px;"><a class="section-link" href="products.html?cat=${cat.id}">See all in ${cat.label} →</a></div>
+        </div>`;
+        });
+        con.innerHTML =
+          html ||
+          `<p class="text-muted" style="text-align:center;padding:40px;">No products yet — check back soon!</p>`;
+        sqmInitReveal();
+      }
+
+      window.sqmApplyStoreStatus = sqmApplyStoreStatus;
+    </script>
+  </body>
 </html>

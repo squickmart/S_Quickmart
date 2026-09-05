@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product — S_Quick Mart</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="timing-bar" id="timingBar"></div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <span class="mark"
+            ><img
+              src="SLOGO.png"
+              onerror="
+                this.style.display = 'none';
+                this.parentNode.textContent = '🛒';
+              "
+          /></span>
+          <div>
+            <div>S_Quick Mart</div>
+            <div class="logo-sub">Parbhani's Own Store</div>
+          </div>
+        </a>
+        <div class="search-shell" id="searchShell">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.3-4.3" />
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder='Search "milk", "grocery", "soap"...'
+            autocomplete="off"
+          />
+          <div class="search-suggest" id="searchDrop"></div>
+        </div>
+        <div class="header-actions">
+          <a href="products.html" class="icon-btn" aria-label="Categories">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </a>
+          <a
+            href="profile.html?tab=wishlist"
+            class="icon-btn"
+            aria-label="Wishlist"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 21s-7.5-4.9-10-9.3C.4 8 2 4.5 5.6 4c2-.3 3.8.7 4.9 2.3C11.6 4.7 13.4 3.7 15.4 4c3.6.5 5.2 4 3.6 7.7C19 16.1 12 21 12 21z"
+              />
+            </svg>
+            <span
+              class="badge"
+              data-wish-badge
+              style="position: absolute; top: 0; right: 0"
+              >0</span
+            >
+          </a>
+          <a href="login.html" class="icon-btn" aria-label="Account"
+            >👤 <span class="txt" data-user-label>Login</span></a
+          >
+          <a href="cart.html" class="header-cart">
+            <span style="position: relative"
+              >🛒<span
+                class="badge"
+                data-cart-badge
+                style="position: absolute; top: -10px; right: -12px"
+                >0</span
+              ></span
+            >
+            <span class="label">Cart</span
+            ><span class="amt" data-cart-amount>₹0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="pd-layout" id="pdRoot">
+        <p
+          class="text-muted"
+          style="grid-column: 1/-1; text-align: center; padding: 60px"
+        >
+          Loading product…
+        </p>
+      </div>
+
+      <section class="section" style="padding-top: 0">
+        <div class="section-head">
+          <div>
+            <h2 style="font-size: 22px" id="relatedHeading">
+              You may also like
+            </h2>
+          </div>
+        </div>
+        <div class="prod-grid" id="relatedGrid"></div>
+      </section>
+    </div>
+
+    <nav class="mobile-nav">
+      <a href="index.html"
+        ><svg viewBox="0 0 24 24">
+          <path d="M3 11l9-8 9 8" />
+          <path d="M5 10v10h14V10" /></svg
+        >Home</a
+      >
+      <a href="products.html"
+        ><svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+        >Categories</a
+      >
+      <a href="cart.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          /></svg
+        >Cart</a
+      >
+      <a href="orders.html"
+        ><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18" /></svg
+        >Orders</a
+      >
+      <a href="login.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" /></svg
+        >Account</a
+      >
+    </nav>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+      document.addEventListener("sqm:data-ready", renderPD);
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.products && window.products.length) renderPD();
+      });
+
+      let pdRendered = false;
+      function renderPD() {
+        const pid = Number(new URLSearchParams(location.search).get("id"));
+        const product = sqmProductById(pid);
+        if (!product) {
+          if (window.products && window.products.length) {
+            document.getElementById("pdRoot").innerHTML =
+              `<div class="empty-cart" style="grid-column:1/-1;"><div class="ic">🔎</div><h3>Product not found</h3><a href="products.html" class="btn btn-primary mt-16">Back to Shop</a></div>`;
+          }
+          return;
+        }
+        document.title = `${product.name} — S_Quick Mart`;
+        const disc = sqmDiscount(product.price, product.mrp);
+        const wished = WishStore.has(product.id);
+        const oos = product.active === false;
+        const pclosed = window._productsClosed === true && !oos;
+        const hasVariants =
+          Array.isArray(product.variants) && product.variants.length > 0;
+
+        document.getElementById("pdRoot").innerHTML = `
+      <div class="pd-gallery">
+        <div class="pd-main-img">
+          ${product.img ? `<img src="${product.img}" alt="${product.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="emoji-fallback" style="display:none;">${product.emoji || "🛒"}</span>` : `<span class="emoji-fallback">${product.emoji || "🛒"}</span>`}
+        </div>
+      </div>
+      <div>
+        <span class="pd-brand">${sqmCatLabel(product.cat)} ${product.sub ? "· " + product.sub : ""}</span>
+        <h1 class="pd-title">${product.name}</h1>
+        ${oos ? `<span class="badge-pill" style="background:#FBE7E7;color:var(--red);">Out of Stock</span>` : ""}
+        ${pclosed ? `<span class="badge-pill" style="background:#FBE7E7;color:var(--red);">Currently Closed</span>` : ""}
+
+        <div class="pd-price-row">
+          <span class="now">${sqmCurrency(product.price)}</span>
+          ${disc.has ? `<span class="mrp">${sqmCurrency(product.mrp)}</span><span class="badge-pill">${disc.pct}% OFF</span>` : ""}
+        </div>
+        <span class="text-muted">${product.unit || ""}</span>
+
+        <div class="pd-qty-row" style="display:flex;align-items:center;gap:16px;margin:20px 0;">
+          <button class="wish-btn ${wished ? "active" : ""}" data-wish-id="${product.id}" style="position:static;background:var(--tint);width:44px;height:44px;flex-shrink:0;">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.9-10-9.3C.4 8 2 4.5 5.6 4c2-.3 3.8.7 4.9 2.3C11.6 4.7 13.4 3.7 15.4 4c3.6.5 5.2 4 3.6 7.7C19 16.1 12 21 12 21z"/></svg>
+          </button>
+        </div>
+
+        ${hasVariants ? `<div id="pdVariantHost"></div>` : ""}
+
+        ${
+          !oos && !pclosed
+            ? `
+        <div class="pd-actions">
+          <button class="btn btn-ghost" data-action="${hasVariants ? "variant" : "add"}" data-id="${product.id}">Add to Cart</button>
+          <a href="cart.html" class="btn btn-primary" id="buyNowBtn">Buy Now</a>
+        </div>`
+            : ""
+        }
+
+        <div style="margin-top:24px;">
+          <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.8;">${product.desc && product.desc.trim() ? product.desc.trim() : `${product.name} — packed fresh and delivered to your doorstep in ${product.unit || "standard"} pack. Sourced through S_Quick Mart's quality-checked supplier network.`}</p>
+        </div>
+      </div>
+    `;
+
+        if (hasVariants) renderPdVariantList(product);
+
+        document.getElementById("buyNowBtn")?.addEventListener("click", (e) => {
+          if (hasVariants) {
+            e.preventDefault();
+            openVariantModal(product.id);
+            return;
+          }
+          if (CartStore.qtyOfKey(String(product.id)) === 0)
+            CartStore.add(product, null, 1);
+        });
+
+        let related = (window.products || []).filter(
+          (p) =>
+            p.cat === product.cat &&
+            p.sub === product.sub &&
+            p.id !== product.id &&
+            p.visible !== false,
+        );
+        const relHeading = document.getElementById("relatedHeading");
+        if (related.length >= 4) {
+          if (relHeading)
+            relHeading.textContent = product.sub
+              ? `More ${product.sub}`
+              : "You may also like";
+        } else {
+          if (relHeading)
+            relHeading.textContent = product.sub
+              ? `More in ${sqmCatLabel(product.cat)}`
+              : "You may also like";
+          const more = (window.products || []).filter(
+            (p) =>
+              p.cat === product.cat &&
+              p.sub !== product.sub &&
+              p.id !== product.id &&
+              p.visible !== false,
+          );
+          related = related.concat(more);
+        }
+        related = related.slice(0, 10);
+        sqmRenderProductGrid(document.getElementById("relatedGrid"), related);
+        pdRendered = true;
+      }
+
+      function renderPdVariantList(product) {
+        const host = document.getElementById("pdVariantHost");
+        const rows = [];
+        if (product.unit && product.price)
+          rows.push({
+            vIdx: null,
+            unit: product.unit,
+            price: product.price,
+            mrp: product.mrp,
+          });
+        (product.variants || []).forEach((v, i) =>
+          rows.push({ vIdx: i, unit: v.unit, price: v.price, mrp: v.mrp }),
+        );
+        host.innerHTML =
+          `<div class="pd-variant-list">` +
+          rows
+            .map((r) => {
+              const key = sqmCartKey(product.id, r.vIdx);
+              const qty = CartStore.qtyOfKey(key);
+              const disc = sqmDiscount(r.price, r.mrp);
+              return `<div class="pd-variant-row">
+        <div><div class="vname">${r.unit}</div><div class="vprice">${sqmCurrency(r.price)} ${disc.has ? `<span style="text-decoration:line-through;color:var(--ink-soft);">${sqmCurrency(r.mrp)}</span>` : ""}</div></div>
+        ${
+          qty > 0
+            ? `<div class="qty-stepper" style="width:auto;"><button onclick="chQtyVariant(${product.id},${r.vIdx},-1);renderPdVariantList(sqmProductById(${product.id}))">−</button><span class="n" style="padding:0 8px;">${qty}</span><button onclick="chQtyVariant(${product.id},${r.vIdx},1);renderPdVariantList(sqmProductById(${product.id}))">+</button></div>`
+            : `<button class="add-btn" style="width:auto;padding:8px 18px;" onclick="addVariantToCart(${product.id},${r.vIdx});renderPdVariantList(sqmProductById(${product.id}))">+ Add</button>`
+        }
+      </div>`;
+            })
+            .join("") +
+          `</div>`;
+      }
+
+      document.addEventListener("sqm:cart-changed", () => {
+        if (pdRendered) renderPD();
+      });
+      window.sqmApplyStoreStatus = sqmApplyStoreStatus;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" href="S2.PNG" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Orders — S_Quick Mart</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo">
+      <span class="mark"><img src="SLOGO.png" onerror="this.style.display='none';this.parentNode.textContent='🛒'"></span>
+      <div><div>S_Quick Mart</div><div class="logo-sub">Parbhani's Own Store</div></div>
+    </a>
+    <a href="profile.html?tab=addresses" class="location-pill">
+      <span class="loc-ic">📍</span>
+      <div class="loc-text">
+        <div class="loc-line1" id="locLine1">Select delivery area</div>
+        <div class="loc-line2">Parbhani, Maharashtra</div>
+      </div>
+      <span class="loc-change">Change</span>
+    </a>
+    <div class="header-actions" style="margin-left:auto;">
+      <a href="products.html" class="icon-btn" aria-label="Categories">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </a>
+      <a href="login.html" class="icon-btn" aria-label="Account">👤 <span class="txt" data-user-label>Login</span></a>
+      <a href="cart.html" class="header-cart">
+        <span style="position:relative">🛒<span class="badge" data-cart-badge style="position:absolute;top:-10px;right:-12px;">0</span></span>
+        <span class="label">Cart</span><span class="amt" data-cart-amount>₹0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="max-width:760px;padding-bottom:60px;">
+  <h1 style="font-size:26px;padding-top:24px;">My Orders</h1>
+  <div id="loginNotice" style="display:none;" class="empty-cart">
+    <div class="ic">📱</div><h3 style="font-size:19px;margin-bottom:6px;">Login to view your orders</h3>
+    <a href="login.html" class="btn btn-primary mt-16">Login</a>
+  </div>
+  <div id="ordersWrap" style="display:none;">
+    <div class="order-tabs" id="orderTabs">
+      <button class="active" data-filter="all">All</button>
+      <button data-filter="active">Active</button>
+      <button data-filter="delivered">Delivered</button>
+      <button data-filter="cancelled">Cancelled</button>
+    </div>
+    <div id="ordersHost"></div>
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</a>
+  <a href="products.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Categories</a>
+  <a href="cart.html"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Cart</a>
+  <a href="orders.html" class="active"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg>Orders</a>
+  <a href="login.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>Account</a>
+</nav>
+
+<script src="js/firebase.js"></script>
+<script src="js/core.js"></script>
+<script src="js/orders-shared.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const u = UserStore.get();
+    if (!u.phone) { document.getElementById('loginNotice').style.display = 'block'; return; }
+    document.getElementById('ordersWrap').style.display = 'block';
+    loadOrderHistory(u.phone, document.getElementById('ordersHost'), document.getElementById('orderTabs'));
+  });
+</script>
+</body>
+</html>

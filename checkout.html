@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout — S_Quick Mart</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+      .checkout-wrap {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 30px 0 80px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner" style="justify-content: center">
+        <a href="index.html" class="logo">
+          <span class="mark"
+            ><img
+              src="SLOGO.png"
+              onerror="
+                this.style.display = 'none';
+                this.parentNode.textContent = '🛒';
+              "
+          /></span>
+          <div>
+            <div>S_Quick Mart</div>
+            <div class="logo-sub">Parbhani's Own Store</div>
+          </div>
+        </a>
+      </div>
+    </header>
+
+    <div class="container" id="checkoutRoot">
+      <div class="checkout-wrap">
+        <div id="cartEmptyNotice" style="display: none" class="empty-cart">
+          <div class="ic">🛒</div>
+          <h3>Your cart is empty</h3>
+          <a href="products.html" class="btn btn-primary mt-16"
+            >Start Shopping</a
+          >
+        </div>
+
+        <div id="checkoutFlow">
+          <div id="closedNotice" class="closed-notice" style="display: none">
+            ⏰ Store is currently closed. Orders can be placed 7AM–10PM.
+          </div>
+
+          <div class="checkout-steps">
+            <div class="step-pip active" data-pip="1">
+              <span class="num">1</span>Details
+            </div>
+            <span class="bar"></span>
+            <div class="step-pip" data-pip="2">
+              <span class="num">2</span>Summary
+            </div>
+            <span class="bar"></span>
+            <div class="step-pip" data-pip="3">
+              <span class="num">3</span>Payment
+            </div>
+            <span class="bar"></span>
+            <div class="step-pip" data-pip="4">
+              <span class="num">4</span>Confirm
+            </div>
+          </div>
+
+          <!-- STEP 1: DELIVERY ADDRESS -->
+          <div class="step-panel active" data-step="1">
+            <h3 style="font-size: 18px; margin-bottom: 4px">
+              📍 Delivery address
+            </h3>
+            <p class="text-muted" style="font-size: 13px; margin-bottom: 18px">
+              Choose where you'd like your order delivered.
+            </p>
+
+            <div
+              id="checkoutLoginNotice"
+              style="display: none"
+              class="empty-cart"
+            >
+              <div class="ic">📱</div>
+              <h3 style="font-size: 17px">Login to continue</h3>
+              <p class="text-muted" style="margin-bottom: 16px">
+                Please login to select a delivery address.
+              </p>
+              <a href="login.html" class="btn btn-primary">Login</a>
+            </div>
+
+            <div id="checkoutAddrFlow">
+              <div id="checkoutAddrList"></div>
+              <button
+                class="btn btn-ghost btn-block mt-16"
+                id="coAddAddressBtn"
+                type="button"
+              >
+                + Add a new address
+              </button>
+              <div
+                id="coNewAddressFormWrap"
+                class="cart-card"
+                style="display: none; margin-top: 16px; padding: 20px"
+              >
+                <h4 style="font-size: 14px; margin-bottom: 14px">
+                  New Address
+                </h4>
+                <div class="field" style="margin-bottom: 18px">
+                  <label
+                    style="
+                      font-size: 14px;
+                      color: var(--ink);
+                      font-weight: 800;
+                      margin-bottom: 10px;
+                    "
+                    >🚚 Delivery area</label
+                  >
+                  <div id="areaBadgeWrap" style="display: none">
+                    <span class="area-selected-badge"
+                      ><span class="badge-dot"></span
+                      ><span id="areaBadgeText"></span
+                    ></span>
+                    <button
+                      type="button"
+                      class="area-change-btn"
+                      id="changeAreaBtn"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  <div class="area-picker-wrap" id="areaPicker">
+                    <div class="area-search-wrap">
+                      <span class="search-icon">🔍</span>
+                      <input
+                        type="text"
+                        class="area-search-input"
+                        id="areaSearchInput"
+                        placeholder="Search your area..."
+                      />
+                    </div>
+                    <div class="area-no-result" id="areaNoResult">
+                      No matching area found.
+                    </div>
+                    <div class="area-grid" id="areaGrid">
+                      <p class="text-muted" style="grid-column: 1/-1">
+                        Loading areas…
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <form id="coNewAddressForm" novalidate>
+                  <div class="field">
+                    <label>Full name</label
+                    ><input type="text" id="coAddrFullName" />
+                  </div>
+                  <div class="field">
+                    <label>Mobile number</label
+                    ><input type="tel" id="coAddrMobile" maxlength="10" />
+                  </div>
+                  <div class="field">
+                    <label>Full address</label
+                    ><textarea id="coAddrAddress" rows="3" placeholder="Enter your complete address"></textarea>
+                  </div>
+                  <div class="field">
+                    <label>Landmark (optional)</label
+                    ><input type="text" id="coAddrLandmark" />
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <label>City</label
+                      ><input type="text" id="coAddrCity" value="Parbhani" />
+                    </div>
+                    <div class="field">
+                      <label>Pincode</label
+                      ><input
+                        type="text"
+                        id="coAddrPincode"
+                        maxlength="6"
+                        oninput="sqmCheckPinHint(this, 'coPinHint')"
+                      /><span class="pin-hint" id="coPinHint"></span>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 10px">
+                    <button type="submit" class="btn btn-primary">
+                      Save Address
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost"
+                      id="coCancelAddAddress"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <button class="btn btn-primary btn-block mt-24" id="toStep2">
+                Continue to Order Summary
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: SUMMARY -->
+          <div class="step-panel" data-step="2">
+            <h3 style="font-size: 18px; margin-bottom: 16px">Order summary</h3>
+            <div class="cart-card" style="padding: 0">
+              <div id="checkoutSummaryItems" style="padding: 6px 20px"></div>
+              <div class="divider"></div>
+              <div style="padding: 16px 20px">
+                <div class="summary-row">
+                  <span>Subtotal</span><span data-co-subtotal>₹0</span>
+                </div>
+                <div class="summary-row">
+                  <span>Delivery Fee</span><span data-co-delivery>₹0</span>
+                </div>
+                <div class="summary-row total">
+                  <span>Total</span><span data-co-total>₹0</span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px" class="mt-24">
+              <button class="btn btn-ghost" id="backTo1">Back</button>
+              <button class="btn btn-primary btn-block" id="toStep3">
+                Continue to Payment
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: PAYMENT -->
+          <div class="step-panel" data-step="3">
+            <h3 style="font-size: 18px; margin-bottom: 16px">Payment method</h3>
+            <div class="pay-option">
+              <span class="ic">💵</span>
+              <div>
+                <div style="font-weight: 800; font-size: 14.5px">
+                  Cash on Delivery
+                </div>
+                <div class="text-muted" style="font-size: 12.5px">
+                  Pay in cash when your order arrives
+                </div>
+              </div>
+            </div>
+            <div class="cancel-pol">
+              <div class="cp-title">📌 Cancellation Policy</div>
+              <div class="cp-text">
+                Orders once placed cannot be cancelled after preparation begins.
+                Please double-check your order before confirming.
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px" class="mt-24">
+              <button class="btn btn-ghost" id="backTo2">Back</button>
+              <button class="btn btn-primary btn-block" id="toStep4">
+                Review Order
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: CONFIRM -->
+          <div class="step-panel" data-step="4">
+            <h3 style="font-size: 18px; margin-bottom: 16px">
+              Confirm & place order
+            </h3>
+            <div class="cart-card" style="padding: 20px">
+              <div class="summary-row">
+                <span>Items total</span><span data-co-subtotal>₹0</span>
+              </div>
+              <div class="summary-row">
+                <span>Delivery Fee</span><span data-co-delivery>₹0</span>
+              </div>
+              <div class="summary-row total">
+                <span>To Pay on Delivery</span><span data-co-total>₹0</span>
+              </div>
+              <div class="divider mt-16"></div>
+              <h4 style="font-size: 14px; margin: 14px 0 6px">
+                Delivery Address
+              </h4>
+              <p
+                class="text-muted"
+                id="checkoutConfirmAddress"
+                style="font-size: 13px; line-height: 1.6"
+              ></p>
+              <p class="text-muted mt-16" style="font-size: 12.5px">
+                Payment Method: Cash on Delivery
+              </p>
+            </div>
+            <div style="display: flex; gap: 12px" class="mt-24">
+              <button class="btn btn-ghost" id="backTo3">Back</button>
+              <button class="btn btn-primary btn-block" id="placeOrderBtn">
+                Place Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS OVERLAY -->
+    <div class="overlay" id="sucOverlay">
+      <div
+        class="drawer"
+        style="
+          top: 50%;
+          left: 50%;
+          right: auto;
+          transform: translate(-50%, -50%);
+          height: auto;
+          max-width: 380px;
+          width: 92vw;
+          border-radius: var(--r-lg);
+          text-align: center;
+          padding: 40px 30px;
+        "
+      >
+        <div style="font-size: 56px; margin-bottom: 12px">🎉</div>
+        <h3 style="font-size: 20px; margin-bottom: 8px">Order Placed!</h3>
+        <p class="text-muted" style="margin-bottom: 24px">
+          Your order has been placed successfully. We'll deliver it soon!
+        </p>
+        <a href="orders.html" class="btn btn-primary btn-block mt-8"
+          >Track My Order</a
+        >
+        <a href="index.html" class="btn btn-ghost btn-block mt-8"
+          >Continue Shopping</a
+        >
+      </div>
+    </div>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+      let selectedCheckoutArea = "";
+      let sqmCoAddresses = [];
+      let selectedCheckoutAddrId = "";
+
+      /* ---------- saved addresses (same Firestore doc as profile.html) ---------- */
+      function loadCheckoutAddresses() {
+        const u = UserStore.get();
+        if (!u.phone) {
+          document.getElementById("checkoutLoginNotice").style.display =
+            "block";
+          document.getElementById("checkoutAddrFlow").style.display = "none";
+          return;
+        }
+        document.getElementById("checkoutLoginNotice").style.display = "none";
+        document.getElementById("checkoutAddrFlow").style.display = "block";
+        if (!window._db) {
+          setTimeout(loadCheckoutAddresses, 400);
+          return;
+        }
+        window._onSnapshot(
+          window._doc(window._db, "customers", u.phone),
+          (snap) => {
+            sqmCoAddresses =
+              snap.exists() && Array.isArray(snap.data().addresses)
+                ? snap.data().addresses
+                : [];
+            if (!selectedCheckoutAddrId) {
+              const def =
+                sqmCoAddresses.find((a) => a.isDefault) || sqmCoAddresses[0];
+              if (def) selectedCheckoutAddrId = def.id;
+            }
+            renderCheckoutAddrList();
+          },
+        );
+      }
+
+      function renderCheckoutAddrList() {
+        const host = document.getElementById("checkoutAddrList");
+        if (!sqmCoAddresses.length) {
+          host.innerHTML = `
+      <div class="cart-card" style="padding:36px 20px;text-align:center;">
+        <div style="font-size:38px;margin-bottom:10px;">📍</div>
+        <p style="font-weight:800;font-size:15px;margin-bottom:4px;">No saved address yet</p>
+        <p class="text-muted" style="font-size:13px;">Add a delivery address below to continue.</p>
+      </div>`;
+          return;
+        }
+        host.innerHTML = sqmCoAddresses
+          .map(
+            (a) => `
+      <div class="cart-card ${selectedCheckoutAddrId === a.id ? "selected-addr" : ""}" style="padding:16px 20px;margin-bottom:12px;cursor:pointer;border-color:${selectedCheckoutAddrId === a.id ? "var(--green)" : "var(--line)"};" data-pick-addr="${a.id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="font-weight:700;font-size:14px;">${a.name} ${a.isDefault ? '<span class="badge-pill">Default</span>' : ""}</div>
+          <span style="width:18px;height:18px;border-radius:50%;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${selectedCheckoutAddrId === a.id ? '<span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:block;"></span>' : ""}</span>
+        </div>
+        <p class="text-muted" style="font-size:13px;line-height:1.6;margin-top:6px;">${a.address || a.house}, ${a.street}${a.landmark ? ", " + a.landmark : ""}, ${a.city} - ${a.pincode}<br>📞 ${a.mobile}</p>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      document
+        .getElementById("checkoutAddrList")
+        .addEventListener("click", (e) => {
+          const card = e.target.closest("[data-pick-addr]");
+          if (!card) return;
+          selectedCheckoutAddrId = card.dataset.pickAddr;
+          renderCheckoutAddrList();
+        });
+
+      document
+        .getElementById("coAddAddressBtn")
+        .addEventListener("click", () => {
+          fillCheckoutContactFields();
+          document.getElementById("coNewAddressFormWrap").style.display =
+            "block";
+          document.getElementById("coAddAddressBtn").style.display = "none";
+        });
+      document
+        .getElementById("coCancelAddAddress")
+        .addEventListener("click", () => {
+          document.getElementById("coNewAddressFormWrap").style.display =
+            "none";
+          document.getElementById("coAddAddressBtn").style.display = "";
+        });
+      document
+        .getElementById("coNewAddressForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const u = UserStore.get();
+          if (!u.phone) {
+            sqmToast("❌ Please login first!", "error");
+            return;
+          }
+          const addr = {
+            id: Date.now().toString(),
+            name: document.getElementById("coAddrFullName").value.trim(),
+            mobile: document.getElementById("coAddrMobile").value.trim(),
+            address: document.getElementById("coAddrAddress").value.trim(),
+            street: selectedCheckoutArea,
+            landmark: document.getElementById("coAddrLandmark").value.trim(),
+            city:
+              document.getElementById("coAddrCity").value.trim() || "Parbhani",
+            pincode: document.getElementById("coAddrPincode").value.trim(),
+            isDefault: sqmCoAddresses.length === 0,
+          };
+          if (
+            !addr.name ||
+            !addr.mobile ||
+            !addr.address ||
+            !addr.street ||
+            !addr.pincode
+          ) {
+            sqmToast("❌ Please fill all required fields!", "error");
+            return;
+          }
+          if (addr.pincode !== "431401") {
+            sqmToast("❌ We deliver only in Parbhani (431401)", "error");
+            return;
+          }
+          sqmCoAddresses.push(addr);
+          window._setDoc(
+            window._doc(window._db, "customers", u.phone),
+            {
+              addresses: sqmCoAddresses,
+              address: `${addr.address}, ${addr.street}, ${addr.city} - ${addr.pincode}`,
+            },
+            { merge: true },
+          );
+          selectedCheckoutAddrId = addr.id;
+          e.target.reset();
+          document.getElementById("coAddrCity").value = "Parbhani";
+          sqmCheckPinHint(
+            document.getElementById("coAddrPincode"),
+            "coPinHint",
+          );
+          document.getElementById("coNewAddressFormWrap").style.display =
+            "none";
+          document.getElementById("coAddAddressBtn").style.display = "";
+          sqmToast("✅ Address saved!", "success");
+        });
+
+      function renderAreaGrid(areas) {
+        const grid = document.getElementById("areaGrid");
+        if (!areas || !areas.length) {
+          grid.innerHTML = `<p class="text-muted" style="grid-column:1/-1;">No delivery areas configured yet.</p>`;
+          return;
+        }
+        grid.innerHTML = areas
+          .map((a) => {
+            const na = a.available === false;
+            return `<button type="button" class="area-btn ${selectedCheckoutArea === a.name ? "selected" : ""}" data-area="${a.name}" ${na ? 'disabled style="opacity:.5;cursor:not-allowed;"' : `onclick="selectArea('${a.name.replace(/'/g, "\\'")}')"`}>
+        ${a.name}${na ? " 🚫" : ""}
+      </button>`;
+          })
+          .join("");
+      }
+      window.applyAreasToUI = function (areas) {
+        renderAreaGrid(areas);
+      };
+
+      function selectArea(area) {
+        selectedCheckoutArea = area;
+        document.getElementById("areaPicker").style.display = "none";
+        document.getElementById("areaBadgeWrap").style.display = "block";
+        document.getElementById("areaBadgeText").textContent = area;
+        renderAreaGrid(window._ynAreas || []);
+      }
+      document.getElementById("changeAreaBtn").addEventListener("click", () => {
+        document.getElementById("areaPicker").style.display = "block";
+        document.getElementById("areaBadgeWrap").style.display = "none";
+      });
+      document
+        .getElementById("areaSearchInput")
+        .addEventListener("input", (e) => {
+          const q = e.target.value.trim().toLowerCase();
+          let visible = 0;
+          document.querySelectorAll("#areaGrid .area-btn").forEach((btn) => {
+            const match = !q || btn.dataset.area.toLowerCase().includes(q);
+            btn.style.display = match ? "" : "none";
+            if (match) visible++;
+          });
+          document
+            .getElementById("areaNoResult")
+            .classList.toggle("show", visible === 0 && q.length > 0);
+        });
+
+      function autoFillCheckout() {
+        const u = UserStore.get();
+        fillCheckoutContactFields();
+        if (u.area) selectArea(u.area);
+      }
+
+      function fillCheckoutContactFields() {
+        const u = UserStore.get();
+        const nameInput = document.getElementById("coAddrFullName");
+        const phoneInput = document.getElementById("coAddrMobile");
+        if (u.name) {
+          nameInput.value = u.name;
+          nameInput.readOnly = true;
+        }
+        if (u.phone) {
+          phoneInput.value = u.phone;
+          phoneInput.readOnly = true;
+        }
+      }
+
+      function sqmDeliveryFee(subtotal) {
+        if (subtotal > 399) return 0;
+        const areas = window._ynAreas || [];
+        const areaData = areas.find((a) => a.name === selectedCheckoutArea);
+        return areaData && areaData.deliveryCharge !== undefined
+          ? areaData.deliveryCharge
+          : 23;
+      }
+
+      function goToStep(step) {
+        document
+          .querySelectorAll(".step-panel")
+          .forEach((p) =>
+            p.classList.toggle("active", Number(p.dataset.step) === step),
+          );
+        document.querySelectorAll(".step-pip").forEach((p) => {
+          const n = Number(p.dataset.pip);
+          p.classList.toggle("done", n < step);
+          p.classList.toggle("active", n === step);
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function renderSummary() {
+        const items = CartStore.items();
+        document.getElementById("checkoutSummaryItems").innerHTML = items
+          .map(
+            (i) => `
+      <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;border-bottom:1px solid var(--line);">
+        <span>${i.emoji || "🛒"} ${i.name} <span class="text-muted">× ${i.qty}</span></span>
+        <span style="font-weight:700;">${sqmCurrency(i.price * i.qty)}</span>
+      </div>`,
+          )
+          .join("");
+        fillTotals();
+      }
+      function fillTotals() {
+        const subtotal = CartStore.subtotal();
+        const delivery = sqmDeliveryFee(subtotal);
+        const total = subtotal + delivery;
+        document
+          .querySelectorAll("[data-co-subtotal]")
+          .forEach((el) => (el.textContent = sqmCurrency(subtotal)));
+        document
+          .querySelectorAll("[data-co-delivery]")
+          .forEach(
+            (el) =>
+              (el.textContent =
+                delivery === 0 ? "FREE 🎉" : sqmCurrency(delivery)),
+          );
+        document
+          .querySelectorAll("[data-co-total]")
+          .forEach((el) => (el.textContent = sqmCurrency(total)));
+        const addr = sqmCoAddresses.find(
+          (item) => item.id === selectedCheckoutAddrId,
+        );
+        const confirmAddress = document.getElementById("checkoutConfirmAddress");
+        if (confirmAddress && addr) {
+          const address = addr.address || addr.house || "";
+          confirmAddress.innerHTML = `${address}, ${selectedCheckoutArea}${addr.landmark ? ", " + addr.landmark : ""}, ${addr.city}<br>📞 ${addr.mobile}`;
+        }
+      }
+
+      document.getElementById("toStep2").addEventListener("click", () => {
+        if (!sqmCoAddresses.length || !selectedCheckoutAddrId) {
+          sqmToast("Please add and select a delivery address", "error");
+          return;
+        }
+        const addr = sqmCoAddresses.find(
+          (a) => a.id === selectedCheckoutAddrId,
+        );
+        if (!selectedCheckoutArea) {
+          sqmToast("Please select your delivery area", "error");
+          return;
+        }
+        if (!addr || addr.pincode !== "431401") {
+          sqmToast("Delivery available only in Parbhani (431401)", "error");
+          return;
+        }
+        renderSummary();
+        goToStep(2);
+      });
+      document
+        .getElementById("backTo1")
+        .addEventListener("click", () => goToStep(1));
+      document
+        .getElementById("toStep3")
+        .addEventListener("click", () => goToStep(3));
+      document
+        .getElementById("backTo2")
+        .addEventListener("click", () => goToStep(2));
+      document.getElementById("toStep4").addEventListener("click", () => {
+        fillTotals();
+        goToStep(4);
+      });
+      document
+        .getElementById("backTo3")
+        .addEventListener("click", () => goToStep(3));
+
+      document
+        .getElementById("placeOrderBtn")
+        .addEventListener("click", async () => {
+          if (!sqmIsOrderable()) {
+            sqmToast("Store is closed! Orders only between 7AM–10PM.", "error");
+            return;
+          }
+          const items = CartStore.items();
+          if (!items.length) {
+            sqmToast("Your cart is empty", "error");
+            return;
+          }
+
+          const _areas = window._ynAreas || [];
+          const _selArea = _areas.find((a) => a.name === selectedCheckoutArea);
+          if (_selArea && _selArea.available === false) {
+            sqmToast(
+              selectedCheckoutArea +
+                " is currently Not Available. Please select another area.",
+              "error",
+            );
+            selectedCheckoutArea = "";
+            document.getElementById("areaBadgeWrap").style.display = "none";
+            document.getElementById("areaPicker").style.display = "block";
+            goToStep(1);
+            return;
+          }
+
+          const addr = sqmCoAddresses.find(
+            (a) => a.id === selectedCheckoutAddrId,
+          );
+          if (!addr) {
+            sqmToast("Please select a delivery address", "error");
+            goToStep(1);
+            return;
+          }
+          const name = addr.name;
+          const phone = addr.mobile;
+          const address = addr.address || addr.house || "";
+          const fullAddr = `${address}, ${selectedCheckoutArea}${addr.landmark ? ", " + addr.landmark : ""}, ${addr.city}`;
+          const pin = addr.pincode;
+
+          const subtotal = CartStore.subtotal();
+          const delivery = sqmDeliveryFee(subtotal);
+          const total = subtotal + delivery;
+
+          const btn = document.getElementById("placeOrderBtn");
+          btn.classList.add("is-loading");
+
+          const orderData = {
+            name,
+            phone,
+            address: fullAddr,
+            pincode: pin,
+            items: items.map((i) => ({
+              id: i.id,
+              name: i.name,
+              unit: i.unit,
+              price: i.price,
+              qty: i.qty,
+              emoji: i.emoji || "📦",
+              img: i.img || null,
+            })),
+            subtotal,
+            delivery,
+            total,
+            status: "pending",
+            createdAt: { seconds: Math.floor(Date.now() / 1000) },
+          };
+          await window.saveOrderToFirebase(orderData);
+
+          const user = {
+            phone,
+            name,
+            address: fullAddr,
+            area: selectedCheckoutArea,
+          };
+          UserStore.save(user);
+          window.saveCustomerProfile && window.saveCustomerProfile(user);
+
+          CartStore.clear();
+          btn.classList.remove("is-loading");
+          document.getElementById("sucOverlay").classList.add("open");
+        });
+
+      function updateCheckoutClosedNotice() {
+        const notice = document.getElementById("closedNotice");
+        if (notice) notice.style.display = sqmIsOrderable() ? "none" : "block";
+      }
+      window.updateCheckoutClosedNotice = updateCheckoutClosedNotice;
+      window.sqmApplyStoreStatus = sqmApplyStoreStatus;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const items = CartStore.items();
+        if (!items.length) {
+          document.getElementById("cartEmptyNotice").style.display = "block";
+          document.getElementById("checkoutFlow").style.display = "none";
+          return;
+        }
+        autoFillCheckout();
+        loadCheckoutAddresses();
+        updateCheckoutClosedNotice();
+        if (window._ynAreas && window._ynAreas.length)
+          renderAreaGrid(window._ynAreas);
+      });
+    </script>
+  </body>
+</html>

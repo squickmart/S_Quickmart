@@ -2,1369 +2,411 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>S_Quick Mart — Products</title>
     <link rel="icon" type="image/png" href="S2.PNG" />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="stylesheet" href="pannel.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-        setDoc,
-        onSnapshot,
-        collection,
-        addDoc,
-        updateDoc,
-        query,
-        orderBy,
-        getDocs,
-        where,
-        serverTimestamp,
-      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-      import {
-        getStorage,
-        ref,
-        uploadBytes,
-        getDownloadURL,
-      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
-      import {
-        getAuth,
-        signInWithEmailAndPassword,
-        signOut,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyD1qOrie6i62ThyR0oeZtAomJbeYQwjMh4",
-        authDomain: "quickmart-b117e.firebaseapp.com",
-        projectId: "quickmart-b117e",
-        storageBucket: "quickmart-b117e.firebasestorage.app",
-        messagingSenderId: "128330058901",
-        appId: "1:128330058901:web:2bbd1eae9231308ef79f9c",
-      };
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const storage = getStorage(app);
-      const auth = getAuth(app);
-
-      // ── EXPOSE AUTH FUNCTIONS TO GLOBAL SCRIPT ────────────────
-      window.fbSignIn = async (email, password) => {
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          return { success: true };
-        } catch (e) {
-          return { success: false, code: e.code };
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop All Products — S_Quick Mart</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+      .shop-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 32px;
+        align-items: flex-start;
+        padding: 28px 0 60px;
+      }
+      .filter-panel {
+        background: var(--paper-raised);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        padding: 20px;
+        position: sticky;
+        top: calc(var(--header-h) + 60px);
+      }
+      .filter-group {
+        padding: 16px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .filter-group:last-child {
+        border-bottom: none;
+      }
+      .filter-group h5 {
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--ink-soft);
+        padding: 6px 0;
+        cursor: pointer;
+      }
+      .filter-row.active-cat {
+        color: var(--green-deep);
+        font-weight: 700;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .result-count {
+        font-size: 13.5px;
+        color: var(--ink-soft);
+      }
+      .filter-fab {
+        display: none;
+      }
+      @media (max-width: 980px) {
+        .shop-layout {
+          grid-template-columns: 1fr;
         }
-      };
-
-      window.fbSignOut = async () => {
-        try {
-          await signOut(auth);
-          return true;
-        } catch (e) {
-          return false;
+        .filter-panel {
+          display: none;
         }
-      };
-
-      window.fbOnAuthChanged = (cb) => {
-        onAuthStateChanged(auth, cb);
-      };
-
-      window.fbSaveProducts = async (p) => {
-        try {
-          await setDoc(doc(db, "store", "products"), { list: p });
-          return true;
-        } catch (e) {
-          return false;
+        .filter-fab {
+          display: flex;
         }
-      };
-      window.fbSaveAnn = async (a) => {
-        try {
-          await setDoc(doc(db, "store", "announcements"), { list: a });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbSaveCategories = async (c) => {
-        try {
-          await setDoc(doc(db, "store", "categories"), { list: c });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbSaveStoreStatus = async (s) => {
-        try {
-          await setDoc(doc(db, "store", "status"), s);
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbLoadProducts = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "products"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbLoadAnn = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "announcements"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbLoadCategories = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "categories"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbUpdateOrder = async (id, status) => {
-        try {
-          await updateDoc(doc(db, "orders", id), { status });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-
-      window.fbUploadImage = async (file, name) => {
-        try {
-          const r = ref(storage, `products/${Date.now()}_${name}`);
-          await uploadBytes(r, file);
-          return await getDownloadURL(r);
-        } catch (e) {
-          console.error("Upload error:", e);
-          return null;
-        }
-      };
-
-      window.startOrdersListener = (cb) => {
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-        return onSnapshot(q, (snap) =>
-          cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-        );
-      };
-
-      window.startYourNeedListener = (cb) => {
-        const q = query(
-          collection(db, "yourneed_requests"),
-          orderBy("createdAt", "desc"),
-        );
-        return onSnapshot(q, (snap) =>
-          cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-        );
-      };
-
-      window.fbUpdateYourNeed = async (id, status, adminNote) => {
-        try {
-          await updateDoc(doc(db, "yourneed_requests", id), {
-            status,
-            adminNote: adminNote || "",
-          });
-          return true;
-        } catch (e) {
-          console.error(e);
-          return false;
-        }
-      };
-
-      window.fbSaveAreas = async (areas) => {
-        try {
-          await setDoc(doc(db, "store", "yourneed_areas"), { list: areas });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-
-      window.fbLoadAreas = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "yourneed_areas"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-
-      // ── DELIVERY AREAS (with shops) ───────────────────────────
-      window.fbSaveDeliveryAreas = async (areas) => {
-        try {
-          await setDoc(doc(db, "store", "delivery_areas"), { list: areas });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbLoadDeliveryAreas = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "delivery_areas"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-
-      // ── STOCKFLOW PRICES (for Buy price lookup) ───────────────
-      window.fbLoadStockflow = async () => {
-        try {
-          const s = await getDoc(doc(db, "stockflow", "prices"));
-          return s.exists() ? s.data().items || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbWatchDeliveryAreas = (cb) => {
-        return onSnapshot(doc(db, "store", "delivery_areas"), (snap) => {
-          cb(snap.exists() ? snap.data().list || [] : []);
-        });
-      };
-
-      // ── SHOP PICKUPS ──────────────────────────────────────────
-      window.fbSavePickup = async (pickup) => {
-        try {
-          await addDoc(collection(db, "shop_pickups"), { ...pickup, createdAt: serverTimestamp() });
-          return true;
-        } catch (e) {
-          console.error(e);
-          return false;
-        }
-      };
-      window.fbWatchPickups = (cb) => {
-        return onSnapshot(collection(db, "shop_pickups"), (snap) => {
-          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          docs.sort((a, b) => {
-            const at = a.createdAt ? (a.createdAt.seconds || a.createdAt._seconds || 0) : 0;
-            const bt = b.createdAt ? (b.createdAt.seconds || b.createdAt._seconds || 0) : 0;
-            return bt - at;
-          });
-          cb(docs);
-        }, (err) => {
-          console.error("shop_pickups error:", err);
-        });
-      };
-
-      // ── DELIVERY BOYS ─────────────────────────────────────────
-      window.fbSaveBoys = async (boys) => {
-        try {
-          await setDoc(doc(db, "store", "delivery_boys"), { list: boys });
-          return true;
-        } catch (e) {
-          return false;
-        }
-      };
-      window.fbLoadBoys = async () => {
-        try {
-          const s = await getDoc(doc(db, "store", "delivery_boys"));
-          return s.exists() ? s.data().list || [] : [];
-        } catch (e) {
-          return [];
-        }
-      };
-      window.fbWatchBoys = (cb) => {
-        return onSnapshot(doc(db, "store", "delivery_boys"), (snap) => {
-          cb(snap.exists() ? snap.data().list || [] : []);
-        });
-      };
-
-      window.fbWatchCustomers = (cb) => {
-        return onSnapshot(collection(db, "customers"), (snap) => {
-          cb(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        });
-      };
-
-      // ── SALARY CLEAR ─────────────────────────────────────────────
-      window.fbSaveSalaryClear = async (phone, weekKey, amount, boyName) => {
-        try {
-          const docId = phone + "_" + weekKey;
-          await setDoc(doc(db, "salary_cleared", docId), {
-            phone, weekKey, amount, boyName,
-            clearedAt: serverTimestamp()
-          });
-          return true;
-        } catch (e) {
-          console.error("❌ Salary clear Firestore error:", e.code, e.message);
-          // Common fix: Add this to Firestore Rules:
-          // match /salary_cleared/{docId} { allow read, write: if request.auth != null; }
-          return { error: e.code || e.message };
-        }
-      };
-      window.fbWatchSalaryCleared = (cb) => {
-        return onSnapshot(collection(db, "salary_cleared"), (snap) => {
-          const data = {};
-          snap.docs.forEach(d => { data[d.id] = d.data(); });
-          cb(data);
-        });
-      };
-      window.fbLoadSalaryCleared = async () => {
-        try {
-          const snap = await getDocs(collection(db, "salary_cleared"));
-          const data = {};
-          snap.docs.forEach(d => { data[d.id] = d.data(); });
-          return data;
-        } catch(e) { return {}; }
-      };
-
-      // ── PICKUP (SHOP) AMOUNT CLEAR ────────────────────────────────
-      window.fbSavePickupClear = async (shopName, areaName, dayKey, mode, amount) => {
-        try {
-          const safeShop = String(shopName || "unknown-shop")
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/^_+|_+$/g, "");
-          const docId = dayKey + "_" + safeShop;
-          await setDoc(doc(db, "pickup_clears", docId), {
-            shopName, areaName, dayKey, mode, amount,
-            clearedAt: serverTimestamp()
-          });
-          return true;
-        } catch (e) {
-          console.error("❌ Pickup clear Firestore error:", e.code, e.message);
-          // Common fix: Add this to Firestore Rules:
-          // match /pickup_clears/{docId} { allow read, write: if request.auth != null; }
-          return { error: e.code || e.message };
-        }
-      };
-      window.fbLoadPickupClears = async () => {
-        try {
-          const snap = await getDocs(collection(db, "pickup_clears"));
-          const data = {};
-          snap.docs.forEach(d => { data[d.id] = d.data(); });
-          return data;
-        } catch (e) { return {}; }
-      };
-      window.fbWatchPickupClears = (cb) => {
-        return onSnapshot(collection(db, "pickup_clears"), (snap) => {
-          const data = {};
-          snap.docs.forEach(d => { data[d.id] = d.data(); });
-          cb(data);
-        });
-      };
-
-      onSnapshot(doc(db, "store", "status"), (snap) => {
-        if (snap.exists()) window._storeStatus = snap.data();
-      });
-
-      // ── AUTH STATE LISTENER ───────────────────────────────────
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User logged in — show admin panel
-          document.getElementById("loginScreen").style.display = "none";
-          document.getElementById("adminScreen").style.display = "block";
-          // Call loadAdminData only if not already loaded
-          if (typeof window.loadAdminData === "function") {
-            window.loadAdminData();
-          } else {
-            // Wait for second script to be ready
-            window._authUser = user;
-          }
-        } else {
-          // User logged out — show login screen
-          document.getElementById("loginScreen").style.display = "flex";
-          document.getElementById("adminScreen").style.display = "none";
-          window._authUser = null;
-        }
-      });
-
-      document.dispatchEvent(new Event("firebaseReady"));
-    </script>
-    
+      }
+    </style>
   </head>
   <body>
-    <!-- LOGIN -->
-    <div class="login-screen" id="loginScreen">
-      <div class="login-box">
-        <div class="login-logo">🔐</div>
-        <div class="login-title">S_Quick Mart Admin</div>
-        <div class="login-sub">Login to manage your store</div>
-        <input
-          type="email"
-          class="login-input"
-          id="loginUser"
-          placeholder="Email Address"
-        />
-        <input
-          type="password"
-          class="login-input"
-          id="loginPass"
-          placeholder="Password"
-          onkeydown="if (event.key === 'Enter') doLogin();"
-        />
-        <button class="login-btn" onclick="doLogin()">🔓 Login</button>
-        <div class="login-error" id="loginError">❌ Wrong credentials!</div>
-      </div>
-    </div>
+    <div class="timing-bar" id="timingBar"></div>
 
-    <!-- ADMIN -->
-    <div class="admin-screen" id="adminScreen">
-      <div class="admin-header">
-        <div class="admin-logo">
-          <img src="SLOGO.png" alt="QuickMart Logo" onerror="this.style.display='none'" />
-          S_Quick Mart <span class="admin-badge">PRODUCTS</span>
-        </div>
-        <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
-      </div>
-      <div class="admin-tabs">
-        <div class="admin-tab active" onclick="switchTab('products', this)">
-          📦 Products
-        </div>
-        <div class="admin-tab" onclick="switchTab('addProduct', this)">
-          ➕ Add Product
-        </div>
-        <div class="admin-tab" onclick="switchTab('categories', this)">
-          🏷️ Categories
-        </div>
-      </div>
-      <div class="admin-content">
-        <!-- ── ORDERS TAB ── -->
-        <div class="tab-panel" id="tab-orders">
-          <div class="sync-bar">🔴 Live — New orders arrive automatically!</div>
-          <div class="order-filter-bar">
-            <div class="filter-chip active" onclick="filterOrders('all', this)">
-              🗂️ All
-            </div>
-            <div class="filter-chip" onclick="filterOrders('pending', this)">
-              📋 Pending
-            </div>
-            <div class="filter-chip" onclick="filterOrders('confirmed', this)">
-              ✅ Confirmed
-            </div>
-            <div
-              class="filter-chip"
-              onclick="filterOrders('out_for_delivery', this)"
-            >
-              🛵 Delivery
-            </div>
-            <div class="filter-chip" onclick="filterOrders('delivered', this)">
-              🎉 Delivered
-            </div>
-            <div class="filter-chip" onclick="filterOrders('cancelled', this)">
-              ❌ Cancelled
-            </div>
-          </div>
-          <div id="ordersContainer">
-            <div class="no-orders-admin">
-              <p>⏳ Orders are loading...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── DASHBOARD TAB ── -->
-        <div class="tab-panel" id="tab-dashboard">
-          <div class="revenue-card">
-            <div class="rev-title" id="revTitle">Today's Revenue 💰</div>
-            <div class="rev-num" id="todayRevenue">₹0</div>
-            <div class="rev-sub" id="todayOrderCount">0 orders</div>
-            <div class="rev-filters">
-              <div
-                class="rev-chip active"
-                onclick="setRevFilter('today', this)"
-              >
-                Today
-              </div>
-              <div class="rev-chip" onclick="setRevFilter('yesterday', this)">
-                Yesterday
-              </div>
-              <div class="rev-chip" onclick="setRevFilter('week', this)">
-                This Week
-              </div>
-              <div class="rev-chip" onclick="setRevFilter('month', this)">
-                This Month
-              </div>
-              <div class="rev-chip" onclick="setRevFilter('custom', this)">
-                📅 Date
-              </div>
-            </div>
-            <div class="rev-date-input" id="revDatePicker">
-              <input
-                type="date"
-                id="customDateInput"
-                onchange="updateDashboardStats()"
-              />
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">🛵</div>
-              <div class="stat-num" id="statParcelsToday">0</div>
-              <div class="stat-label" id="labelParcels">Parcels Today</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">🎉</div>
-              <div class="stat-num" id="statDeliveredTotal">0</div>
-              <div class="stat-label">Total Delivered</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">📋</div>
-              <div class="stat-num" id="statPending">0</div>
-              <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">💰</div>
-              <div class="stat-num" id="statTotalRevenue">₹0</div>
-              <div class="stat-label">Total Revenue</div>
-            </div>
-          </div>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">✅</div>
-              <div class="stat-num" id="statConfirmed">0</div>
-              <div class="stat-label">Confirmed</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">🛵</div>
-              <div class="stat-num" id="statOTD">0</div>
-              <div class="stat-label">Out for Delivery</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">📦</div>
-              <div class="stat-num" id="statTotalOrders">0</div>
-              <div class="stat-label">Total Orders</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">❌</div>
-              <div class="stat-num" id="statCancelled">0</div>
-              <div class="stat-label">Cancelled</div>
-            </div>
-          </div>
-
-          <div class="admin-card" style="margin-top: 14px">
-            <div class="admin-card-title">📍 Area Wise Orders</div>
-            <div
-              style="font-size: 12px; color: var(--muted); margin-bottom: 12px"
-            >
-              Orders for selected period — by area
-            </div>
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                margin-bottom: 10px;
-                flex-wrap: wrap;
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <span class="mark"
+            ><img
+              src="SLOGO.png"
+              onerror="
+                this.style.display = 'none';
+                this.parentNode.textContent = '🛒';
               "
-            >
-              <span
-                style="
-                  font-size: 11px;
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                "
-                ><span
-                  style="
-                    background: #e8f7f0;
-                    color: #1a9e5c;
-                    border-radius: 50px;
-                    padding: 2px 8px;
-                    font-weight: 700;
-                  "
-                  >✅ N</span
-                >
-                Delivered</span
-              >
-              <span
-                style="
-                  font-size: 11px;
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                "
-                ><span
-                  style="
-                    background: #fff3ec;
-                    color: #ff6b00;
-                    border-radius: 50px;
-                    padding: 2px 8px;
-                    font-weight: 700;
-                  "
-                  >⏳ N</span
-                >
-                Pending</span
-              >
-              <span
-                style="
-                  font-size: 11px;
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                "
-                ><span
-                  style="
-                    background: #fff0f0;
-                    color: #e53935;
-                    border-radius: 50px;
-                    padding: 2px 8px;
-                    font-weight: 700;
-                  "
-                  >❌ N</span
-                >
-                Cancelled</span
-              >
-              <span
-                style="
-                  font-size: 11px;
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                "
-                ><span
-                  style="
-                    background: #e8f4f5;
-                    color: var(--pr);
-                    border-radius: 50px;
-                    padding: 2px 8px;
-                    font-weight: 700;
-                  "
-                  >₹</span
-                >
-                Revenue</span
-              >
-            </div>
-            <div id="areaStatsContainer">
-              <p
-                style="
-                  text-align: center;
-                  color: #aaa;
-                  padding: 16px;
-                  font-size: 13px;
-                "
-              >
-                Loading...
-              </p>
-            </div>
+          /></span>
+          <div>
+            <div>S_Quick Mart</div>
+            <div class="logo-sub">Parbhani's Own Store</div>
           </div>
-
-          <div class="admin-card">
-            <div class="admin-card-title">📣 Announcements</div>
-            <div class="form-group">
-              <label class="form-label">Announcement 1</label
-              ><input
-                type="text"
-                class="form-input"
-                id="ann1"
-                placeholder="Type announcement..."
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Announcement 2</label
-              ><input
-                type="text"
-                class="form-input"
-                id="ann2"
-                placeholder="Type second announcement..."
-              />
-            </div>
-            <button class="btn-primary" onclick="saveAnnouncements()">
-              💾 Save
-            </button>
-          </div>
-          <!-- ── YOURNEED DASHBOARD ── -->
-          <div class="admin-card" style="margin-top: 14px">
-            <div class="admin-card-title">🎯 YourNeed Dashboard</div>
-            <div class="stats-grid" style="margin-top: 10px">
-              <div
-                class="stat-card"
-                onclick="openYN('all')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">🎯</div>
-                <div class="stat-num" id="yn_total">0</div>
-                <div class="stat-label">Total Requests</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('pending')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">⏳</div>
-                <div class="stat-num" id="yn_pending">0</div>
-                <div class="stat-label">Pending</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('confirmed')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">✅</div>
-                <div class="stat-num" id="yn_confirmed">0</div>
-                <div class="stat-label">Confirmed</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('out_for_delivery')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">🛵</div>
-                <div class="stat-num" id="yn_otd">0</div>
-                <div class="stat-label">Sent</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('delivered')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">🎉</div>
-                <div class="stat-num" id="yn_delivered">0</div>
-                <div class="stat-label">Delivered</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('rejected')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">❌</div>
-                <div class="stat-num" id="yn_rejected">0</div>
-                <div class="stat-label">Rejected</div>
-              </div>
-            </div>
-            <div class="stats-grid" style="margin-top: 12px">
-              <div
-                class="stat-card"
-                onclick="openYN('custom_item')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">🛍️</div>
-                <div class="stat-num" id="yn_custom">0</div>
-                <div class="stat-label">Custom Items</div>
-              </div>
-              <div
-                class="stat-card"
-                onclick="openYN('pickup_drop')"
-                style="cursor: pointer"
-              >
-                <div class="stat-icon">🏍️</div>
-                <div class="stat-num" id="yn_pd">0</div>
-                <div class="stat-label">Pickup & Drop</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── PRODUCTS TAB ── -->
-        <div class="tab-panel active" id="tab-products">
-          <div class="admin-card">
-            <div class="admin-card-title">
-              📦 All Products
-              <span
-                style="
-                  font-size: 13px;
-                  color: var(--muted);
-                  font-family: &quot;Inter&quot;;
-                "
-                id="productCount"
-              ></span>
-            </div>
-            <div class="search-bar" style="align-items: center; gap: 8px">
-              <input
-                type="text"
-                class="search-input2"
-                placeholder="🔍 Search products..."
-                oninput="filterProducts(this.value)"
-              />
-              <select
-                class="form-select"
-                style="width: auto"
-                onchange="filterByCat(this.value)"
-                id="filterCatSelect"
-              >
-                <option value="all">All</option>
-              </select>
-            </div>
-            <div style="overflow-x: auto">
-              <table class="product-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Homepage</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="productTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── ADD PRODUCT TAB ── -->
-        <div class="tab-panel" id="tab-addProduct">
-          <div class="admin-card">
-            <div class="admin-card-title">➕ Add New Product</div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Emoji (backup icon)</label
-                ><input
-                  type="text"
-                  class="form-input"
-                  id="newEmoji"
-                  placeholder="📦"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Category *</label
-                ><select
-                  class="form-select"
-                  id="newCat"
-                  onchange="updateSubOptions('newCat', 'newSub')"
-                >
-                  <option value="">Loading...</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Subcategory</label
-                ><select class="form-select" id="newSub">
-                  <option value="">Select category first</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Product Name *</label
-                ><input
-                  type="text"
-                  class="form-input"
-                  id="newName"
-                  placeholder="e.g. Tata Salt"
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Unit *</label
-                ><input
-                  type="text"
-                  class="form-input"
-                  id="newUnit"
-                  placeholder="e.g. 1 kg"
-                />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (₹) *</label
-                ><input
-                  type="number"
-                  class="form-input"
-                  id="newPrice"
-                  placeholder="45"
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">MRP (₹) <span style="color:var(--muted);font-weight:500;">(optional)</span></label
-                ><input
-                  type="number"
-                  class="form-input"
-                  id="newMrp"
-                  placeholder="e.g. 60"
-                />
-              </div>
-            </div>
-            <!-- VARIANTS SECTION -->
-            <div class="form-group">
-              <label class="form-label">📦 Variants (Multiple Sizes/Qty) <span style="color:var(--muted);font-weight:500;">(optional — leave empty for single size)</span></label>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">If this product comes in multiple pack sizes (e.g. 8 pcs, 16 pcs), add them below. The Unit/Price/MRP above will be ignored if variants are added.</div>
-              <div id="newVariantsList"></div>
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="addVariantRow('new')">+ Add Variant</button>
-            </div>
-            <!-- IMAGE UPLOAD SECTION -->
-            <div class="form-group">
-              <label class="form-label">📷 Product Image</label>
-              <div class="img-upload-tabs">
-                <div
-                  class="img-tab active"
-                  onclick="switchImgTab('url', 'new')"
-                >
-                  🔗 From URL
-                </div>
-                <div class="img-tab" onclick="switchImgTab('file', 'new')">
-                  📁 From File
-                </div>
-              </div>
-              <div class="img-panel active" id="new-url-panel">
-                <input
-                  type="text"
-                  class="form-input"
-                  id="newImg"
-                  placeholder="Paste image URL (BigBasket, Google, etc.)"
-                  oninput="previewImgUrl('newImg', 'newImgPreview')"
-                />
-              </div>
-              <div class="img-panel" id="new-file-panel">
-                <div
-                  class="file-drop-zone"
-                  onclick="document.getElementById('newImgFile').click()"
-                >
-                  <input
-                    type="file"
-                    id="newImgFile"
-                    accept="image/*"
-                    onchange="
-                      handleFileSelect(
-                        this,
-                        'newImgPreview',
-                        'newImg',
-                        'newUploadProgress',
-                      )
-                    "
-                  />
-                  <div style="font-size: 28px; margin-bottom: 6px">📁</div>
-                  <div style="font-size: 13px; color: var(--muted)">
-                    Click or drag file here<br /><strong>JPG, PNG, WebP</strong>
-                    supported
-                  </div>
-                </div>
-                <div class="upload-progress" id="newUploadProgress">
-                  ⏳ Uploading...
-                </div>
-              </div>
-              <div class="img-preview-box" id="newImgPreview">
-                <span style="font-size: 32px; color: #ccc">📷</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Show on Homepage</label>
-              <label
-                class="toggle"
-                style="
-                  margin-top: 4px;
-                  display: inline-flex;
-                  align-items: center;
-                "
-              >
-                <input type="checkbox" id="newActive" checked />
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Description</label
-              ><input
-                type="text"
-                class="form-input"
-                id="newDesc"
-                placeholder="Short product description"
-              />
-            </div>
-            <button class="btn-primary" onclick="addProduct()">
-              ✅ Add Product
-            </button>
-          </div>
-        </div>
-
-        <!-- ── CATEGORIES TAB ── -->
-        <div class="tab-panel" id="tab-categories">
-          <div class="admin-card">
-            <div class="admin-card-title">🏷️ Manage Categories</div>
-            <p
-              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
-            >
-              Add or remove categories and subcategories here. These changes
-              will automatically appear in the Add Product form.
-            </p>
-            <div id="categoryManager"></div>
-            <button
-              class="btn-primary"
-              style="margin-top: 8px"
-              onclick="saveCategoriesAndRefresh()"
-            >
-              💾 Save Categories
-            </button>
-          </div>
-        </div>
-
-        <!-- ── YOURNEED TAB ── -->
-        <div class="tab-panel" id="tab-yourneed">
-          <div class="sync-bar">🔴 Live — YourNeed requests auto-update!</div>
-          <div class="order-filter-bar">
-            <div class="filter-chip active" onclick="filterYN('all', this)">
-              🗂️ All
-            </div>
-            <div class="filter-chip" onclick="filterYN('pending', this)">
-              ⏳ Pending
-            </div>
-            <div class="filter-chip" onclick="filterYN('confirmed', this)">
-              ✅ Confirmed
-            </div>
-            <div class="filter-chip" onclick="filterYN('rejected', this)">
-              ❌ Rejected
-            </div>
-            <div class="filter-chip" onclick="filterYN('custom_item', this)">
-              🛍️ Custom Items
-            </div>
-            <div class="filter-chip" onclick="filterYN('pickup_drop', this)">
-              🏍️ Pickup & Drop
-            </div>
-          </div>
-          <div id="yourNeedContainer">
-            <div class="no-orders-admin">
-              <p>⏳ Loading YourNeed requests...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── AREAS TAB ── -->
-        <div class="tab-panel" id="tab-areas">
-          <div class="admin-card">
-            <div class="admin-card-title">🗺️ Manage YourNeed Areas</div>
-            <p
-              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
-            >
-              Add or remove areas here. Toggle off an area to mark
-              <strong>Not Available</strong> — it will appear blurred on the
-              YourNeed page and cannot be selected. Set a
-              <strong>delivery charge</strong> per area — this will
-              automatically apply on the YourNeed and checkout pages.
-            </p>
-
-            <!-- Add new area row -->
-            <div
-              style="
-                display: flex;
-                gap: 8px;
-                margin-bottom: 16px;
-                flex-wrap: wrap;
-              "
-            >
-              <input
-                type="text"
-                id="newAreaName"
-                class="form-input"
-                placeholder="New area name (e.g. Sailu Road)"
-                style="flex: 1; min-width: 160px"
-                onkeydown="if (event.key === 'Enter') addArea();"
-              />
-              <input
-                type="number"
-                id="newAreaCharge"
-                class="form-input"
-                placeholder="Delivery ₹"
-                min="0"
-                style="width: 110px; flex-shrink: 0"
-                onkeydown="if (event.key === 'Enter') addArea();"
-              />
-              <button class="btn-primary" onclick="addArea()">
-                ＋ Add Area
-              </button>
-            </div>
-
-            <div
-              id="areasList"
-              style="display: grid; gap: 10px"
-            >
-              <div
-                style="
-                  text-align: center;
-                  color: var(--muted);
-                  grid-column: 1/-1;
-                  padding: 20px;
-                "
-              >
-                ⏳ Loading areas...
-              </div>
-            </div>
-
-            <button
-              class="btn-primary"
-              style="margin-top: 16px; width: 100%"
-              onclick="saveAreas()"
-            >
-              💾 Save All Areas
-            </button>
-          </div>
-        </div>
-
-        <!-- ── DELIVERY AREA TAB ── -->
-        <div class="tab-panel" id="tab-deliveryarea">
-          <div class="admin-card">
-            <div class="admin-card-title">📍 Delivery Area Management</div>
-            <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px">
-              Add delivery areas and shops (with phone numbers). Delivery boys can log pickups per order from miniadmin.
-            </p>
-
-            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-              <input
-                type="text"
-                id="newDelivAreaName"
-                class="form-input"
-                placeholder="New area name (e.g. Sailu Road)"
-                style="flex:1;min-width:160px"
-                onkeydown="if(event.key==='Enter') addDelivArea();"
-              />
-              <button class="btn-primary" onclick="addDelivArea()">＋ Add Area</button>
-            </div>
-
-            <div id="delivAreasList" style="display:flex;flex-direction:column;gap:14px;">
-              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading...</div>
-            </div>
-
-            <button
-              class="btn-primary"
-              style="margin-top:16px;width:100%"
-              onclick="saveDelivAreas()"
-            >
-              💾 Save All Areas & Shops
-            </button>
-          </div>
-
-          <div class="admin-card" style="margin-top:14px;">
-            <div class="admin-card-title">
-              🧾 Shop Pickup Log
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                <select id="pickupFilterArea" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
-                  <option value="all">All Areas</option>
-                </select>
-                <select id="pickupFilterBoy" class="form-select" style="font-size:12px;padding:6px 10px;width:auto;" onchange="renderPickupLog()">
-                  <option value="all">All Boys</option>
-                </select>
-              </div>
-            </div>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
-              Every time a delivery boy marks an order as Out for Delivery, the selected area and shop are recorded here for quick review.
-            </p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-              <button id="pickupViewToday" type="button" onclick="setPickupView('today')" style="border:1px solid #ffd5b0;background:#fff7f2;color:var(--pr);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(255,107,0,0.12);">Today</button>
-              <button id="pickupViewYesterday" type="button" onclick="setPickupView('yesterday')" style="border:1px solid #e7ebf5;background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Yesterday</button>
-              <button id="pickupViewAll" type="button" onclick="setPickupView('all')" style="border:1px solid #e7ebf5;background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">All Days</button>
-            </div>
-            <div id="pickupSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;"></div>
-            <div id="pickupLogContainer">
-              <div style="text-align:center;color:var(--muted);padding:20px;">⏳ Loading pickup log...</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── DELIVERY BOYS TAB ── -->
-        <div class="tab-panel" id="tab-boys">
-          <div class="admin-card">
-            <div class="admin-card-title">🏍️ Delivery Boys Management</div>
-            <p
-              style="font-size: 13px; color: var(--muted); margin-bottom: 16px"
-            >
-              Add delivery boys — they will log in with their phone number in
-              miniadmin. Each boy's today and total delivered counts are shown
-              here.
-            </p>
-            <div
-              style="
-                display: flex;
-                gap: 8px;
-                margin-bottom: 16px;
-                flex-wrap: wrap;
-              "
-            >
-              <input
-                type="text"
-                id="newBoyName"
-                class="form-input"
-                placeholder="Delivery boy name (e.g. Rahul)"
-                style="flex: 1; min-width: 140px"
-                onkeydown="if (event.key === 'Enter') addBoy();"
-              />
-              <input
-                type="tel"
-                id="newBoyPhone"
-                class="form-input"
-                placeholder="10-digit phone"
-                style="width: 160px"
-                onkeydown="if (event.key === 'Enter') addBoy();"
-              />
-              <button class="btn-primary" onclick="addBoy()">➕ Add Boy</button>
-            </div>
-            <div
-              id="boysListAdmin"
-              style="display: flex; flex-direction: column; gap: 10px"
-            >
-              <p style="text-align: center; color: var(--muted); padding: 20px">
-                ⏳ Loading...
-              </p>
-            </div>
-            <button
-              class="btn-primary"
-              style="margin-top: 16px; width: 100%"
-              onclick="saveBoys()"
-            >
-              💾 Save Changes
-            </button>
-          </div>
-
-          <div class="admin-card" style="margin-top: 14px">
-            <div class="admin-card-title">📊 Delivery Performance</div>
-            <div style="font-size: 12px; color: var(--muted); margin-bottom: 14px">
-              Search by name or click a delivery boy below to view today's parcel count &amp; pending amount.
-            </div>
-            <!-- Search Box -->
-            <div style="position:relative;margin-bottom:16px;">
-              <input
-                type="text"
-                id="boySearchInput"
-                class="form-input"
-                placeholder="🔍 Search delivery boy name..."
-                oninput="onBoySearch(this.value)"
-                autocomplete="off"
-              />
-              <div id="boySearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid #ff6b00;border-top:none;border-radius:0 0 12px 12px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:200px;overflow-y:auto;"></div>
-            </div>
-            <!-- All Boys List (always visible) -->
-            <div id="boysQuickList" style="margin-bottom:16px;"></div>
-            <!-- Selected Boy Detail -->
-            <div id="boysStatsContainer"></div>
-          </div>
-        </div>
-        <!-- CUSTOMERS TAB -->
-        <div class="tab-panel" id="tab-customers">
-          <div class="admin-card" style="padding:0;overflow:hidden;border-radius:var(--r);">
-            <div id="custView" style="padding:18px;">
-              <p style="text-align:center;color:var(--muted);padding:30px;">⏳ Loading...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div class="modal-overlay" id="editModal">
-      <div class="modal-box">
-        <div class="modal-title">✏️ Edit Product</div>
-        <input type="hidden" id="editId" />
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Emoji</label
-            ><input type="text" class="form-input" id="editEmoji" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Category</label
-            ><select
-              class="form-select"
-              id="editCat"
-              onchange="updateSubOptions('editCat', 'editSub')"
-            >
-              <option>Loading...</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Subcategory</label
-          ><select class="form-select" id="editSub"></select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Name</label
-            ><input type="text" class="form-input" id="editName" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Unit</label
-            ><input type="text" class="form-input" id="editUnit" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Price (₹)</label
-            ><input type="number" class="form-input" id="editPrice" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">MRP (₹) <span style="color:var(--muted);font-weight:500;">(optional)</span></label
-            ><input type="number" class="form-input" id="editMrp" />
-          </div>
-        </div>
-        <!-- VARIANTS SECTION (EDIT) -->
-        <div class="form-group">
-          <label class="form-label">📦 Variants (Multiple Sizes/Qty) <span style="color:var(--muted);font-weight:500;">(optional — leave empty for single size)</span></label>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">If this product comes in multiple pack sizes (e.g. 8 pcs, 16 pcs), add them below. The Unit/Price/MRP above will be ignored if variants are added.</div>
-          <div id="editVariantsList"></div>
-          <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="addVariantRow('edit')">+ Add Variant</button>
-        </div>
-        <!-- IMAGE UPLOAD FOR EDIT -->
-        <div class="form-group">
-          <label class="form-label">📷 Product Image</label>
-          <div class="img-upload-tabs">
-            <div class="img-tab active" onclick="switchImgTab('url', 'edit')">
-              🔗 From URL
-            </div>
-            <div class="img-tab" onclick="switchImgTab('file', 'edit')">
-              📁 From File
-            </div>
-          </div>
-          <div class="img-panel active" id="edit-url-panel">
-            <input
-              type="text"
-              class="form-input"
-              id="editImg"
-              placeholder="Paste image URL..."
-              oninput="previewImgUrl('editImg', 'editImgPreview')"
-            />
-          </div>
-          <div class="img-panel" id="edit-file-panel">
-            <div
-              class="file-drop-zone"
-              onclick="document.getElementById('editImgFile').click()"
-            >
-              <input
-                type="file"
-                id="editImgFile"
-                accept="image/*"
-                onchange="
-                  handleFileSelect(
-                    this,
-                    'editImgPreview',
-                    'editImg',
-                    'editUploadProgress',
-                  )
-                "
-              />
-              <div style="font-size: 28px; margin-bottom: 6px">📁</div>
-              <div style="font-size: 13px; color: var(--muted)">
-                Click or drag file here
-              </div>
-            </div>
-            <div class="upload-progress" id="editUploadProgress">
-              ⏳ Uploading...
-            </div>
-          </div>
-          <div class="img-preview-box" id="editImgPreview">
-            <span style="font-size: 32px; color: #ccc">📷</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Show on Homepage</label>
-          <label
-            class="toggle"
-            style="margin-top: 4px; display: inline-flex; align-items: center"
+        </a>
+        <div class="search-shell" id="searchShell">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
           >
-            <input type="checkbox" id="editActive" />
-            <span class="toggle-slider"></span>
-          </label>
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.3-4.3" />
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder='Search "milk", "grocery", "soap"...'
+            autocomplete="off"
+          />
+          <div class="search-suggest" id="searchDrop"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Description</label
-          ><input type="text" class="form-input" id="editDesc" />
+        <div class="header-actions">
+          <a href="products.html" class="icon-btn" aria-label="Categories">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </a>
+          <a
+            href="profile.html?tab=wishlist"
+            class="icon-btn"
+            aria-label="Wishlist"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 21s-7.5-4.9-10-9.3C.4 8 2 4.5 5.6 4c2-.3 3.8.7 4.9 2.3C11.6 4.7 13.4 3.7 15.4 4c3.6.5 5.2 4 3.6 7.7C19 16.1 12 21 12 21z"
+              />
+            </svg>
+            <span
+              class="badge"
+              data-wish-badge
+              style="position: absolute; top: 0; right: 0"
+              >0</span
+            >
+          </a>
+          <a href="login.html" class="icon-btn" aria-label="Account"
+            >👤 <span class="txt" data-user-label>Login</span></a
+          >
+          <a href="cart.html" class="header-cart">
+            <span style="position: relative"
+              >🛒<span
+                class="badge"
+                data-cart-badge
+                style="position: absolute; top: -10px; right: -12px"
+                >0</span
+              ></span
+            >
+            <span class="label">Cart</span
+            ><span class="amt" data-cart-amount>₹0</span>
+          </a>
         </div>
-        <div class="modal-actions">
-          <button class="btn-cancel-m" onclick="closeEdit()">Cancel</button>
-          <button class="btn-primary" style="flex: 1" onclick="saveEdit()">
-            💾 Save
-          </button>
-        </div>
+      </div>
+      <nav class="nav-row"><div class="container" id="navRow"></div></nav>
+    </header>
+
+    <div class="container">
+      <div class="shop-layout">
+        <aside class="filter-panel" id="filterPanel">
+          <h4 style="font-size: 16px; margin-bottom: 4px">Categories</h4>
+          <div class="filter-group"><div id="catFilters"></div></div>
+        </aside>
+
+        <main>
+          <div class="subcat-pills" id="subcatPills"></div>
+          <div class="toolbar">
+            <span class="result-count" id="resultCount">Showing products</span>
+          </div>
+          <div class="prod-grid" id="productGrid">
+            <p
+              class="text-muted"
+              style="grid-column: 1/-1; text-align: center; padding: 40px"
+            >
+              Loading products…
+            </p>
+          </div>
+        </main>
       </div>
     </div>
 
-    <div class="toast" id="toast"></div>
-    <script src="pannel.js"></script>
+    <button
+      class="btn btn-primary filter-fab"
+      id="filterFab"
+      style="
+        position: fixed;
+        bottom: 78px;
+        right: 16px;
+        z-index: 150;
+        border-radius: 999px;
+        box-shadow: var(--shadow-lg);
+      "
+    >
+      Categories
+    </button>
+    <div class="overlay" id="filterOverlay">
+      <div
+        class="drawer"
+        id="filterDrawer"
+        style="
+          top: auto;
+          bottom: 0;
+          height: auto;
+          max-height: 80vh;
+          border-radius: var(--r-lg) var(--r-lg) 0 0;
+          transform: translateY(100%);
+        "
+      >
+        <div
+          style="
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h4 style="font-size: 16px">Categories</h4>
+          <button id="closeFilter" style="font-size: 20px">✕</button>
+        </div>
+        <div
+          style="padding: 16px 20px; overflow-y: auto"
+          id="mobileFilterHost"
+        ></div>
+      </div>
+    </div>
+
+    <nav class="mobile-nav">
+      <a href="index.html"
+        ><svg viewBox="0 0 24 24">
+          <path d="M3 11l9-8 9 8" />
+          <path d="M5 10v10h14V10" /></svg
+        >Home</a
+      >
+      <a href="products.html" class="active"
+        ><svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+        >Categories</a
+      >
+      <a href="cart.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          /></svg
+        >Cart</a
+      >
+      <a href="orders.html"
+        ><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18" /></svg
+        >Orders</a
+      >
+      <a href="login.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" /></svg
+        >Account</a
+      >
+    </nav>
+
+    <div class="closed-overlay-full" id="closedOverlay">
+      <div class="closed-box">
+        <div class="ic">🌙</div>
+        <h3>Store Closed</h3>
+        <p id="closedCustomMsg">
+          We are currently closed. Please visit again tomorrow! 🙏
+        </p>
+        <p class="text-muted" style="font-size: 12.5px">
+          ⏰ Open: 7:00 AM – 10:00 PM
+        </p>
+        <button
+          class="btn btn-ghost mt-16"
+          onclick="
+            window._closedDismissed = true;
+            document.getElementById('closedOverlay').classList.remove('show');
+          "
+        >
+          Browse Products 👀
+        </button>
+      </div>
+    </div>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/core.js"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const state = {
+        cat: params.get("cat") || "",
+        sub: params.get("sub") || "",
+        q: (params.get("q") || "").toLowerCase(),
+      };
+
+      document.addEventListener("sqm:data-ready", render);
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.categories && window.categories.length) render();
+      });
+
+      function catFilterHTML() {
+        return (
+          `<label class="filter-row ${!state.cat ? "active-cat" : ""}" style="cursor:pointer;font-weight:700;" onclick="location.href='products.html'">🏪 All Items</label>` +
+          (window.categories || [])
+            .map(
+              (c) =>
+                `<label class="filter-row ${state.cat === c.id ? "active-cat" : ""}" style="cursor:pointer;" onclick="location.href='products.html?cat=${c.id}'">${c.emoji} ${c.label}</label>`,
+            )
+            .join("")
+        );
+      }
+
+      function render() {
+        document.getElementById("catFilters").innerHTML = catFilterHTML();
+        document.getElementById("mobileFilterHost").innerHTML = catFilterHTML();
+        document.getElementById("navRow").innerHTML =
+          (window.categories || [])
+            .map(
+              (c) =>
+                `<a href="products.html?cat=${c.id}" class="${state.cat === c.id ? "active" : ""}">${c.label}</a>`,
+            )
+            .join("") +
+          `<a href="yourneed.html">YourNeed</a><a href="orders.html">Track Order</a>`;
+
+        // subcategory pills (only when a specific category chosen)
+        const pillsEl = document.getElementById("subcatPills");
+        if (state.cat && window.catInfo[state.cat]) {
+          const subs = (window.catInfo[state.cat].subs || []).filter((s) =>
+            (window.products || []).some(
+              (p) => p.cat === state.cat && p.sub === s,
+            ),
+          );
+          if (subs.length > 1) {
+            pillsEl.style.display = "flex";
+            pillsEl.innerHTML =
+              `<button class="subcat-pill ${!state.sub ? "active" : ""}" onclick="setSub('')">All</button>` +
+              subs
+                .map(
+                  (s) =>
+                    `<button class="subcat-pill ${state.sub === s ? "active" : ""}" onclick="setSub('${s.replace(/'/g, "\\'")}')">${s}</button>`,
+                )
+                .join("");
+          } else pillsEl.style.display = "none";
+        } else pillsEl.style.display = "none";
+
+        renderGrid();
+      }
+
+      function setSub(sub) {
+        state.sub = sub;
+        render();
+      }
+
+      function renderGrid() {
+        let list = (window.products || []).filter((p) => p.visible !== false);
+        if (state.cat) list = list.filter((p) => p.cat === state.cat);
+        if (state.sub) list = list.filter((p) => p.sub === state.sub);
+        if (state.q)
+          list = list.filter((p) =>
+            (p.name || "").toLowerCase().includes(state.q),
+          );
+        document.getElementById("resultCount").textContent =
+          `Showing ${list.length} product${list.length !== 1 ? "s" : ""}`;
+        sqmRenderProductGrid(document.getElementById("productGrid"), list);
+      }
+
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        state.q = e.target.value.toLowerCase();
+        renderGrid();
+      });
+
+      const fab = document.getElementById("filterFab");
+      const overlay = document.getElementById("filterOverlay");
+      const drawer = document.getElementById("filterDrawer");
+      fab.addEventListener("click", () => {
+        overlay.classList.add("open");
+        requestAnimationFrame(() => (drawer.style.transform = "translateY(0)"));
+      });
+      function closeSheet() {
+        drawer.style.transform = "translateY(100%)";
+        setTimeout(() => overlay.classList.remove("open"), 280);
+      }
+      document
+        .getElementById("closeFilter")
+        .addEventListener("click", closeSheet);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeSheet();
+      });
+
+      window.sqmApplyStoreStatus = sqmApplyStoreStatus;
+    </script>
   </body>
 </html>

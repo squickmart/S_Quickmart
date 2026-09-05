@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="S2.PNG" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account — S_Quick Mart</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <style>
+      .addr-add-link {
+        background: none;
+        border: none;
+        padding: 0;
+        color: var(--green, #1a7f4a);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-block;
+      }
+      .addr-add-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="index.html" class="logo">
+          <span class="mark"
+            ><img
+              src="SLOGO.png"
+              onerror="
+                this.style.display = 'none';
+                this.parentNode.textContent = '🛒';
+              "
+          /></span>
+          <div>
+            <div>S_Quick Mart</div>
+            <div class="logo-sub">Parbhani's Own Store</div>
+          </div>
+        </a>
+        <div class="header-actions" style="margin-left: auto">
+          <a href="products.html" class="icon-btn" aria-label="Categories">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </a>
+          <a href="cart.html" class="header-cart">
+            <span style="position: relative"
+              >🛒<span
+                class="badge"
+                data-cart-badge
+                style="position: absolute; top: -10px; right: -12px"
+                >0</span
+              ></span
+            >
+            <span class="label">Cart</span
+            ><span class="amt" data-cart-amount>₹0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="profile-layout">
+        <nav class="profile-nav" id="profileNav">
+          <button class="active" data-panel="info">
+            👤 Profile Information
+          </button>
+          <button data-panel="orders">📦 My Orders</button>
+          <button data-panel="addresses">📍 Saved Addresses</button>
+          <button data-panel="wishlist">❤️ Wishlist</button>
+          <button data-panel="logout" style="color: var(--red)">
+            🚪 Logout
+          </button>
+        </nav>
+
+        <div>
+          <!-- PROFILE INFO -->
+          <div class="profile-panel active" data-panel="info">
+            <div class="avatar-block">
+              <div class="avatar-circle" id="avatarInitial">👤</div>
+              <div>
+                <h3 style="font-size: 18px" id="profileName">Guest User</h3>
+                <p class="text-muted" style="font-size: 13px" id="profileMeta">
+                  Login to save your details
+                </p>
+              </div>
+            </div>
+            <form id="profileInfoForm">
+              <div class="field">
+                <label>Mobile number</label
+                ><input type="tel" id="infoPhone" maxlength="10" />
+              </div>
+              <div class="field">
+                <label>Full name</label><input type="text" id="infoName" />
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+              <p class="text-muted mt-8" style="font-size: 12px">
+                Full address details are managed under
+                <strong>📍 Saved Addresses</strong>.
+              </p>
+            </form>
+          </div>
+
+          <!-- MY ORDERS -->
+          <div class="profile-panel" data-panel="orders">
+            <h3 style="font-size: 17px; margin-bottom: 16px">My Orders</h3>
+            <div id="ordersHost">
+              <p class="text-muted">Login to view your orders.</p>
+            </div>
+          </div>
+
+          <!-- SAVED ADDRESSES -->
+          <div class="profile-panel" data-panel="addresses">
+            <h3 style="font-size: 17px; margin-bottom: 16px">
+              Saved Addresses
+            </h3>
+            <div id="addressListHost"></div>
+            <button class="saved-address-add" id="addAddressBtn">
+              + Add a new address
+            </button>
+            <div
+              id="newAddressFormWrap"
+              style="display: none; margin-top: 16px"
+            >
+              <form id="newAddressForm" novalidate>
+                <div class="field">
+                  <label>Full name</label
+                  ><input type="text" id="addrFullName" />
+                </div>
+                <div class="field">
+                  <label>Mobile number</label
+                  ><input type="tel" id="addrMobile" maxlength="10" />
+                </div>
+                <div class="field">
+                  <label>Full address</label
+                  ><textarea id="addrAddress" rows="3" placeholder="Enter your complete address"></textarea>
+                </div>
+                <div class="field">
+                  <label>Delivery area</label>
+                  <div id="pAreaBadgeWrap" style="display: none">
+                    <span class="area-selected-badge"
+                      ><span class="badge-dot"></span
+                      ><span id="pAreaBadgeText"></span
+                    ></span>
+                    <button
+                      type="button"
+                      class="area-change-btn"
+                      id="pChangeAreaBtn"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  <div class="area-picker-wrap" id="pAreaPicker">
+                    <div class="area-search-wrap">
+                      <span class="search-icon">🔍</span
+                      ><input
+                        type="text"
+                        class="area-search-input"
+                        id="pAreaSearchInput"
+                        placeholder="Search your area..."
+                      />
+                    </div>
+                    <div class="area-no-result" id="pAreaNoResult">
+                      No matching area found.
+                    </div>
+                    <div class="area-grid" id="pAreaGrid">
+                      <p class="text-muted" style="grid-column: 1/-1">
+                        Loading areas…
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Selected area</label
+                  ><input
+                    type="text"
+                    id="addrStreet"
+                    readonly
+                    placeholder="Select a delivery area above"
+                  />
+                </div>
+                <div class="field">
+                  <label>Landmark (optional)</label
+                  ><input type="text" id="addrLandmark" />
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>City</label
+                    ><input type="text" id="addrCity" value="Parbhani" />
+                  </div>
+                  <div class="field">
+                    <label>Pincode</label
+                    ><input
+                      type="text"
+                      id="addrPincode"
+                      maxlength="6"
+                      oninput="sqmCheckPinHint(this, 'profilePinHint')"
+                    /><span class="pin-hint" id="profilePinHint"></span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px">
+                  <button type="submit" class="btn btn-primary">
+                    Save Address
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    id="cancelAddAddress"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- WISHLIST -->
+          <div class="profile-panel" data-panel="wishlist">
+            <h3 style="font-size: 17px; margin-bottom: 16px">My Wishlist</h3>
+            <div
+              class="prod-grid"
+              id="wishGrid"
+              style="grid-template-columns: repeat(3, 1fr)"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="mobile-nav">
+      <a href="index.html"
+        ><svg viewBox="0 0 24 24">
+          <path d="M3 11l9-8 9 8" />
+          <path d="M5 10v10h14V10" /></svg
+        >Home</a
+      >
+      <a href="products.html"
+        ><svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+        >Categories</a
+      >
+      <a href="cart.html"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          /></svg
+        >Cart</a
+      >
+      <a href="orders.html"
+        ><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18" /></svg
+        >Orders</a
+      >
+      <a href="profile.html" class="active"
+        ><svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" /></svg
+        >Account</a
+      >
+    </nav>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/orders-shared.js"></script>
+    <script>
+      let selectedProfileArea = "";
+
+      function loadProfileInfo() {
+        const u = UserStore.get();
+        document.getElementById("profileName").textContent =
+          u.name || "Guest User";
+        document.getElementById("profileMeta").textContent =
+          [u.phone, u.area].filter(Boolean).join(" · ") ||
+          "Login to save your details";
+        document.getElementById("avatarInitial").textContent = u.name
+          ? u.name[0].toUpperCase()
+          : "👤";
+        document.getElementById("infoPhone").value = u.phone || "";
+        document.getElementById("infoName").value = u.name || "";
+        selectedProfileArea = u.area || "";
+        if (u.area) selectProfileArea(u.area);
+        if (u.phone)
+          loadOrderHistory(u.phone, document.getElementById("ordersHost"));
+      }
+
+      function renderPAreaGrid(areas) {
+        const grid = document.getElementById("pAreaGrid");
+        if (!areas || !areas.length) {
+          grid.innerHTML = `<p class="text-muted" style="grid-column:1/-1;">No delivery areas configured yet.</p>`;
+          return;
+        }
+        grid.innerHTML = areas
+          .map((a) => {
+            const na = a.available === false;
+            return `<button type="button" class="area-btn ${selectedProfileArea === a.name ? "selected" : ""}" data-area="${a.name}" ${na ? 'disabled style="opacity:.5;"' : `onclick="selectProfileArea('${a.name.replace(/'/g, "\\'")}')"`}>${a.name}${na ? " 🚫" : ""}</button>`;
+          })
+          .join("");
+      }
+      function selectProfileArea(area) {
+        selectedProfileArea = area;
+        document.getElementById("addrStreet").value = area;
+        document.getElementById("pAreaPicker").style.display = "none";
+        document.getElementById("pAreaBadgeWrap").style.display = "block";
+        document.getElementById("pAreaBadgeText").textContent = area;
+        renderPAreaGrid(window._ynAreas || []);
+      }
+      document
+        .getElementById("pChangeAreaBtn")
+        .addEventListener("click", () => {
+          document.getElementById("pAreaPicker").style.display = "block";
+          document.getElementById("pAreaBadgeWrap").style.display = "none";
+        });
+      document
+        .getElementById("pAreaSearchInput")
+        .addEventListener("input", (e) => {
+          const q = e.target.value.trim().toLowerCase();
+          let visible = 0;
+          document.querySelectorAll("#pAreaGrid .area-btn").forEach((btn) => {
+            const match = !q || btn.dataset.area.toLowerCase().includes(q);
+            btn.style.display = match ? "" : "none";
+            if (match) visible++;
+          });
+          document
+            .getElementById("pAreaNoResult")
+            .classList.toggle("show", visible === 0 && q.length > 0);
+        });
+      window.applyAreasToUI = function (areas) {
+        renderPAreaGrid(areas);
+      };
+
+      document
+        .getElementById("profileInfoForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const phone = document.getElementById("infoPhone").value.trim();
+          const name = document.getElementById("infoName").value.trim();
+          if (!phone || phone.length !== 10) {
+            sqmToast("❌ Please fill your phone number!", "error");
+            document.getElementById("infoPhone").focus();
+            return;
+          }
+          if (!name) {
+            sqmToast("❌ Please fill your name!", "error");
+            document.getElementById("infoName").focus();
+            return;
+          }
+          const existing = UserStore.get();
+          const user = { ...existing, phone, name };
+          UserStore.save(user);
+          window.saveCustomerProfile && window.saveCustomerProfile(user);
+          loadProfileInfo();
+          sqmToast("✅ Details saved!", "success");
+        });
+
+      /* ---- saved addresses (stored on customers/{phone} doc in Firestore) ---- */
+      let sqmAddresses = [];
+      let sqmAddrUnsub = null;
+
+      function readSavedAddresses(data) {
+        if (Array.isArray(data.addresses)) return data.addresses;
+        if (Array.isArray(data.savedAddresses)) return data.savedAddresses;
+        if (data.address && typeof data.address === "object") {
+          return [{
+            id: data.address.id || "legacy-address",
+            ...data.address,
+            isDefault: true,
+          }];
+        }
+        return [];
+      }
+
+      async function findAddressesByPhone(phone) {
+        if (!window._query || !window._collection || !window._where || !window._getDocs) return [];
+        try {
+          const result = await window._getDocs(
+            window._query(
+              window._collection(window._db, "customers"),
+              window._where("phone", "==", phone),
+            ),
+          );
+          for (const customer of result.docs) {
+            const addresses = readSavedAddresses(customer.data());
+            if (addresses.length) return addresses;
+          }
+        } catch (error) {
+          console.error("Could not find saved addresses by phone", error);
+        }
+        return [];
+      }
+
+      function loadAddresses() {
+        const u = UserStore.get();
+        const host = document.getElementById("addressListHost");
+        const addBtn = document.getElementById("addAddressBtn");
+        if (!u.phone) {
+          host.innerHTML = `<p class="text-muted">Login to add and manage your saved addresses.</p>`;
+          addBtn.style.display = "none";
+          return;
+        }
+        addBtn.style.display = "";
+        if (!window._db) {
+          setTimeout(loadAddresses, 400);
+          return;
+        }
+        if (sqmAddrUnsub) {
+          sqmAddrUnsub();
+          sqmAddrUnsub = null;
+        }
+        sqmAddrUnsub = window._onSnapshot(
+          window._doc(window._db, "customers", u.phone),
+          async (snap) => {
+            sqmAddresses = snap.exists() ? readSavedAddresses(snap.data()) : [];
+            if (!sqmAddresses.length) sqmAddresses = await findAddressesByPhone(u.phone);
+            renderAddressList();
+          },
+        );
+      }
+
+      function renderAddressList() {
+        const host = document.getElementById("addressListHost");
+        if (!sqmAddresses.length) {
+          host.innerHTML =
+            '<p class="saved-address-empty">No saved addresses yet.</p>';
+          return;
+        }
+        host.innerHTML = sqmAddresses
+          .map(
+            (a) => `
+      <div class="saved-address-card">
+        <div class="saved-address-pin">📍</div>
+        <div>
+          <div class="saved-address-name">${a.name} ${a.isDefault ? '<span class="badge-pill">Default</span>' : ""}</div>
+          <p class="saved-address-details">${a.address || a.house}, ${a.street}${a.landmark ? ", " + a.landmark : ""}, ${a.city}, ${a.state || "Maharashtra"} - ${a.pincode}</p>
+          <div class="saved-address-actions">
+          ${!a.isDefault ? `<button class="section-link" data-setdef="${a.id}">Set as Default</button>` : ""}
+          <button class="section-link" style="color:var(--red);" data-deladdr="${a.id}">Delete</button>
+          </div>
+        </div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      function saveAddressesToFirestore() {
+        const u = UserStore.get();
+        if (!u.phone || !window._db) return;
+        window._setDoc(
+          window._doc(window._db, "customers", u.phone),
+          { addresses: sqmAddresses },
+          { merge: true },
+        );
+      }
+
+      document
+        .getElementById("addressListHost")
+        .addEventListener("click", (e) => {
+          const setBtn = e.target.closest("[data-setdef]");
+          const delBtn = e.target.closest("[data-deladdr]");
+          if (setBtn) {
+            sqmAddresses = sqmAddresses.map((a) => ({
+              ...a,
+              isDefault: a.id === setBtn.dataset.setdef,
+            }));
+            saveAddressesToFirestore();
+            sqmToast("✅ Default address updated", "success");
+          }
+          if (delBtn) {
+            sqmAddresses = sqmAddresses.filter(
+              (a) => a.id !== delBtn.dataset.deladdr,
+            );
+            saveAddressesToFirestore();
+            sqmToast("Address removed");
+          }
+        });
+
+      document.getElementById("addAddressBtn").addEventListener("click", () => {
+        fillProfileContactFields();
+        document.getElementById("newAddressFormWrap").style.display = "block";
+        document.getElementById("addAddressBtn").style.display = "none";
+      });
+
+      function fillProfileContactFields() {
+        const u = UserStore.get();
+        const nameInput = document.getElementById("addrFullName");
+        const phoneInput = document.getElementById("addrMobile");
+        if (u.name) {
+          nameInput.value = u.name;
+          nameInput.readOnly = true;
+        }
+        if (u.phone) {
+          phoneInput.value = u.phone;
+          phoneInput.readOnly = true;
+        }
+      }
+      document
+        .getElementById("cancelAddAddress")
+        .addEventListener("click", () => {
+          document.getElementById("newAddressFormWrap").style.display = "none";
+          document.getElementById("addAddressBtn").style.display = "";
+        });
+      document
+        .getElementById("newAddressForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          const u = UserStore.get();
+          if (!u.phone) {
+            sqmToast("❌ Please login first!", "error");
+            return;
+          }
+          const addr = {
+            id: Date.now().toString(),
+            name: document.getElementById("addrFullName").value.trim(),
+            mobile: document.getElementById("addrMobile").value.trim(),
+            address: document.getElementById("addrAddress").value.trim(),
+            street: document.getElementById("addrStreet").value.trim(),
+            landmark: document.getElementById("addrLandmark").value.trim(),
+            city:
+              document.getElementById("addrCity").value.trim() || "Parbhani",
+            pincode: document.getElementById("addrPincode").value.trim(),
+            isDefault: sqmAddresses.length === 0,
+          };
+          if (
+            !addr.name ||
+            !addr.mobile ||
+            !addr.address ||
+            !addr.street ||
+            !addr.pincode
+          ) {
+            sqmToast("❌ Please fill all required fields!", "error");
+            return;
+          }
+          if (addr.pincode !== "431401") {
+            sqmToast("❌ We deliver only in Parbhani (431401)", "error");
+            return;
+          }
+          const updatedUser = { ...u, area: selectedProfileArea };
+          UserStore.save(updatedUser);
+          window.saveCustomerProfile && window.saveCustomerProfile(updatedUser);
+          sqmAddresses.push(addr);
+          window._setDoc(
+            window._doc(window._db, "customers", u.phone),
+            {
+              addresses: sqmAddresses,
+              address: `${addr.address}, ${addr.street}, ${addr.city} - ${addr.pincode}`,
+            },
+            { merge: true },
+          );
+          e.target.reset();
+          document.getElementById("addrCity").value = "Parbhani";
+          document.getElementById("addrStreet").value = selectedProfileArea;
+          sqmCheckPinHint(
+            document.getElementById("addrPincode"),
+            "profilePinHint",
+          );
+          document.getElementById("newAddressFormWrap").style.display = "none";
+          document.getElementById("addAddressBtn").style.display = "";
+          sqmToast("✅ Address saved!", "success");
+        });
+
+      function renderWishlist() {
+        const ids = WishStore.get();
+        const products = ids.map(sqmProductById).filter(Boolean);
+        sqmRenderProductGrid(document.getElementById("wishGrid"), products);
+      }
+      document.addEventListener("sqm:wish-changed", renderWishlist);
+      document.addEventListener("sqm:data-ready", renderWishlist);
+
+      const nav = document.getElementById("profileNav");
+      nav.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        if (btn.dataset.panel === "logout") {
+          if (!confirm("Are you sure you want to logout?")) return;
+          const u = UserStore.get();
+          if (u.phone && window._db) {
+            window._setDoc(
+              window._doc(window._db, "customers", u.phone),
+              { loggedOut: true, lastLogout: new Date().toISOString() },
+              { merge: true },
+            );
+          }
+          UserStore.logout();
+          sqmToast("Logged out successfully!", "success");
+          setTimeout(() => (location.href = "index.html"), 500);
+          return;
+        }
+        nav
+          .querySelectorAll("button")
+          .forEach((b) => b.classList.toggle("active", b === btn));
+        document
+          .querySelectorAll(".profile-panel")
+          .forEach((p) =>
+            p.classList.toggle("active", p.dataset.panel === btn.dataset.panel),
+          );
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadProfileInfo();
+        loadAddresses();
+        renderWishlist();
+        const requestedTab = new URLSearchParams(location.search).get("tab");
+        if (
+          requestedTab &&
+          document.querySelector(`.profile-panel[data-panel="${requestedTab}"]`)
+        ) {
+          document
+            .querySelectorAll("#profileNav button")
+            .forEach((b) =>
+              b.classList.toggle("active", b.dataset.panel === requestedTab),
+            );
+          document
+            .querySelectorAll(".profile-panel")
+            .forEach((p) =>
+              p.classList.toggle("active", p.dataset.panel === requestedTab),
+            );
+        }
+        if (window._ynAreas && window._ynAreas.length)
+          renderPAreaGrid(window._ynAreas);
+      });
+    </script>
+  </body>
+</html>

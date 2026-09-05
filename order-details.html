@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" href="S2.PNG" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Details — S_Quick Mart</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner" style="justify-content:center;">
+    <a href="index.html" class="logo">
+      <span class="mark"><img src="SLOGO.png" onerror="this.style.display='none';this.parentNode.textContent='🛒'"></span>
+      <div><div>S_Quick Mart</div><div class="logo-sub">Parbhani's Own Store</div></div>
+    </a>
+  </div>
+</header>
+
+<div class="container" style="padding-top:24px;padding-bottom:60px;">
+  <a href="orders.html" class="section-link" style="margin-bottom:14px;display:inline-flex;">← Back to Orders</a>
+  <div id="orderDetailsHost">
+    <p class="text-muted" style="text-align:center;padding:60px;">Loading order…</p>
+  </div>
+</div>
+
+<script src="js/firebase.js"></script>
+<script src="js/core.js"></script>
+<script>
+  const REG_STEPS = ['pending', 'confirmed', 'delivered'];
+  const REG_LABELS = { pending: 'Order Placed', confirmed: 'Confirmed', delivered: 'Delivered' };
+  const YN_STEPS = ['pending', 'confirmed', 'out_for_delivery', 'delivered'];
+  const YN_LABELS = { pending: 'Placed', confirmed: 'Confirmed', out_for_delivery: 'On the Way', delivered: 'Delivered' };
+
+  async function loadOrder() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const type = params.get('type') || 'regular';
+    const host = document.getElementById('orderDetailsHost');
+    if (!id || !window._db) { setTimeout(loadOrder, 400); return; }
+
+    try {
+      const collName = type === 'yourneed' ? 'yourneed_requests' : 'orders';
+      const snap = await window._getDocs(window._query(window._collection(window._db, collName)));
+      const docSnap = snap.docs.find(d => d.id === id);
+      if (!docSnap) { host.innerHTML = `<div class="empty-cart"><div class="ic">🔎</div><h3>Order not found</h3><a href="orders.html" class="btn btn-primary mt-16">Back to Orders</a></div>`; return; }
+      renderOrder({ id: docSnap.id, ...docSnap.data() }, type);
+    } catch (e) {
+      host.innerHTML = `<div class="empty-cart"><div class="ic">⚠️</div><h3>Could not load order</h3><a href="orders.html" class="btn btn-primary mt-16">Back to Orders</a></div>`;
+    }
+  }
+
+  function renderOrder(o, type) {
+    const host = document.getElementById('orderDetailsHost');
+    const isYN = type === 'yourneed';
+    const st = o.status || 'pending';
+    const cancelled = st === 'cancelled' || st === 'rejected';
+    const steps = isYN ? YN_STEPS : REG_STEPS;
+    const labels = isYN ? YN_LABELS : REG_LABELS;
+    const stepIdx = steps.indexOf(st);
+
+    const timeline = steps.map((s, i) => {
+      const done = !cancelled && i <= stepIdx;
+      const isCurrent = !cancelled && i === stepIdx;
+      return `<div class="track-step ${done ? 'done' : ''} ${isCurrent ? 'current' : ''}" style="display:flex;gap:16px;align-items:flex-start;position:relative;padding-bottom:30px;">
+        <span class="track-dot" style="width:24px;height:24px;border-radius:50%;background:${done ? 'var(--green)' : 'var(--paper)'};border:2px solid ${done ? 'var(--green)' : 'var(--line)'};color:${done?'#fff':'var(--ink-soft)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;z-index:1;">${done && i < stepIdx ? '✓' : (isCurrent ? '●' : '○')}</span>
+        <div><div style="font-weight:700;font-size:14px;">${labels[s]}</div>${isCurrent ? `<div style="font-size:11.5px;color:var(--amber-deep);font-weight:700;">In progress</div>` : ''}</div>
+      </div>`;
+    }).join('');
+
+    const itemsHTML = isYN
+      ? (o.type === 'pickup_drop'
+          ? `<p style="font-size:13.5px;">${o.itemDesc || 'Pickup & Drop request'}</p>`
+          : (o.items || []).map(i => `<div style="display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;"><span>${i.name} <span class="text-muted">× ${i.qty}</span></span></div>`).join(''))
+      : (o.items || []).map(i => `<div style="display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;">
+          <span>${i.emoji||'🛒'} ${i.name} <span class="text-muted">× ${i.qty}</span></span>
+          <span style="font-weight:700;">${sqmCurrency(i.price*i.qty)}</span>
+        </div>`).join('');
+
+    const dt = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+
+    host.innerHTML = `
+      <div class="od-layout">
+        <div class="cart-card">
+          <div class="cart-head">
+            <div><span style="font-weight:800;font-size:15px;">${isYN ? '✨ YourNeed #' : 'Order #'}${o.id.slice(-6).toUpperCase()}</span><div class="text-muted" style="font-size:12px;">Placed on ${dt}</div></div>
+          </div>
+          <div style="padding:24px 22px;">
+            ${cancelled
+              ? `<div class="badge-pill" style="background:#FBE7E7;color:var(--red);">${st === 'rejected' ? 'Request Rejected' : 'Order Cancelled'}</div>`
+              : `<div class="track-timeline">${timeline}</div>`}
+          </div>
+          <div class="divider"></div>
+          <div style="padding:20px 22px;">
+            <h4 style="font-size:14px;margin-bottom:14px;">${isYN ? 'Request details' : 'Items in this order'}</h4>
+            ${itemsHTML}
+          </div>
+        </div>
+        <div>
+          <div class="cart-card" style="padding:20px 22px;">
+            ${!isYN ? `
+            <h4 style="font-size:14px;margin-bottom:12px;">Order Summary</h4>
+            <div class="summary-row"><span>Subtotal</span><span>${sqmCurrency(o.subtotal)}</span></div>
+            <div class="summary-row"><span>Delivery</span><span>${o.delivery === 0 ? 'FREE' : sqmCurrency(o.delivery)}</span></div>
+            <div class="summary-row total"><span>Total</span><span>${sqmCurrency(o.total)}</span></div>
+            <div class="divider mt-16"></div>` : ''}
+            <h4 style="font-size:14px;margin:16px 0 6px;">Delivery Address</h4>
+            <p class="text-muted" style="font-size:13px;line-height:1.6;">${o.address || o.dropAddr || ''}<br>📞 ${o.phone}</p>
+            <div class="divider mt-16"></div>
+            <p style="font-size:13px;margin-top:14px;"><strong>Payment:</strong> Cash on Delivery</p>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  document.addEventListener('DOMContentLoaded', loadOrder);
+</script>
+</body>
+</html>
