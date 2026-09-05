@@ -280,6 +280,33 @@
         _custState.custIdx = -1;
         renderCustomers();
       }
+      function custShowLoggedOut() {
+        _custState = { view: 'loggedout', area: null, custIdx: -1 };
+        renderCustomers();
+      }
+
+      function customerArea(customer) {
+        if (customer.area && customer.area.trim()) return customer.area.trim();
+        const addresses = Array.isArray(customer.addresses)
+          ? customer.addresses
+          : [];
+        const selected = addresses.find((address) => address.isDefault) || addresses[0];
+        return selected && (selected.street || selected.area)
+          ? (selected.street || selected.area).trim()
+          : 'Unknown';
+      }
+
+      function customerAddress(customer) {
+        if (customer.address && customer.address.trim()) return customer.address;
+        const addresses = Array.isArray(customer.addresses)
+          ? customer.addresses
+          : [];
+        const selected = addresses.find((address) => address.isDefault) || addresses[0];
+        if (!selected) return '—';
+        return [selected.address || selected.house, selected.street, selected.city, selected.pincode]
+          .filter(Boolean)
+          .join(', ');
+      }
 
       function renderCustomers() {
         const con = document.getElementById("custView");
@@ -288,20 +315,26 @@
         if (_custState.view === 'areas') {
           const grouped = {};
           allCustomers.forEach(c => {
-            const area = (c.area || 'Unknown').trim();
+            const area = customerArea(c);
             if (!grouped[area]) grouped[area] = [];
             grouped[area].push(c);
           });
           const areas = Object.keys(grouped).sort();
+          const loggedOutCount = allCustomers.filter(c => c.loggedOut === true).length;
+          const toggleBar = `
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <button onclick="custGoHome()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--pr);background:var(--pr);color:#fff;font-weight:700;font-size:12.5px;">📍 All Areas</button>
+              <button onclick="custShowLoggedOut()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #eee;background:#fff;color:var(--dark);font-weight:700;font-size:12.5px;position:relative;">🚪 Logged Out ${loggedOutCount ? `<span style="background:#e74c3c;color:#fff;border-radius:50px;padding:1px 7px;font-size:10.5px;margin-left:4px;">${loggedOutCount}</span>` : ''}</button>
+            </div>`;
           if (!areas.length) {
-            con.innerHTML = `<div style="text-align:center;padding:50px 20px;">
+            con.innerHTML = toggleBar + `<div style="text-align:center;padding:50px 20px;">
               <div style="font-size:44px;margin-bottom:12px;">👥</div>
               <div style="font-weight:700;font-size:16px;color:var(--dark);margin-bottom:6px;">No Customers Yet</div>
               <div style="font-size:13px;color:var(--muted);">Customers appear here once they sign up.</div>
             </div>`;
             return;
           }
-          con.innerHTML = `
+          con.innerHTML = toggleBar + `
             <div style="margin-bottom:16px;">
               <div style="font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--dark);">All Areas</div>
               <div style="font-size:13px;color:var(--muted);">${allCustomers.length} customer${allCustomers.length!==1?'s':''} · ${areas.length} area${areas.length!==1?'s':''}</div>
@@ -323,9 +356,43 @@
           return;
         }
 
+        if (_custState.view === 'loggedout') {
+          const list = allCustomers.map((c,i)=>({c,i})).filter(({c}) => c.loggedOut === true)
+            .sort((a,b) => new Date(b.c.lastLogout||0) - new Date(a.c.lastLogout||0));
+          con.innerHTML = `
+            <div onclick="custGoHome()" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+              <div style="width:34px;height:34px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--dark);flex-shrink:0;">‹</div>
+              <div>
+                <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:var(--dark);">🚪 Logged Out Customers</div>
+                <div style="font-size:12px;color:var(--muted);">${list.length} customer${list.length!==1?'s':''}</div>
+              </div>
+            </div>
+            ${!list.length ? `
+            <div style="text-align:center;padding:50px 20px;">
+              <div style="font-size:44px;margin-bottom:12px;">🚪</div>
+              <div style="font-weight:700;font-size:16px;color:var(--dark);margin-bottom:6px;">No One Logged Out</div>
+              <div style="font-size:13px;color:var(--muted);">Customers who log out from their account will show up here.</div>
+            </div>` : `
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${list.map(({c,i}) => {
+                const avatar = (c.name||'?')[0].toUpperCase();
+                const lo = c.lastLogout ? new Date(c.lastLogout).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : '—';
+                return '<div onclick="custSelectUser(' + i + ',\'loggedout\');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onmouseover="this.style.borderColor=\'var(--pr)\'" onmouseout="this.style.borderColor=\'#eee\'">'
+                  + '<div style="display:flex;align-items:center;gap:12px;">'
+                  + '<div style="width:40px;height:40px;border-radius:50%;background:#bbb;color:#fff;display:flex;align-items:center;justify-content:center;font-family:\'Baloo 2\',cursive;font-size:17px;font-weight:800;flex-shrink:0;">' + avatar + '</div>'
+                  + '<div><div style="font-weight:700;font-size:14px;color:var(--dark);">' + (c.name||'—') + '</div>'
+                  + '<div style="font-size:12px;color:var(--muted);">📱 ' + (c.phone||'—') + ' &nbsp;·&nbsp; 📍 ' + customerArea(c) + '</div>'
+                  + '<div style="font-size:11px;color:#e74c3c;margin-top:2px;font-weight:600;">🕐 Logged out: ' + lo + '</div></div>'
+                  + '</div><div style="color:#bbb;font-size:22px;line-height:1;padding-right:2px;">›</div></div>';
+              }).join('')}
+            </div>`}
+          `;
+          return;
+        }
+
         if (_custState.view === 'names') {
           const area = _custState.area;
-          const list = allCustomers.map((c,i)=>({c,i})).filter(({c}) => (c.area||'Unknown').trim()===area);
+          const list = allCustomers.map((c,i)=>({c,i})).filter(({c}) => customerArea(c)===area);
           con.innerHTML = `
             <div onclick="custGoHome()" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
               <div style="width:34px;height:34px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--dark);flex-shrink:0;">‹</div>
@@ -338,7 +405,7 @@
               ${list.map(({c,i}) => {
                 const avatar = (c.name||'?')[0].toUpperCase();
                 const oc = (allOrders||[]).filter(o=>o.phone===c.phone).length + (allYourNeed||[]).filter(r=>r.phone===c.phone).length;
-                return '<div onclick="custSelectUser(' + i + ');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchstart="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" ontouchend="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'" onmouseover="this.style.borderColor=\'var(--pr)\'" onmouseout="this.style.borderColor=\'#eee\'">'
+                return '<div onclick="custSelectUser(' + i + ',\'names\');event.stopPropagation();" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #eee;border-radius:12px;padding:13px 15px;cursor:pointer;-webkit-tap-highlight-color:transparent;" ontouchstart="this.style.borderColor=\'var(--pr)\';this.style.background=\'#fffaf5\'" ontouchend="this.style.borderColor=\'#eee\';this.style.background=\'#fff\'" onmouseover="this.style.borderColor=\'var(--pr)\'" onmouseout="this.style.borderColor=\'#eee\'">'
                   + '<div style="display:flex;align-items:center;gap:12px;">'
                   + '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--pr),#ff9a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:\'Baloo 2\',cursive;font-size:17px;font-weight:800;flex-shrink:0;">' + avatar + '</div>'
                   + '<div><div style="font-weight:700;font-size:14px;color:var(--dark);">' + (c.name||'—') + '</div>'
@@ -375,17 +442,19 @@
           const lastSeen = fmt(c.lastSeen, true);
           const avatar = (c.name||'?')[0].toUpperCase();
           con.innerHTML = `
-            <div onclick="custGoArea()" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+            <div onclick="custGoBack()" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
               <div style="width:34px;height:34px;border-radius:9px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--dark);flex-shrink:0;">‹</div>
-              <div style="font-size:13px;color:var(--muted);">Back to <strong style="color:var(--dark);">${_custState.area}</strong></div>
+              <div style="font-size:13px;color:var(--muted);">Back to <strong style="color:var(--dark);">${_custState.from === 'loggedout' ? 'Logged Out list' : _custState.area}</strong></div>
             </div>
+
+            ${c.loggedOut ? `<div style="background:#fdecea;border:1px solid #f5c2bd;color:#c0392b;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;margin-bottom:14px;">🚪 Currently logged out${c.lastLogout ? ' · ' + new Date(c.lastLogout).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : ''}</div>` : ''}
 
             <div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--pr),#ff9a00);border-radius:16px;padding:18px 16px;margin-bottom:16px;">
               <div style="width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;flex-shrink:0;">${avatar}</div>
               <div style="min-width:0;">
                 <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name||'—'}</div>
                 <div style="font-size:13px;color:rgba(255,255,255,0.85);">📱 ${c.phone||'—'}</div>
-                <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">📍 ${c.area||'—'}</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">📍 ${customerArea(c)}</div>
               </div>
             </div>
 
@@ -401,7 +470,7 @@
             </div>
 
             <div style="background:#f7f8fc;border-radius:14px;overflow:hidden;margin-bottom:16px;">
-              ${[['📍','Area',c.area||'—'],['🏠','Address',c.address||'—'],['🕐','Last Seen',lastSeen]]
+              ${[['📍','Area',customerArea(c)],['🏠','Address',customerAddress(c)],['🕐','Last Seen',lastSeen]]
                 .map(([icon,label,val],i,arr)=>`
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;${i<arr.length-1?'border-bottom:1px solid #eee;':''}gap:10px;">
                   <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">
@@ -486,10 +555,15 @@
         _custState = { view: 'names', area: area, custIdx: -1 };
         renderCustomers();
       }
-      function custSelectUser(idx) {
+      function custSelectUser(idx, from) {
         _custState.view = 'detail';
         _custState.custIdx = parseInt(idx);
+        _custState.from = from || 'names';
         renderCustomers();
+      }
+      function custGoBack() {
+        if (_custState.from === 'loggedout') custShowLoggedOut();
+        else custGoArea();
       }
 
       function switchTab(id, btn) {
@@ -850,7 +924,7 @@ ${items}
         const msgs = {
           confirmed: `Hello ${name}! 🎉 Your order has been confirmed! We will deliver it soon. — S_Quick Mart`,
           out_for_delivery: `Hello ${name}! 🛵 Your order is out for delivery! It should arrive within 20-30 minutes. — S_Quick Mart${locationNote}`,
-          delivered: `Hello {name}! ✅ Your order has been delivered. Thank you for shopping with S_Quick Mart — see you again soon!`,
+          delivered: `Hello ${name}! ✅ Order has been delivered! Thank you 🙏 — S_Quick Mart`,
           cancelled: `Hello ${name}! ❌ Order has been cancelled. If there is a problem, please call: 9545148205 — S_Quick Mart`,
         };
         const msg =
@@ -987,7 +1061,7 @@ ${items}
         con.innerHTML = `
           <!-- Search -->
           <div style="margin-bottom:12px;">
-            <input type="text" id="areaSearchInput" placeholder="🔍 Search area..." oninput="filterAreaStats(this.value)"
+            <input type="text" id="areaSearchInput" placeholder=". Search area..." oninput="filterAreaStats(this.value)"
               style="width:100%; border:1.5px solid #eee; border-radius:10px; padding:9px 14px; font-size:13px; font-family:'Inter',sans-serif; outline:none;" />
           </div>
           <!-- List -->
