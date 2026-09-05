@@ -6,6 +6,10 @@
   display: none;
 }
 
+.mobile-category-pills {
+  display: none;
+}
+
 @media (max-width: 1180px) {
   .container {
     padding: 0 22px;
@@ -30,6 +34,20 @@
 @media (max-width: 980px) {
   .nav-row {
     display: none;
+  }
+  .mobile-category-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 0 16px;
+    scrollbar-width: none;
+  }
+  .mobile-category-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-category-pills .subcat-pill {
+    flex: 0 0 auto;
   }
   .hero-grid {
     grid-template-columns: 1fr;
