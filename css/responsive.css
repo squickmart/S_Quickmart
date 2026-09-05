@@ -153,12 +153,19 @@
   }
 
   .prod-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+  }
+  .prod-card {
+    min-width: 0;
+  }
+  .prod-body {
+    min-width: 0;
   }
   .prod-name {
     font-size: 13px;
     min-height: 32px;
+    overflow-wrap: anywhere;
   }
   .prod-price-row .now {
     font-size: 15px;
@@ -301,7 +308,7 @@
 
 @media (max-width: 420px) {
   .prod-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
   }
   .cat-grid {

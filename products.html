@@ -183,9 +183,6 @@
 
         <main>
           <div class="subcat-pills" id="subcatPills"></div>
-          <div class="toolbar">
-            <span class="result-count" id="resultCount">Showing products</span>
-          </div>
           <div class="prod-grid" id="productGrid">
             <p
               class="text-muted"
@@ -378,8 +375,6 @@
           list = list.filter((p) =>
             (p.name || "").toLowerCase().includes(state.q),
           );
-        document.getElementById("resultCount").textContent =
-          `Showing ${list.length} product${list.length !== 1 ? "s" : ""}`;
         sqmRenderProductGrid(document.getElementById("productGrid"), list);
       }
 
