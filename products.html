@@ -183,6 +183,7 @@
 
         <main>
           <div class="subcat-pills" id="subcatPills"></div>
+          <div class="mobile-category-pills" id="mobileCategoryPills"></div>
           <div class="prod-grid" id="productGrid">
             <p
               class="text-muted"
@@ -329,6 +330,25 @@
       function render() {
         document.getElementById("catFilters").innerHTML = catFilterHTML();
         document.getElementById("mobileFilterHost").innerHTML = catFilterHTML();
+        const mobileCategoryPills = document.getElementById("mobileCategoryPills");
+        mobileCategoryPills.classList.toggle("has-category", Boolean(state.cat));
+        const selectedCategory = window.catInfo[state.cat];
+        const availableSubs = selectedCategory
+          ? (selectedCategory.subs || []).filter((sub) =>
+              (window.products || []).some(
+                (product) => product.cat === state.cat && product.sub === sub,
+              ),
+            )
+          : [];
+        mobileCategoryPills.innerHTML = state.cat
+          ? `<a class="subcat-pill ${!state.sub ? "active" : ""}" href="products.html?cat=${state.cat}">All</a>` +
+            availableSubs
+              .map(
+                (sub) =>
+                  `<a class="subcat-pill ${state.sub === sub ? "active" : ""}" href="products.html?cat=${state.cat}&sub=${encodeURIComponent(sub)}">${sub}</a>`,
+              )
+              .join("")
+          : "";
         document.getElementById("navRow").innerHTML =
           (window.categories || [])
             .map(
