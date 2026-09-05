@@ -31,9 +31,6 @@
   .nav-row {
     display: none;
   }
-  .subcat-pills {
-    display: none !important;
-  }
   .hero-grid {
     grid-template-columns: 1fr;
   }
